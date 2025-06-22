@@ -5,3 +5,8 @@ venv/
 data_pipeline/logs/
 # Database files
 data_pipeline/database/
+# Flutter build outputs
+frontend/build/
+# Flutter dependencies
+frontend/.dart_tool/
+frontend/.idea/
