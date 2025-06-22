@@ -5,11 +5,19 @@ class VoiceService {
   final stt.SpeechToText _speech = stt.SpeechToText();
   final FlutterTts _tts = FlutterTts();
 
-  Future<String?> listen() async {
+  Future<String?> listen({Duration listenFor = const Duration(seconds: 5)}) async {
     final available = await _speech.initialize();
     if (!available) return null;
-    await _speech.listen();
-    return null; // placeholder for transcript
+    String transcript = '';
+    await _speech.listen(
+      listenFor: listenFor,
+      onResult: (result) {
+        transcript = result.recognizedWords;
+      },
+    );
+    await Future.delayed(listenFor);
+    await _speech.stop();
+    return transcript.isEmpty ? null : transcript;
   }
 
   Future<void> stopListening() async {
