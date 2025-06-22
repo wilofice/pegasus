@@ -1,0 +1,7 @@
+watchdog
+openai-whisper
+eml_parser
+nltk
+sentence-transformers
+chromadb
+requests
