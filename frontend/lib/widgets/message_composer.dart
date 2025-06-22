@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/voice_service.dart';
 
 class MessageComposer extends StatefulWidget {
   final void Function(String) onSend;
@@ -11,6 +12,7 @@ class MessageComposer extends StatefulWidget {
 
 class _MessageComposerState extends State<MessageComposer> {
   final TextEditingController _controller = TextEditingController();
+  final VoiceService _voice = VoiceService();
 
   void _handleSend() {
     final text = _controller.text.trim();
@@ -41,8 +43,11 @@ class _MessageComposerState extends State<MessageComposer> {
           ),
           IconButton(
             icon: const Icon(Icons.mic),
-            onPressed: () {
-              // to be implemented with VoiceService
+            onPressed: () async {
+              final transcript = await _voice.listen();
+              if (transcript != null && transcript.isNotEmpty) {
+                widget.onSend(transcript);
+              }
             },
           ),
         ],

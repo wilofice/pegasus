@@ -12,6 +12,10 @@ flutter pub get
 flutter run
 ```
 
+The project uses Firebase for push notifications and requires a Firebase
+project configured with FCM. Voice interaction relies on the
+`speech_to_text` and `flutter_tts` packages.
+
 ## Project Structure
 
 - `lib/` contains the Dart source files

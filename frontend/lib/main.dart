@@ -6,9 +6,9 @@ import 'services/notification_service.dart';
 
 final _notificationService = NotificationService();
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _notificationService.init();
+  await _notificationService.init();
   runApp(const ProviderScope(child: PegasusApp()));
 }
 

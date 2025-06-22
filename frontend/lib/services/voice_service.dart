@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -8,8 +10,14 @@ class VoiceService {
   Future<String?> listen() async {
     final available = await _speech.initialize();
     if (!available) return null;
-    await _speech.listen();
-    return null; // placeholder for transcript
+
+    final completer = Completer<String?>();
+    _speech.listen(onResult: (result) {
+      if (result.finalResult) {
+        completer.complete(result.recognizedWords);
+      }
+    });
+    return completer.future;
   }
 
   Future<void> stopListening() async {
