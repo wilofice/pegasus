@@ -1,0 +1,7 @@
+# Python virtual environments
+venv/
+**/__pycache__/
+# Logs
+data_pipeline/logs/
+# Database files
+data_pipeline/database/
