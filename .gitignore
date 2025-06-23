@@ -10,3 +10,7 @@ frontend/build/
 # Flutter dependencies
 frontend/.dart_tool/
 frontend/.idea/
+pegasus/build/
+# Flutter dependencies
+pegasus/.dart_tool/
+pegasus/.idea/
