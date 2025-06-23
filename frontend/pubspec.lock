@@ -1,9 +1,0 @@
-# This is a placeholder lock file for the Pegasus Flutter project.
-packages:
-  pegusus_placeholder:
-    dependency: "direct main"
-    description:
-      name: pegusus_placeholder
-      url: https://example.com
-    source: hosted
-    version: 0.0.1
