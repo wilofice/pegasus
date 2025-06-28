@@ -1,0 +1,101 @@
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compressDebugAssets'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.CompressAssetsWorkAction
+   > Required array size too large
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+----
+This error occurs because the Phi-3 ONNX model files (~2.4GB total) are too large to be compressed as Android assets. Here are several solutions:
+
+## Solution 1: External Storage (Recommended)
+
+### Remove from Assets, Download at Runtime
+```dart
+// Remove model files from assets folder completely
+// Download to external storage instead
+
+class ModelDownloader {
+  static const String baseUrl = 'https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-onnx/resolve/main/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/';
+  static const String modelName = 'phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4';
+  
+  Future<String> getModelPath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final modelDir = Directory('${directory.path}/models');
+    await modelDir.create(recursive: true);
+    return '${modelDir.path}/$modelName.onnx';
+  }
+  
+  Future<bool> isModelDownloaded() async {
+    final modelPath = await getModelPath();
+    final modelFile = File(modelPath);
+    final dataFile = File('${modelPath.replaceAll('.onnx', '.onnx.data')}');
+    return await modelFile.exists() && await dataFile.exists();
+  }
+  
+  Future<void> downloadModelWithProgress(Function(double) onProgress) async {
+    final modelPath = await getModelPath();
+    final dataPath = modelPath.replaceAll('.onnx', '.onnx.data');
+    
+    // Download model file
+    await _downloadFileWithProgress(
+      '$baseUrl$modelName.onnx', 
+      modelPath, 
+      (progress) => onProgress(progress * 0.3) // 30% of total
+    );
+    
+    // Download data file (larger)
+    await _downloadFileWithProgress(
+      '$baseUrl$modelName.onnx.data', 
+      dataPath, 
+      (progress) => onProgress(0.3 + progress * 0.7) // 70% of total
+    );
+  }
+  
+  Future<void> _downloadFileWithProgress(String url, String savePath, Function(double) onProgress) async {
+    final request = await HttpClient().getUrl(Uri.parse(url));
+    final response = await request.close();
+    
+    final file = File(savePath);
+    final sink = file.openWrite();
+    
+    int downloaded = 0;
+    final total = response.contentLength;
+    
+    await response.listen(
+      (data) {
+        downloaded += data.length;
+        sink.add(data);
+        if (total > 0) {
+          onProgress(downloaded / total);
+        }
+      },
+      onDone: () => sink.close(),
+      onError: (error) => sink.close(),
+    ).asFuture();
+  }
+}
+```
+
+## Recommended Approach
+
+**Use Solution 1 (External Storage)** because:
+- Keeps APK size manageable
+- Allows users to download only when needed
+- Provides progress feedback
+- Avoids Android asset compression limits
+- Can be updated without app updates
+
+**Implementation Steps:**
+1. Remove model files from `assets/` folder
+2. Implement `ModelDownloader` class
+3. Add download progress UI
+4. Download models to `getApplicationDocumentsDirectory()`
+5. Load models from external storage path
+
+This approach is used by most production AI apps and provides the best user experience for large model files.

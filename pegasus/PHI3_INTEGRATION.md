@@ -120,3 +120,19 @@ flutter test test/phi3_integration_test.dart
 - Check device compatibility with ONNX Runtime
 - Monitor memory usage during inference
 - Enable release mode optimizations
+
+### Release Build Issues (FIXED)
+If you encounter errors like "To access 'Phi3IsolateService' from native code, it must be annotated":
+- ✅ **FIXED**: Added `@pragma('vm:entry-point')` annotations to all isolate entry points
+- This is required when using flutter_isolate in AOT/release mode
+
+### Android Back Navigation Warning (FIXED)
+If you see "OnBackInvokedCallback is not enabled":
+- ✅ **FIXED**: Added `android:enableOnBackInvokedCallback="true"` to AndroidManifest.xml
+- This enables proper back gesture handling on Android 13+
+
+### Riverpod Provider Lifecycle Error (FIXED)
+If you encounter "Tried to modify a provider while the widget tree was building":
+- ✅ **FIXED**: Moved provider modifications out of `initState()` using `WidgetsBinding.instance.addPostFrameCallback()`
+- Provider state changes are now properly delayed until after the widget tree is built
+- This prevents inconsistent UI state when multiple widgets listen to the same provider

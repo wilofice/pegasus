@@ -37,7 +37,10 @@ class _Phi3ChatScreenState extends ConsumerState<Phi3ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _loadModel();
+    // Delay model loading until after the widget tree is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadModel();
+    });
   }
 
   Future<void> _loadModel() async {

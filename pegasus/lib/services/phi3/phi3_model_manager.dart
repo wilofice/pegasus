@@ -11,8 +11,8 @@ class Phi3ModelManager {
   String? _modelPath;
   late Phi3Tokenizer _tokenizer;
   
-  static const String _modelAssetPath = 'assets/models/phi3_mini.onnx';
-  static const String _modelFileName = 'phi3_mini.onnx';
+  static const String _modelAssetPath = 'assets/models/phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx';
+  static const String _modelFileName = 'phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx';
   static const String _prefKeyModelLoaded = 'phi3_model_loaded';
   
   bool get isLoaded => _isLoaded;

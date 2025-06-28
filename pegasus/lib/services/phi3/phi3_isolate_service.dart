@@ -2,11 +2,13 @@ import 'dart:isolate';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'phi3_model_manager.dart';
 
+@pragma('vm:entry-point')
 class Phi3IsolateService {
   static FlutterIsolate? _isolate;
   static SendPort? _sendPort;
   static bool _isInitialized = false;
 
+  @pragma('vm:entry-point')
   static Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -23,6 +25,7 @@ class Phi3IsolateService {
     _isInitialized = true;
   }
 
+  @pragma('vm:entry-point')
   static Future<String> generateText(String prompt, {int maxTokens = 100}) async {
     if (!_isInitialized) {
       await initialize();
@@ -48,6 +51,7 @@ class Phi3IsolateService {
     }
   }
 
+  @pragma('vm:entry-point')
   static void dispose() {
     _isolate?.kill();
     _isolate = null;
@@ -56,6 +60,7 @@ class Phi3IsolateService {
   }
 
   // Isolate entry point
+  @pragma('vm:entry-point')
   static void _isolateEntryPoint(SendPort mainSendPort) async {
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
@@ -112,6 +117,7 @@ class Phi3IsolateService {
 }
 
 // Alternative implementation using compute() for simpler cases
+@pragma('vm:entry-point')
 class Phi3ComputeService {
   static Phi3ModelManager? _modelManager;
   static bool _isLoaded = false;

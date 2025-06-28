@@ -1,0 +1,12 @@
+Following "PHI3_INTEGRATION.md", We faced some errors in debugging. Here is logcat logs. Design a plan for fixing the issues
+then act on that plan. 
+----------
+2025-06-28 22:06:55.002 30418-30418 WindowOnBackDispatcher  com.pegasus.coach                    W  OnBackInvokedCallback is not enabled for the application.
+                                                                                                    Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+2025-06-28 22:06:55.106 30418-30418 DartVM                  com.pegasus.coach                    E  ERROR: To access 'package:pegasus/services/phi3/phi3_isolate_service.dart::Phi3IsolateService' from native code, it must be annotated.
+                                                                                                    ERROR: See https://github.com/dart-lang/sdk/blob/master/runtime/docs/compiler/aot/entry_point_pragma.md
+2025-06-28 22:06:55.106 30418-30418 flutter                 com.pegasus.coach                    E  [ERROR:flutter/lib/ui/dart_runtime_hooks.cc(38)] Dart Error: ERROR: To access 'package:pegasus/services/phi3/phi3_isolate_service.dart::Phi3IsolateService' from native code, it must be annotated.
+                                                                                                    ERROR: See https://github.com/dart-lang/sdk/blob/master/runtime/docs/compiler/aot/entry_point_pragma.md
+2025-06-28 22:06:55.106 30418-30418 flutter                 com.pegasus.coach                    E  [ERROR:flutter/shell/common/shell.cc(115)] Dart Error: ERROR: To access 'package:pegasus/services/phi3/phi3_isolate_service.dart::Phi3IsolateService' from native code, it must be annotated.
+
+                                                                                                    ERROR: See https://github.com/dart-lang/sdk/blob/master/runtime/docs/compiler/aot/entry_point_pragma.md
