@@ -1,0 +1,6 @@
+1) I want to integrate a feature for recording voice in Pegasus app. 
+The voice will be sent to a data store for processing by the backend;
+Each recoding will have a well defined maximum length that will be set in in parameters screen (this is the target but for now just set the audio length parameters in a settings file).
+
+Your task isn't to code yet. Your task is to write an implementation plan in full detail before moving on coding;
+
