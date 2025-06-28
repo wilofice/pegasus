@@ -1,19 +1,14 @@
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'phi3_tokenizer.dart';
+import 'model_downloader.dart';
 
 class Phi3ModelManager {
   OrtSession? _session;
   bool _isLoaded = false;
   String? _modelPath;
   late Phi3Tokenizer _tokenizer;
-  
-  static const String _modelAssetPath = 'assets/models/phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx';
-  static const String _modelFileName = 'phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx';
-  static const String _prefKeyModelLoaded = 'phi3_model_loaded';
+  final ModelDownloader _modelDownloader = ModelDownloader();
   
   bool get isLoaded => _isLoaded;
   
@@ -21,20 +16,13 @@ class Phi3ModelManager {
     if (_isLoaded) return;
     
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final modelLoaded = prefs.getBool(_prefKeyModelLoaded) ?? false;
+      // Get model path from downloader
+      _modelPath = await _modelDownloader.getModelPath();
       
-      // Get app documents directory
-      final directory = await getApplicationDocumentsDirectory();
-      _modelPath = '${directory.path}/$_modelFileName';
-      
-      // Check if model exists in documents directory
+      // Check if model exists
       final modelFile = File(_modelPath!);
-      
-      if (!modelFile.existsSync() || !modelLoaded) {
-        // Copy model from assets to documents directory
-        await _copyModelFromAssets(_modelPath!);
-        await prefs.setBool(_prefKeyModelLoaded, true);
+      if (!await modelFile.exists()) {
+        throw Exception('Model file not found. Please download the model first.');
       }
       
       // Initialize ONNX Runtime
@@ -57,19 +45,6 @@ class Phi3ModelManager {
     } catch (e) {
       print('Error loading Phi-3 model: $e');
       throw Exception('Failed to load Phi-3 model: $e');
-    }
-  }
-  
-  Future<void> _copyModelFromAssets(String targetPath) async {
-    try {
-      final byteData = await rootBundle.load(_modelAssetPath);
-      final buffer = byteData.buffer;
-      await File(targetPath).writeAsBytes(
-        buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-      );
-    } catch (e) {
-      print('Error copying model from assets: $e');
-      throw Exception('Failed to copy model from assets: $e');
     }
   }
   

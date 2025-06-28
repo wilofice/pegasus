@@ -10,17 +10,12 @@ The integration allows users to run the Phi-3 Mini language model locally on the
 
 ### 1. Model Preparation
 
-Before running the app with Phi-3 functionality, you need to obtain the Phi-3 Mini ONNX model:
+The Phi-3 Mini model is now downloaded automatically when you first use the feature:
 
-1. Download the Phi-3 Mini ONNX model (approximately 2GB)
-2. Place the model file at: `assets/models/phi3_mini.onnx`
-3. Update `pubspec.yaml` to include the model in assets:
-
-```yaml
-flutter:
-  assets:
-    - assets/models/phi3_mini.onnx
-```
+1. **No manual download required** - The app will download the model (~2.4GB) automatically
+2. **First-time setup** - On first use, the app will show a download progress indicator
+3. **Storage location** - Models are stored in the app's documents directory
+4. **Offline use** - Once downloaded, the model works completely offline
 
 ### 2. Dependencies
 
@@ -41,6 +36,11 @@ The integration consists of several components:
   - Handles model loading and inference
   - Manages ONNX Runtime session
   - Processes input/output tensors
+
+- **ModelDownloader** (`lib/services/phi3/model_downloader.dart`)
+  - Downloads models from Hugging Face automatically
+  - Shows download progress with real-time updates
+  - Manages model storage in app documents directory
 
 - **Phi3Tokenizer** (`lib/services/phi3/phi3_tokenizer.dart`)
   - Simplified BPE tokenizer implementation
@@ -67,8 +67,16 @@ The integration consists of several components:
 
 1. Launch the app
 2. From the home screen, tap "Phi-3 Mini Chat (Experimental)"
-3. Wait for the model to initialize (first load copies model to device storage)
-4. Start chatting with the local AI model
+3. **First time only**: Wait for the model to download (~2.4GB, progress shown)
+4. Wait for the model to initialize
+5. Start chatting with the local AI model
+
+### Download Process
+
+- **Automatic**: No manual intervention required
+- **Progress tracking**: Real-time download progress and status
+- **Resumable**: Download will resume if interrupted
+- **One-time**: Only downloads once, then uses cached model
 
 ## Performance Considerations
 
@@ -136,3 +144,10 @@ If you encounter "Tried to modify a provider while the widget tree was building"
 - ✅ **FIXED**: Moved provider modifications out of `initState()` using `WidgetsBinding.instance.addPostFrameCallback()`
 - Provider state changes are now properly delayed until after the widget tree is built
 - This prevents inconsistent UI state when multiple widgets listen to the same provider
+
+### Build Failed - Asset Compression Error (FIXED)
+If you encounter "Required array size too large" during build:
+- ✅ **FIXED**: Removed large model files from assets, implemented runtime download
+- Models are now downloaded automatically from Hugging Face on first use
+- APK size reduced significantly, avoiding Android asset compression limits
+- Download progress is shown to user with real-time updates

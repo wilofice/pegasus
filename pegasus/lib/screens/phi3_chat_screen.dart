@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/phi3/phi3_model_manager.dart';
 import '../services/phi3/phi3_isolate_service.dart';
+import '../services/phi3/model_downloader.dart';
 
 final phi3ModelProvider = Provider<Phi3ModelManager>((ref) {
   return Phi3ModelManager();
 });
 
 final isModelLoadingProvider = StateProvider<bool>((ref) => false);
+final downloadProgressProvider = StateProvider<double>((ref) => 0.0);
+final downloadStatusProvider = StateProvider<String>((ref) => '');
+final isDownloadingProvider = StateProvider<bool>((ref) => false);
 final chatMessagesProvider = StateProvider<List<ChatMessage>>((ref) => []);
 
 class ChatMessage {
@@ -33,14 +37,51 @@ class _Phi3ChatScreenState extends ConsumerState<Phi3ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isGenerating = false;
+  final ModelDownloader _modelDownloader = ModelDownloader();
 
   @override
   void initState() {
     super.initState();
     // Delay model loading until after the widget tree is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadModel();
+      _checkAndLoadModel();
     });
+  }
+
+  Future<void> _checkAndLoadModel() async {
+    try {
+      final isDownloaded = await _modelDownloader.isModelDownloaded();
+      
+      if (!isDownloaded) {
+        _addSystemMessage('Model not found. Starting download...');
+        await _downloadModel();
+      } else {
+        _addSystemMessage('Model found. Loading...');
+        await _loadModel();
+      }
+    } catch (e) {
+      _addSystemMessage('Error checking model: $e');
+    }
+  }
+
+  Future<void> _downloadModel() async {
+    ref.read(isDownloadingProvider.notifier).state = true;
+    ref.read(downloadProgressProvider.notifier).state = 0.0;
+    ref.read(downloadStatusProvider.notifier).state = 'Starting download...';
+    
+    try {
+      await _modelDownloader.downloadModelWithProgress((progress, status) {
+        ref.read(downloadProgressProvider.notifier).state = progress;
+        ref.read(downloadStatusProvider.notifier).state = status;
+      });
+      
+      _addSystemMessage('Model downloaded successfully. Loading...');
+      await _loadModel();
+    } catch (e) {
+      _addSystemMessage('Download failed: $e');
+    } finally {
+      ref.read(isDownloadingProvider.notifier).state = false;
+    }
   }
 
   Future<void> _loadModel() async {
@@ -134,6 +175,9 @@ class _Phi3ChatScreenState extends ConsumerState<Phi3ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(isModelLoadingProvider);
+    final isDownloading = ref.watch(isDownloadingProvider);
+    final downloadProgress = ref.watch(downloadProgressProvider);
+    final downloadStatus = ref.watch(downloadStatusProvider);
     final messages = ref.watch(chatMessagesProvider);
 
     return Scaffold(
@@ -143,7 +187,7 @@ class _Phi3ChatScreenState extends ConsumerState<Phi3ChatScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: isLoading ? null : _loadModel,
+            onPressed: isLoading ? null : _checkAndLoadModel,
             tooltip: 'Reload Model',
           ),
         ],
@@ -152,6 +196,11 @@ class _Phi3ChatScreenState extends ConsumerState<Phi3ChatScreen> {
         children: [
           if (isLoading)
             const LinearProgressIndicator(),
+          if (isDownloading)
+            _DownloadProgressWidget(
+              progress: downloadProgress,
+              status: downloadStatus,
+            ),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -167,7 +216,7 @@ class _Phi3ChatScreenState extends ConsumerState<Phi3ChatScreen> {
             controller: _messageController,
             onSend: _sendMessage,
             isGenerating: _isGenerating,
-            isModelLoaded: !isLoading,
+            isModelLoaded: !isLoading && !isDownloading,
           ),
         ],
       ),
@@ -256,7 +305,7 @@ class _InputBar extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: isModelLoaded
                     ? 'Type a message...'
-                    : 'Loading model...',
+                    : 'Model not ready...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
@@ -281,6 +330,63 @@ class _InputBar extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.send),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DownloadProgressWidget extends StatelessWidget {
+  final double progress;
+  final String status;
+
+  const _DownloadProgressWidget({
+    required this.progress,
+    required this.status,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.download, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Downloading Phi-3 Model',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const Spacer(),
+              Text(
+                '${(progress * 100).toInt()}%',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            status,
+            style: Theme.of(context).textTheme.bodySmall,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
