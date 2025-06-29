@@ -340,7 +340,7 @@ async def process_audio_file(audio_id: UUID, file_path: str):
                 await audio_repo.update(audio_id, {"duration_seconds": duration})
             
             # Step 3: Transcribe audio
-            transcription_result = await transcription_service.transcribe_audio(file_path)
+            transcription_result = await transcription_service.transcribe_audio(file_path, settings.transcription_engine)
             
             if not transcription_result["success"]:
                 error_msg = f"Transcription failed: {transcription_result.get('error', 'Unknown error')}"

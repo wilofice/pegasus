@@ -19,12 +19,22 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create enum type for processing status
+    from sqlalchemy import MetaData, inspect
+    
+    # Check if table already exists
+    inspector = inspect(op.get_bind())
+    tables = inspector.get_table_names()
+    
+    if 'audio_files' in tables:
+        print("Table 'audio_files' already exists, skipping creation...")
+        return
+    
+    # Create enum type for processing status (only if it doesn't exist)
     processing_status_enum = sa.Enum(
         'uploaded', 'transcribing', 'improving', 'completed', 'failed',
         name='processingstatus'
     )
-    processing_status_enum.create(op.get_bind())
+    processing_status_enum.create(op.get_bind(), checkfirst=True)
     
     # Create audio_files table
     op.create_table('audio_files',
