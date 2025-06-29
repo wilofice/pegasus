@@ -5,12 +5,14 @@ class PrefsService {
   static const String _kAutoUploadAudio = 'auto_upload_audio';
   static const String _kAudioQuality = 'audio_quality';
   static const String _kSaveToGallery = 'save_to_gallery';
+  static const String _kRecordingLanguage = 'recording_language';
   
   // Default values
   static const int defaultMaxRecordingSec = 60; // 1 minute
   static const bool defaultAutoUpload = true;
   static const String defaultAudioQuality = 'medium'; // low, medium, high
   static const bool defaultSaveToGallery = false;
+  static const String defaultRecordingLanguage = 'en'; // en, fr
   
   /// Get maximum recording duration in seconds
   Future<int> getMaxRecordingSec() async {
@@ -60,6 +62,18 @@ class PrefsService {
     await prefs.setBool(_kSaveToGallery, saveToGallery);
   }
   
+  /// Get recording language setting
+  Future<String> getRecordingLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_kRecordingLanguage) ?? defaultRecordingLanguage;
+  }
+  
+  /// Set recording language setting
+  Future<void> setRecordingLanguage(String language) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kRecordingLanguage, language);
+  }
+  
   /// Get all audio recording preferences as a map
   Future<Map<String, dynamic>> getAllAudioPrefs() async {
     return {
@@ -67,6 +81,7 @@ class PrefsService {
       'autoUpload': await getAutoUploadAudio(),
       'audioQuality': await getAudioQuality(),
       'saveToGallery': await getSaveToGallery(),
+      'recordingLanguage': await getRecordingLanguage(),
     };
   }
   
@@ -77,6 +92,7 @@ class PrefsService {
     await prefs.remove(_kAutoUploadAudio);
     await prefs.remove(_kAudioQuality);
     await prefs.remove(_kSaveToGallery);
+    await prefs.remove(_kRecordingLanguage);
   }
   
   /// Get recording configuration based on quality setting

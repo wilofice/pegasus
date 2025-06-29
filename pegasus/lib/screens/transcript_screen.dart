@@ -6,6 +6,7 @@ import '../api/pegasus_api_client.dart';
 
 // Providers for transcript screen
 final transcriptDataProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
+final bothTranscriptsProvider = StateProvider<Map<String, String?>>((ref) => {});
 final isLoadingProvider = StateProvider<bool>((ref) => true);
 final selectedTagProvider = StateProvider<String?>((ref) => null);
 final availableTagsProvider = StateProvider<List<String>>((ref) => []);
@@ -21,7 +22,7 @@ class TranscriptScreen extends ConsumerStatefulWidget {
 }
 
 class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with TickerProviderStateMixin {
-  final PegasusApiClient _apiClient = PegasusApiClient(baseUrl: 'http://192.168.1.15:9000', token: 'empty');
+  final PegasusApiClient _apiClient = PegasusApiClient.defaultConfig();
   late TabController _tabController;
   
   @override
@@ -44,9 +45,15 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
     ref.read(isLoadingProvider.notifier).state = true;
     
     try {
-      // Load transcript data
+      // Load transcript data (improved version)
       final transcriptData = await _apiClient.getTranscript(widget.audioId);
       ref.read(transcriptDataProvider.notifier).state = transcriptData;
+      
+      // Load both transcripts if processing is complete
+      if (transcriptData != null && transcriptData['status'] == 'completed') {
+        final bothTranscripts = await _apiClient.getBothTranscripts(widget.audioId);
+        ref.read(bothTranscriptsProvider.notifier).state = bothTranscripts;
+      }
       
       // Load audio file details to get current tag
       final audioData = await _apiClient.getAudioFile(widget.audioId);
@@ -129,6 +136,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
   Widget build(BuildContext context) {
     final isLoading = ref.watch(isLoadingProvider);
     final transcriptData = ref.watch(transcriptDataProvider);
+    final bothTranscripts = ref.watch(bothTranscriptsProvider);
     final selectedTag = ref.watch(selectedTagProvider);
     final availableTags = ref.watch(availableTagsProvider);
     final customController = ref.watch(customTagControllerProvider);
@@ -170,16 +178,17 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildTranscriptTab(transcriptData),
+          _buildTranscriptTab(transcriptData, bothTranscripts),
           _buildTagsTab(selectedTag, availableTags, customController),
         ],
       ),
     );
   }
   
-  Widget _buildTranscriptTab(Map<String, dynamic> transcriptData) {
+  Widget _buildTranscriptTab(Map<String, dynamic> transcriptData, Map<String, String?> bothTranscripts) {
     final status = transcriptData['status'] as String?;
-    final originalTranscript = transcriptData['transcript'] as String?;
+    final improvedTranscript = transcriptData['transcript'] as String?;
+    final originalTranscript = bothTranscripts['original'];
     final isImproved = transcriptData['is_improved'] as bool? ?? false;
     
     if (status != 'completed') {
@@ -206,7 +215,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
       );
     }
     
-    if (originalTranscript == null || originalTranscript.isEmpty) {
+    if (improvedTranscript == null || improvedTranscript.isEmpty) {
       return const Center(
         child: Text('No transcript available'),
       );
@@ -217,30 +226,23 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Transcript type indicator
+          // AI-Improved Transcript Section
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: isImproved ? Colors.green.withValues(alpha: 0.1) : Colors.blue.withValues(alpha: 0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isImproved ? Colors.green : Colors.blue,
-                width: 1,
-              ),
+              border: Border.all(color: Colors.green, width: 1),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  isImproved ? Icons.auto_fix_high : Icons.mic,
-                  size: 16,
-                  color: isImproved ? Colors.green : Colors.blue,
-                ),
+                Icon(Icons.auto_fix_high, size: 16, color: Colors.green),
                 const SizedBox(width: 6),
                 Text(
-                  isImproved ? 'AI-Improved Transcript' : 'Original Transcript',
+                  'AI-Improved Transcript',
                   style: TextStyle(
-                    color: isImproved ? Colors.green : Colors.blue,
+                    color: Colors.green,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -251,43 +253,97 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
           
           const SizedBox(height: 16),
           
-          // Transcript text
+          // Improved transcript text
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: Colors.green.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-              ),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
             ),
             child: SelectableText(
-              originalTranscript,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                height: 1.6,
-              ),
+              improvedTranscript,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
             ),
           ),
           
           const SizedBox(height: 16),
           
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _copyToClipboard(originalTranscript),
-                  icon: const Icon(Icons.copy),
-                  label: const Text('Copy to Clipboard'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+          // Copy improved transcript button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _copyToClipboard(improvedTranscript),
+              icon: const Icon(Icons.copy),
+              label: const Text('Copy Improved Transcript'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ),
+          
+          // Original Transcript Section (if available)
+          if (originalTranscript != null && originalTranscript.isNotEmpty) ...[
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.blue, width: 1),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.mic, size: 16, color: Colors.blue),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Original Transcript',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Original transcript text
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+              ),
+              child: SelectableText(
+                originalTranscript,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Copy original transcript button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _copyToClipboard(originalTranscript),
+                icon: const Icon(Icons.copy),
+                label: const Text('Copy Original Transcript'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  side: BorderSide(color: Colors.blue),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
           
           // Transcript metadata
           if (transcriptData['transcription_engine'] != null) ...[
@@ -309,7 +365,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
                   ),
                   const SizedBox(height: 8),
                   Text('Engine: ${transcriptData['transcription_engine']}'),
-                  if (isImproved) Text('Enhanced: Yes'),
+                  Text('AI Enhanced: Yes'),
                 ],
               ),
             ),

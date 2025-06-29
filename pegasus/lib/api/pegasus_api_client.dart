@@ -3,23 +3,35 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
+import '../config/api_config.dart';
 
 class PegasusApiClient {
   final String baseUrl;
   final String? token;
   late final Dio _dio;
 
-  PegasusApiClient({this.baseUrl = 'http://127.0.0.1:8000', this.token}) {
+  PegasusApiClient({
+    String? baseUrl, 
+    String? token
+  }) : baseUrl = baseUrl ?? ApiConfig.baseUrl,
+       token = token ?? ApiConfig.defaultToken {
     _dio = Dio(BaseOptions(
-      baseUrl: baseUrl,
+      baseUrl: this.baseUrl,
+      connectTimeout: Duration(seconds: ApiConfig.connectionTimeoutSeconds),
+      receiveTimeout: Duration(seconds: ApiConfig.timeoutSeconds),
       headers: {
-        if (token != null) 'Authorization': token!,
+        if (this.token != null) 'Authorization': this.token!,
       },
     ));
   }
 
+  /// Create a client with default configuration
+  factory PegasusApiClient.defaultConfig() {
+    return PegasusApiClient();
+  }
+
   Future<String> sendMessage(String message) async {
-    final uri = Uri.parse('$baseUrl/chat');
+    final uri = Uri.parse(ApiConfig.getFullUrl(ApiConfig.chatEndpoint));
     final response = await http.post(
       uri,
       headers: {
@@ -38,7 +50,7 @@ class PegasusApiClient {
   }
 
   /// Upload an audio file to the backend
-  Future<Map<String, dynamic>> uploadAudioFile(File audioFile) async {
+  Future<Map<String, dynamic>> uploadAudioFile(File audioFile, {String? language}) async {
     try {
       final fileName = audioFile.path.split('/').last;
       final mimeType = _getMimeTypeFromFileName(fileName);
@@ -50,10 +62,11 @@ class PegasusApiClient {
           contentType: MediaType.parse(mimeType),
         ),
         'user_id': 'flutter_user', // Add a default user ID
+        if (language != null) 'language': language,
       });
 
       final response = await _dio.post(
-        '/api/audio/upload',
+        ApiConfig.audioUploadEndpoint,
         data: formData,
         options: Options(
           headers: {
@@ -126,7 +139,7 @@ class PegasusApiClient {
       if (tag != null) queryParams['tag'] = tag;
       if (category != null) queryParams['category'] = category;
       
-      final response = await _dio.get('/api/audio/', queryParameters: queryParams);
+      final response = await _dio.get(ApiConfig.audioListEndpoint, queryParameters: queryParams);
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data['items'] ?? []);
       }
@@ -139,7 +152,7 @@ class PegasusApiClient {
   /// Get audio file details by ID
   Future<Map<String, dynamic>?> getAudioFile(String audioId) async {
     try {
-      final response = await _dio.get('/api/audio/$audioId');
+      final response = await _dio.get('${ApiConfig.audioDetailsEndpoint}$audioId');
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       }
@@ -152,7 +165,7 @@ class PegasusApiClient {
   /// Get transcript for an audio file
   Future<Map<String, dynamic>?> getTranscript(String audioId, {bool improved = true}) async {
     try {
-      final response = await _dio.get('/api/audio/$audioId/transcript', 
+      final response = await _dio.get('${ApiConfig.transcriptEndpoint}$audioId/transcript', 
         queryParameters: {'improved': improved});
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
@@ -163,6 +176,39 @@ class PegasusApiClient {
     }
   }
 
+  /// Get both original and improved transcripts for an audio file
+  Future<Map<String, String?>> getBothTranscripts(String audioId) async {
+    try {
+      // Get improved transcript
+      final improvedResponse = await _dio.get('${ApiConfig.transcriptEndpoint}$audioId/transcript', 
+        queryParameters: {'improved': true});
+      
+      // Get original transcript
+      final originalResponse = await _dio.get('${ApiConfig.transcriptEndpoint}$audioId/transcript', 
+        queryParameters: {'improved': false});
+      
+      String? improvedTranscript;
+      String? originalTranscript;
+      
+      if (improvedResponse.statusCode == 200) {
+        final data = improvedResponse.data as Map<String, dynamic>;
+        improvedTranscript = data['transcript'] as String?;
+      }
+      
+      if (originalResponse.statusCode == 200) {
+        final data = originalResponse.data as Map<String, dynamic>;
+        originalTranscript = data['transcript'] as String?;
+      }
+      
+      return {
+        'original': originalTranscript,
+        'improved': improvedTranscript,
+      };
+    } catch (e) {
+      throw Exception('Failed to get transcripts: $e');
+    }
+  }
+
   /// Update audio file tags
   Future<bool> updateAudioTags(String audioId, {String? tag, String? category}) async {
     try {
@@ -170,7 +216,7 @@ class PegasusApiClient {
       if (tag != null) data['tag'] = tag;
       if (category != null) data['category'] = category;
       
-      final response = await _dio.put('/api/audio/$audioId/tags', data: data);
+      final response = await _dio.put('${ApiConfig.updateTagsEndpoint}$audioId/tags', data: data);
       return response.statusCode == 200;
     } catch (e) {
       throw Exception('Failed to update audio tags: $e');
@@ -183,7 +229,7 @@ class PegasusApiClient {
       final queryParams = <String, dynamic>{};
       if (userId != null) queryParams['user_id'] = userId;
       
-      final response = await _dio.get('/api/audio/tags', queryParameters: queryParams);
+      final response = await _dio.get(ApiConfig.tagsEndpoint, queryParameters: queryParams);
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         return {
@@ -201,7 +247,7 @@ class PegasusApiClient {
   /// Delete an uploaded audio file
   Future<bool> deleteAudioFile(String fileId) async {
     try {
-      final response = await _dio.delete('/api/audio/$fileId');
+      final response = await _dio.delete('${ApiConfig.deleteAudioEndpoint}$fileId');
       return response.statusCode == 200;
     } catch (e) {
       throw Exception('Failed to delete audio file: $e');

@@ -43,6 +43,7 @@ class AudioFile(Base):
     
     # Metadata
     user_id = Column(String(255), index=True)
+    language = Column(String(10), default='en', index=True)  # Language code (e.g., 'en', 'fr')
     upload_timestamp = Column(DateTime, default=datetime.utcnow, index=True)
     processing_status = Column(
         Enum(ProcessingStatus),
@@ -73,6 +74,7 @@ class AudioFile(Base):
             "improved_transcript": self.improved_transcript,
             "transcription_engine": self.transcription_engine,
             "user_id": self.user_id,
+            "language": self.language,
             "upload_timestamp": self.upload_timestamp.isoformat() if self.upload_timestamp else None,
             "processing_status": self.processing_status.value if self.processing_status else None,
             "error_message": self.error_message,

@@ -27,11 +27,12 @@ class TranscriptionService:
             self._whisper_model = whisper.load_model(model_size)
         return self._whisper_model
     
-    async def transcribe_with_whisper(self, file_path: str) -> Dict[str, Any]:
+    async def transcribe_with_whisper(self, file_path: str, language: Optional[str] = None) -> Dict[str, Any]:
         """Transcribe audio file using OpenAI Whisper.
         
         Args:
             file_path: Path to the audio file
+            language: Language code for transcription hint (e.g., 'en', 'fr')
             
         Returns:
             Dictionary with transcription results
@@ -42,7 +43,8 @@ class TranscriptionService:
             result = await loop.run_in_executor(
                 self._executor,
                 self._transcribe_whisper_sync,
-                file_path
+                file_path,
+                language
             )
             
             return {
@@ -61,25 +63,26 @@ class TranscriptionService:
                 "engine": "whisper"
             }
     
-    def _transcribe_whisper_sync(self, file_path: str) -> Dict[str, Any]:
+    def _transcribe_whisper_sync(self, file_path: str, language: Optional[str] = None) -> Dict[str, Any]:
         """Synchronous Whisper transcription (runs in thread pool)."""
         model = self._load_whisper_model()
         
         # Transcribe the audio
         result = model.transcribe(
             file_path,
-            language=None,  # Auto-detect language
+            language=language,  # Use provided language hint or auto-detect
             word_timestamps=True,
             verbose=False
         )
         
         return result
     
-    async def transcribe_with_deepgram(self, file_path: str) -> Dict[str, Any]:
+    async def transcribe_with_deepgram(self, file_path: str, language: Optional[str] = None) -> Dict[str, Any]:
         """Transcribe audio file using Deepgram API.
         
         Args:
             file_path: Path to the audio file
+            language: Language code for transcription hint (e.g., 'en', 'fr')
             
         Returns:
             Dictionary with transcription results
@@ -104,7 +107,7 @@ class TranscriptionService:
             
             params = {
                 "model": "nova-2",
-                "language": "en",
+                "language": language or "en",
                 "smart_format": "true",
                 "punctuate": "true",
                 "diarize": "false",
@@ -158,13 +161,15 @@ class TranscriptionService:
     async def transcribe_audio(
         self,
         file_path: str,
-        engine: str = "auto"
+        engine: str = "auto",
+        language: Optional[str] = None
     ) -> Dict[str, Any]:
         """Transcribe audio file using the specified engine.
         
         Args:
             file_path: Path to the audio file
             engine: Transcription engine ("whisper", "deepgram", or "auto")
+            language: Language code for transcription hint (e.g., 'en', 'fr')
             
         Returns:
             Dictionary with transcription results
@@ -188,9 +193,9 @@ class TranscriptionService:
         
         # Call appropriate transcription method
         if engine == "whisper":
-            return await self.transcribe_with_whisper(file_path)
+            return await self.transcribe_with_whisper(file_path, language)
         elif engine == "deepgram":
-            return await self.transcribe_with_deepgram(file_path)
+            return await self.transcribe_with_deepgram(file_path, language)
         else:
             return {
                 "success": False,

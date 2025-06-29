@@ -139,17 +139,31 @@ class OllamaService:
                 "error": str(e)
             }
     
-    async def improve_transcript(self, transcript: str, context: Optional[str] = None) -> Dict[str, Any]:
+    async def improve_transcript(self, transcript: str, context: Optional[str] = None, language: str = 'en') -> Dict[str, Any]:
         """Improve a transcript using Ollama LLM.
         
         Args:
             transcript: The original transcript to improve
             context: Optional context about the audio content
+            language: Language code for the transcript (e.g., 'en', 'fr')
             
         Returns:
             Dictionary with improvement results
         """
-        system_prompt = """You are an expert transcript editor. Your task is to improve the quality of audio transcripts by:
+        # Create language-specific system prompt
+        if language == 'fr':
+            system_prompt = """Vous êtes un éditeur expert de transcriptions. Votre tâche est d'améliorer la qualité des transcriptions audio en:
+
+1. Corrigeant les erreurs évidentes de transcription et les fautes de frappe
+2. Ajoutant la ponctuation et les majuscules appropriées
+3. Divisant le texte en paragraphes logiques
+4. Corrigeant la grammaire tout en préservant la voix naturelle du locuteur
+5. Supprimant les mots de remplissage (euh, ben, genre) sauf s'ils ajoutent du sens
+6. Maintenant le sens et le contenu originaux
+
+Veuillez améliorer la transcription suivante en la gardant naturelle et lisible. IMPORTANT: Répondez UNIQUEMENT avec le texte amélioré, sans explications ni commentaires:"""
+        else:
+            system_prompt = """You are an expert transcript editor. Your task is to improve the quality of audio transcripts by:
 
 1. Correcting obvious transcription errors and typos
 2. Adding proper punctuation and capitalization
@@ -158,7 +172,7 @@ class OllamaService:
 5. Removing filler words (um, uh, like) unless they add meaning
 6. Maintaining the original meaning and content
 
-Please improve the following transcript while keeping it natural and readable:"""
+Please improve the following transcript while keeping it natural and readable. IMPORTANT: Respond ONLY with the improved text, no explanations or comments:"""
 
         user_prompt = f"Original transcript:\n\n{transcript}"
         

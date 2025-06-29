@@ -45,6 +45,7 @@ async def upload_audio(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     user_id: Optional[str] = Form(None),
+    language: Optional[str] = Form("en"),
     db: AsyncSession = Depends(get_db)
 ):
     """Upload an audio file for transcription and processing.
@@ -52,6 +53,7 @@ async def upload_audio(
     Args:
         file: The audio file to upload
         user_id: Optional user identifier
+        language: Language code for transcription (e.g., 'en', 'fr')
         
     Returns:
         AudioUploadResponse with file ID and status
@@ -91,6 +93,7 @@ async def upload_audio(
             "file_size_bytes": file_info["file_size_bytes"],
             "mime_type": file_info["mime_type"],
             "user_id": user_id,
+            "language": language or "en",
             "upload_timestamp": datetime.utcnow(),
             "processing_status": ProcessingStatus.UPLOADED
         })
@@ -364,8 +367,16 @@ async def process_audio_file(audio_id: UUID, file_path: str):
             if duration:
                 await audio_repo.update(audio_id, {"duration_seconds": duration})
             
-            # Step 3: Transcribe audio
-            transcription_result = await transcription_service.transcribe_audio(file_path, settings.transcription_engine)
+            # Step 3: Get audio file for language info
+            audio_file = await audio_repo.get_by_id(audio_id)
+            language = audio_file.language if audio_file else 'en'
+            
+            # Step 3: Transcribe audio with language hint
+            transcription_result = await transcription_service.transcribe_audio(
+                file_path, 
+                settings.transcription_engine,
+                language=language
+            )
             
             if not transcription_result["success"]:
                 error_msg = f"Transcription failed: {transcription_result.get('error', 'Unknown error')}"
@@ -383,9 +394,10 @@ async def process_audio_file(audio_id: UUID, file_path: str):
             await audio_repo.update_status(audio_id, ProcessingStatus.IMPROVING)
             logger.info(f"Updated status to IMPROVING for {audio_id}")
             
-            # Step 5: Improve transcript with Ollama
+            # Step 5: Improve transcript with Ollama using language context
             improvement_result = await ollama_service.improve_transcript(
-                transcription_result["transcript"]
+                transcription_result["transcript"],
+                language=language
             )
             
             if improvement_result["success"]:

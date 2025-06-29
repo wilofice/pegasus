@@ -18,6 +18,7 @@ final isPlayingProvider = StateProvider<bool>((ref) => false);
 final isUploadingProvider = StateProvider<bool>((ref) => false);
 final uploadedAudioIdProvider = StateProvider<String?>((ref) => null);
 final audioProcessingStatusProvider = StateProvider<String?>((ref) => null);
+final recordingLanguageProvider = StateProvider<String>((ref) => 'en');
 
 class RecordingScreen extends ConsumerStatefulWidget {
   const RecordingScreen({Key? key}) : super(key: key);
@@ -30,7 +31,7 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
   FlutterSoundRecorder? _recorder;
   final AudioPlayer _audioPlayer = AudioPlayer();
   final PrefsService _prefsService = PrefsService();
-  final PegasusApiClient _apiClient = PegasusApiClient(baseUrl: 'http://192.168.1.15:9000', token: 'empty');
+  final PegasusApiClient _apiClient = PegasusApiClient.defaultConfig();
   
   Timer? _recordingTimer;
   Timer? _statusCheckTimer;
@@ -61,6 +62,10 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
   Future<void> _loadPreferences() async {
     final maxTime = await _prefsService.getMaxRecordingSec();
     ref.read(maxRecordingTimeProvider.notifier).state = maxTime;
+    
+    // Load saved language preference
+    final language = await _prefsService.getRecordingLanguage();
+    ref.read(recordingLanguageProvider.notifier).state = language;
   }
   
   Future<String> _buildFilePath() async {
@@ -190,8 +195,14 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
     ref.read(isUploadingProvider.notifier).state = true;
     
     try {
-      // Upload to Pegasus backend
-      final result = await _apiClient.uploadAudioFile(File(filePath));
+      // Get the selected language
+      final language = ref.read(recordingLanguageProvider);
+      
+      // Upload to Pegasus backend with language
+      final result = await _apiClient.uploadAudioFile(
+        File(filePath),
+        language: language,
+      );
       
       // Store the audio file ID
       final audioId = result['id'] as String?;
@@ -572,6 +583,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
   late int _maxDuration;
   late bool _autoUpload;
   late String _audioQuality;
+  late String _recordingLanguage;
   
   @override
   void initState() {
@@ -583,6 +595,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
     _maxDuration = await widget.prefsService.getMaxRecordingSec();
     _autoUpload = await widget.prefsService.getAutoUploadAudio();
     _audioQuality = await widget.prefsService.getAudioQuality();
+    _recordingLanguage = await widget.prefsService.getRecordingLanguage();
     setState(() {});
   }
   
@@ -590,6 +603,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
     await widget.prefsService.setMaxRecordingSec(_maxDuration);
     await widget.prefsService.setAutoUploadAudio(_autoUpload);
     await widget.prefsService.setAudioQuality(_audioQuality);
+    await widget.prefsService.setRecordingLanguage(_recordingLanguage);
   }
   
   @override
@@ -643,6 +657,25 @@ class _SettingsDialogState extends State<_SettingsDialog> {
                 if (value != null) {
                   setState(() {
                     _audioQuality = value;
+                  });
+                }
+              },
+            ),
+          ),
+          
+          // Recording language
+          ListTile(
+            title: const Text('Recording Language'),
+            subtitle: DropdownButton<String>(
+              value: _recordingLanguage,
+              items: const [
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'fr', child: Text('French')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _recordingLanguage = value;
                   });
                 }
               },
