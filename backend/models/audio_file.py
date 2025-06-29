@@ -52,6 +52,10 @@ class AudioFile(Base):
     )
     error_message = Column(Text)
     
+    # Tagging and categorization
+    tag = Column(String(100), index=True)  # User-defined tag (e.g., "Work", "Family", "Groceries")
+    category = Column(String(100), index=True)  # System category (optional)
+    
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -72,6 +76,8 @@ class AudioFile(Base):
             "upload_timestamp": self.upload_timestamp.isoformat() if self.upload_timestamp else None,
             "processing_status": self.processing_status.value if self.processing_status else None,
             "error_message": self.error_message,
+            "tag": self.tag,
+            "category": self.category,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

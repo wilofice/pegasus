@@ -4,7 +4,9 @@ from .audio import (
     AudioUploadResponse,
     AudioFileListResponse,
     TranscriptResponse,
-    AudioProcessingStatusResponse
+    AudioProcessingStatusResponse,
+    AudioTagUpdateRequest,
+    AudioTagsResponse
 )
 
 __all__ = [
@@ -12,5 +14,7 @@ __all__ = [
     "AudioUploadResponse", 
     "AudioFileListResponse",
     "TranscriptResponse",
-    "AudioProcessingStatusResponse"
+    "AudioProcessingStatusResponse",
+    "AudioTagUpdateRequest",
+    "AudioTagsResponse"
 ]

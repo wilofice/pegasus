@@ -16,7 +16,9 @@ from services.audio_storage import AudioStorageService
 from schemas.audio import (
     AudioFileResponse,
     AudioFileListResponse,
-    AudioUploadResponse
+    AudioUploadResponse,
+    AudioTagUpdateRequest,
+    AudioTagsResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -139,6 +141,8 @@ async def get_audio_file(
 async def list_audio_files(
     user_id: Optional[str] = None,
     status: Optional[ProcessingStatus] = None,
+    tag: Optional[str] = None,
+    category: Optional[str] = None,
     limit: int = 20,
     offset: int = 0,
     db: AsyncSession = Depends(get_db)
@@ -148,6 +152,8 @@ async def list_audio_files(
     Args:
         user_id: Filter by user ID
         status: Filter by processing status
+        tag: Filter by tag
+        category: Filter by category
         limit: Maximum number of results (default 20)
         offset: Number of results to skip (default 0)
         
@@ -160,6 +166,8 @@ async def list_audio_files(
     audio_files, total_count = await audio_repo.list_with_filters(
         user_id=user_id,
         status=status,
+        tag=tag,
+        category=category,
         limit=limit,
         offset=offset
     )
@@ -368,3 +376,65 @@ async def process_audio_file(audio_id: UUID, file_path: str):
             error_msg = f"Processing error: {str(e)}"
             await audio_repo.update_status(audio_id, ProcessingStatus.FAILED, error_msg)
             logger.error(f"Audio processing failed for {audio_id}: {error_msg}", exc_info=True)
+
+
+@router.put("/{audio_id}/tags", response_model=AudioFileResponse)
+async def update_audio_tags(
+    audio_id: UUID,
+    tag_update: AudioTagUpdateRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Update tags and categories for an audio file.
+    
+    Args:
+        audio_id: UUID of the audio file
+        tag_update: Tag and category updates
+        
+    Returns:
+        Updated AudioFileResponse
+    """
+    audio_repo = AudioRepository(db)
+    audio_file = await audio_repo.get_by_id(audio_id)
+    
+    if not audio_file:
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    # Update tags/categories
+    update_data = {}
+    if tag_update.tag is not None:
+        update_data["tag"] = tag_update.tag.strip() if tag_update.tag.strip() else None
+    if tag_update.category is not None:
+        update_data["category"] = tag_update.category.strip() if tag_update.category.strip() else None
+    
+    if update_data:
+        updated_file = await audio_repo.update(audio_id, update_data)
+        if updated_file:
+            logger.info(f"Updated tags for audio file {audio_id}: {update_data}")
+            return AudioFileResponse.from_orm(updated_file)
+    
+    return AudioFileResponse.from_orm(audio_file)
+
+
+@router.get("/tags", response_model=AudioTagsResponse)
+async def get_available_tags(
+    user_id: Optional[str] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get list of available tags and categories.
+    
+    Args:
+        user_id: Optional user ID filter
+        
+    Returns:
+        AudioTagsResponse with available tags and categories
+    """
+    audio_repo = AudioRepository(db)
+    
+    # Get available tags and categories
+    tags = await audio_repo.get_available_tags(user_id)
+    categories = await audio_repo.get_available_categories(user_id)
+    
+    return AudioTagsResponse(
+        tags=sorted(tags),
+        categories=sorted(categories)
+    )

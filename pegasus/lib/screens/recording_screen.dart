@@ -16,6 +16,8 @@ final recordingFileProvider = StateProvider<String?>((ref) => null);
 final maxRecordingTimeProvider = StateProvider<int>((ref) => 60);
 final isPlayingProvider = StateProvider<bool>((ref) => false);
 final isUploadingProvider = StateProvider<bool>((ref) => false);
+final uploadedAudioIdProvider = StateProvider<String?>((ref) => null);
+final audioProcessingStatusProvider = StateProvider<String?>((ref) => null);
 
 class RecordingScreen extends ConsumerStatefulWidget {
   const RecordingScreen({Key? key}) : super(key: key);
@@ -31,6 +33,7 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
   final PegasusApiClient _apiClient = PegasusApiClient();
   
   Timer? _recordingTimer;
+  Timer? _statusCheckTimer;
   
   @override
   void initState() {
@@ -44,6 +47,7 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
   @override
   void dispose() {
     _recordingTimer?.cancel();
+    _statusCheckTimer?.cancel();
     _recorder?.closeRecorder();
     _audioPlayer.dispose();
     super.dispose();
@@ -187,7 +191,20 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
     
     try {
       // Upload to Pegasus backend
-      await _apiClient.uploadAudioFile(File(filePath));
+      final result = await _apiClient.uploadAudioFile(File(filePath));
+      
+      // Store the audio file ID
+      final audioId = result['id'] as String?;
+      if (audioId != null) {
+        ref.read(uploadedAudioIdProvider.notifier).state = audioId;
+        ref.read(audioProcessingStatusProvider.notifier).state = result['processing_status'] as String?;
+        
+        // Start checking status if still processing
+        final status = result['processing_status'] as String?;
+        if (status != null && !['completed', 'failed'].contains(status)) {
+          _startStatusChecking(audioId);
+        }
+      }
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -201,6 +218,37 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
       _showErrorSnackBar('Upload failed: $e');
     } finally {
       ref.read(isUploadingProvider.notifier).state = false;
+    }
+  }
+  
+  void _startStatusChecking(String audioId) {
+    _statusCheckTimer?.cancel();
+    _statusCheckTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      try {
+        final audioData = await _apiClient.getAudioFile(audioId);
+        if (audioData != null) {
+          final status = audioData['processing_status'] as String?;
+          ref.read(audioProcessingStatusProvider.notifier).state = status;
+          
+          // Stop checking if processing is complete
+          if (status != null && ['completed', 'failed'].contains(status)) {
+            timer.cancel();
+          }
+        }
+      } catch (e) {
+        // Continue checking on error
+      }
+    });
+  }
+  
+  void _viewTranscript() {
+    final audioId = ref.read(uploadedAudioIdProvider);
+    if (audioId != null) {
+      Navigator.pushNamed(
+        context, 
+        '/transcript',
+        arguments: {'audioId': audioId},
+      );
     }
   }
   
@@ -258,6 +306,82 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
   
+  Widget _buildProcessingStatusWidget(String? status) {
+    if (status == null) return const SizedBox.shrink();
+    
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
+    bool showProgress = false;
+    
+    switch (status.toLowerCase()) {
+      case 'uploaded':
+        statusColor = Colors.blue;
+        statusIcon = Icons.upload_file;
+        statusText = 'Uploaded';
+        break;
+      case 'transcribing':
+        statusColor = Colors.orange;
+        statusIcon = Icons.mic;
+        statusText = 'Transcribing...';
+        showProgress = true;
+        break;
+      case 'improving':
+        statusColor = Colors.purple;
+        statusIcon = Icons.auto_fix_high;
+        statusText = 'Improving with AI...';
+        showProgress = true;
+        break;
+      case 'completed':
+        statusColor = Colors.green;
+        statusIcon = Icons.check_circle;
+        statusText = 'Processing Complete';
+        break;
+      case 'failed':
+        statusColor = Colors.red;
+        statusIcon = Icons.error;
+        statusText = 'Processing Failed';
+        break;
+      default:
+        statusColor = Colors.grey;
+        statusIcon = Icons.help;
+        statusText = 'Unknown Status';
+    }
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: statusColor, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showProgress)
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: statusColor,
+              ),
+            )
+          else
+            Icon(statusIcon, color: statusColor, size: 16),
+          const SizedBox(width: 8),
+          Text(
+            statusText,
+            style: TextStyle(
+              color: statusColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
     final isRecording = ref.watch(isRecordingProvider);
@@ -266,6 +390,8 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
     final hasRecording = ref.watch(recordingFileProvider) != null;
     final isPlaying = ref.watch(isPlayingProvider);
     final isUploading = ref.watch(isUploadingProvider);
+    final uploadedAudioId = ref.watch(uploadedAudioIdProvider);
+    final processingStatus = ref.watch(audioProcessingStatusProvider);
     
     return Scaffold(
       appBar: AppBar(
@@ -327,6 +453,12 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
               textAlign: TextAlign.center,
             ),
             
+            // Processing status indicator
+            if (uploadedAudioId != null) ...[
+              const SizedBox(height: 16),
+              _buildProcessingStatusWidget(processingStatus),
+            ],
+            
             const SizedBox(height: 32),
             
             // Main record button
@@ -352,8 +484,10 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
             
             // Action buttons
             if (hasRecording) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   // Play button
                   ElevatedButton.icon(
@@ -385,6 +519,18 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
                       foregroundColor: Colors.white,
                     ),
                   ),
+                  
+                  // Transcript button (only show when processing is complete)
+                  if (uploadedAudioId != null && processingStatus == 'completed')
+                    ElevatedButton.icon(
+                      onPressed: _viewTranscript,
+                      icon: const Icon(Icons.text_snippet),
+                      label: const Text('View Transcript'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                   
                   // Delete button
                   ElevatedButton.icon(

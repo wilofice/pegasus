@@ -26,6 +26,8 @@ class AudioFileResponse(BaseModel):
     upload_timestamp: Optional[datetime] = None
     processing_status: ProcessingStatus
     error_message: Optional[str] = None
+    tag: Optional[str] = None
+    category: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -91,3 +93,15 @@ class AudioProcessingStatusResponse(BaseModel):
 
     class Config:
         use_enum_values = True
+
+
+class AudioTagUpdateRequest(BaseModel):
+    """Request schema for updating audio file tags."""
+    tag: Optional[str] = Field(None, max_length=100, description="User-defined tag")
+    category: Optional[str] = Field(None, max_length=100, description="System category")
+
+
+class AudioTagsResponse(BaseModel):
+    """Response schema for available tags and categories."""
+    tags: List[str] = Field(description="Available user tags")
+    categories: List[str] = Field(description="Available system categories")

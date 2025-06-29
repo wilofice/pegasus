@@ -119,6 +119,8 @@ class AudioRepository:
         self,
         user_id: Optional[str] = None,
         status: Optional[ProcessingStatus] = None,
+        tag: Optional[str] = None,
+        category: Optional[str] = None,
         from_date: Optional[datetime] = None,
         to_date: Optional[datetime] = None,
         limit: int = 20,
@@ -129,6 +131,8 @@ class AudioRepository:
         Args:
             user_id: Optional user ID filter
             status: Optional status filter
+            tag: Optional tag filter
+            category: Optional category filter
             from_date: Optional start date filter
             to_date: Optional end date filter
             limit: Maximum number of results
@@ -145,6 +149,12 @@ class AudioRepository:
         
         if status:
             conditions.append(AudioFile.processing_status == status)
+        
+        if tag:
+            conditions.append(AudioFile.tag == tag)
+        
+        if category:
+            conditions.append(AudioFile.category == category)
         
         if from_date:
             conditions.append(AudioFile.upload_timestamp >= from_date)
@@ -203,3 +213,41 @@ class AudioRepository:
             update_data["improvement_completed_at"] = datetime.utcnow()
         
         return await self.update(audio_id, update_data)
+    
+    async def get_available_tags(self, user_id: Optional[str] = None) -> List[str]:
+        """Get list of unique tags used by audio files.
+        
+        Args:
+            user_id: Optional user ID filter
+            
+        Returns:
+            List of unique tag strings
+        """
+        query = select(AudioFile.tag).where(AudioFile.tag.isnot(None))
+        
+        if user_id:
+            query = query.where(AudioFile.user_id == user_id)
+        
+        query = query.distinct()
+        
+        result = await self.session.execute(query)
+        return [tag for tag in result.scalars().all() if tag]
+    
+    async def get_available_categories(self, user_id: Optional[str] = None) -> List[str]:
+        """Get list of unique categories used by audio files.
+        
+        Args:
+            user_id: Optional user ID filter
+            
+        Returns:
+            List of unique category strings
+        """
+        query = select(AudioFile.category).where(AudioFile.category.isnot(None))
+        
+        if user_id:
+            query = query.where(AudioFile.user_id == user_id)
+        
+        query = query.distinct()
+        
+        result = await self.session.execute(query)
+        return [category for category in result.scalars().all() if category]
