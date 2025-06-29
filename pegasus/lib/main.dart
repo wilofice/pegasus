@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'theme.dart';
 import 'screens/home_screen.dart';
+import 'screens/transcript_screen.dart';
 import 'services/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -27,6 +28,18 @@ class PegasusApp extends StatelessWidget {
       title: 'Pegasus',
       theme: appTheme,
       home: const HomeScreen(),
+      routes: {
+        '/transcript': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          final audioId = args?['audioId'] as String?;
+          if (audioId == null) {
+            return const Scaffold(
+              body: Center(child: Text('Invalid audio ID')),
+            );
+          }
+          return TranscriptScreen(audioId: audioId);
+        },
+      },
     );
   }
 }

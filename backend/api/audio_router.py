@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/audio", tags=["audio"])
 
 # Allowed audio file extensions
-ALLOWED_EXTENSIONS = {".m4a", ".mp3", ".wav", ".ogg", ".webm", ".aac"}
+ALLOWED_EXTENSIONS = {".m4a", ".mp3", ".wav", ".ogg", ".webm", ".aac", ".flac"}
 ALLOWED_MIME_TYPES = {
     "audio/mp4",
     "audio/mpeg",
@@ -34,7 +34,9 @@ ALLOWED_MIME_TYPES = {
     "audio/ogg",
     "audio/webm",
     "audio/aac",
-    "audio/x-m4a"
+    "audio/x-m4a",
+    "audio/flac",
+    "application/octet-stream"  # Fallback for when MIME type detection fails
 }
 
 
@@ -62,12 +64,16 @@ async def upload_audio(
             detail=f"Invalid file type. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
         )
     
-    # Validate MIME type
+    # Validate MIME type (more lenient - prioritize file extension)
     if file.content_type and file.content_type not in ALLOWED_MIME_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid MIME type. Allowed types: {', '.join(ALLOWED_MIME_TYPES)}"
-        )
+        # If MIME type is not recognized but file extension is valid, log a warning but continue
+        if file.content_type == "application/octet-stream":
+            logger.warning(f"Generic MIME type received for file {file.filename}, using extension validation")
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid MIME type '{file.content_type}'. Allowed types: {', '.join(ALLOWED_MIME_TYPES)}"
+            )
     
     try:
         # Initialize services

@@ -1,0 +1,9 @@
+Following your detailed imple in "backend/AUDIO_UPLOAD_IMPLEMENTATION_PLAN.md",
+we must adapt the frontend (/pegasus folder). We've implemented the recording screen in file : 
+"pegasus/lib/screens/recording_screen.dart"
+After the recorded is sent and finished uploaded by the backend api,
+we want to display the original transcript as well as the improved transcript by the LLM. We need to have an button and an indicator on the recording_screen.dart screen that shows if the recording has finished processing. The button will redirect to the a new screen which role is defined below;
+We want to see that in another screen separated. This screen will have a dedicated role of not only displaying the transcript 
+but also another role of allowing the user to add a tag or a classification or a category to the audio for another kind of processing later  (to be defined later).
+And the tag/category information must be saved to the database via the backend api. Depending on the tag/category of the audio, the backend will run some special processing later for the audio files. That special processing will be defined later. For instance, if tag is "Work" , a precised well defined task will be run. if tag/category is "Family" another treatment will be done. If task is "groceries" , then we will do something else; What we will do, we will define later.
+Your task is to update the frontend and the backend as well. 

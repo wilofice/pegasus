@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 
 class PegasusApiClient {
   final String baseUrl;
@@ -40,13 +41,15 @@ class PegasusApiClient {
   Future<Map<String, dynamic>> uploadAudioFile(File audioFile) async {
     try {
       final fileName = audioFile.path.split('/').last;
+      final mimeType = _getMimeTypeFromFileName(fileName);
+      
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
           audioFile.path,
           filename: fileName,
+          contentType: MediaType.parse(mimeType),
         ),
-        'timestamp': DateTime.now().toIso8601String(),
-        'duration': await _getAudioDuration(audioFile),
+        'user_id': 'flutter_user', // Add a default user ID
       });
 
       final response = await _dio.post(
@@ -66,6 +69,29 @@ class PegasusApiClient {
       }
     } catch (e) {
       throw Exception('Failed to upload audio file: $e');
+    }
+  }
+
+  /// Get MIME type from file extension
+  String _getMimeTypeFromFileName(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'm4a':
+        return 'audio/mp4';
+      case 'mp3':
+        return 'audio/mpeg';
+      case 'wav':
+        return 'audio/wav';
+      case 'ogg':
+        return 'audio/ogg';
+      case 'aac':
+        return 'audio/aac';
+      case 'flac':
+        return 'audio/flac';
+      case 'webm':
+        return 'audio/webm';
+      default:
+        return 'audio/mpeg'; // Default fallback
     }
   }
 

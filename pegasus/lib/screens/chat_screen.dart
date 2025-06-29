@@ -14,7 +14,7 @@ class ChatScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(chatProvider);
     final controller = ScrollController();
-    final api = PegasusApiClient(baseUrl: 'http://localhost:8000');
+    final api = PegasusApiClient(baseUrl: 'http://192.168.1.15:9000', token: 'empty');
     final voice = VoiceService();
 
     void addMessage(String text, bool isUser) {

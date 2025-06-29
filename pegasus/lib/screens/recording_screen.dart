@@ -30,7 +30,7 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
   FlutterSoundRecorder? _recorder;
   final AudioPlayer _audioPlayer = AudioPlayer();
   final PrefsService _prefsService = PrefsService();
-  final PegasusApiClient _apiClient = PegasusApiClient();
+  final PegasusApiClient _apiClient = PegasusApiClient(baseUrl: 'http://192.168.1.15:9000', token: 'empty');
   
   Timer? _recordingTimer;
   Timer? _statusCheckTimer;
