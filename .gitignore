@@ -14,3 +14,7 @@ pegasus/build/
 # Flutter dependencies
 pegasus/.dart_tool/
 pegasus/.idea/
+backend/audio_files/2025/06/29/audio_20250629_192948_7d067ead.m4a
+backend/audio_files/2025/06/29/audio_20250629_192954_a09691e5.m4a
+backend/audio_files/2025/06/29/audio_20250629_193040_ac0c0e9a.m4a
+backend/*.env
