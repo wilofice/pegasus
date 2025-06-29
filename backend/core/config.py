@@ -57,6 +57,14 @@ Corrected transcript:"""
         "audio/x-m4a"
     ]
     
+    # Request/Response Logging
+    enable_request_logging: bool = True
+    log_directory: str = "./logs"
+    log_max_body_size: int = 10000  # Max body size to log in bytes
+    log_binary_content: bool = False
+    log_excluded_paths: List[str] = ["/health", "/docs", "/redoc", "/openapi.json", "/favicon.ico"]
+    log_excluded_methods: List[str] = []
+    
     class Config:
         env_file = ".env"
         case_sensitive = False

@@ -2,8 +2,21 @@
 from fastapi import FastAPI
 
 from api import chat_router, webhook_router, audio_router
+from core.config import settings
+from middleware import SelectiveLoggingMiddleware, RequestLoggingConfig
 
 app = FastAPI(title="Pegasus Backend")
+
+# Add request/response logging middleware
+if settings.enable_request_logging:
+    logging_config = RequestLoggingConfig(
+        log_dir=settings.log_directory,
+        max_body_size=settings.log_max_body_size,
+        log_binary_content=settings.log_binary_content,
+        excluded_paths=settings.log_excluded_paths,
+        excluded_methods=settings.log_excluded_methods
+    )
+    app.add_middleware(SelectiveLoggingMiddleware, config=logging_config)
 
 app.include_router(chat_router.router)
 app.include_router(webhook_router.router)
