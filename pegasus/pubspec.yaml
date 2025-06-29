@@ -44,6 +44,11 @@ dependencies:
   path_provider: ^2.1.1
   flutter_isolate: ^2.0.4
   shared_preferences: ^2.2.2
+  # Audio recording dependencies
+  flutter_sound: ^9.2.13
+  permission_handler: ^11.3.0
+  dio: ^5.4.0
+  just_audio: ^0.9.36
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

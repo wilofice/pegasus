@@ -1,0 +1,224 @@
+We are going to add a recoring audio feature to Pegasus. Here is a draft plan. Refine it.
+
+
+----
+Here is a step-by-step guide to add a self-contained “AudioRecorder” screen to your existing Flutter app, enforce a 1 min max (configurable via SharedPreferences) and plug in file upload later.
+
+---  
+## 1. Add dependencies  
+In your `pubspec.yaml`:
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # audio recording
+  record: ^4.4.0
+
+  # file I/O
+  path_provider: ^2.0.15
+
+  # store user prefs (max duration)
+  shared_preferences: ^2.1.1
+
+  # HTTP uplaod (later)
+  dio: ^5.2.1
+```
+Then run `flutter pub get`.  
+
+---  
+## 2. Expose “max record length” in Preferences  
+Let’s say you already have a Preferences screen. Ensure you:  
+1. Import `shared_preferences`  
+2. Read/write an integer key, e.g. `max_record_sec`  
+```dart
+// prefs_service.dart
+class PrefsService {
+  static const _kMaxSec = 'max_record_sec';
+  Future<int> getMaxRecordingSec() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_kMaxSec) ?? 60; // default 60s
+  }
+  Future<void> setMaxRecordingSec(int sec) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kMaxSec, sec);
+  }
+}
+```
+3. In your Preferences UI let user enter/change that value and call `setMaxRecordingSec(...)`.  
+
+---  
+## 3. Register the new route  
+In your `main.dart` (or wherever you define routes):
+```dart
+import 'screens/recording_screen.dart';
+
+MaterialApp(
+  routes: {
+    '/': (_) => HomePage(),
+    '/record': (_) => RecordingScreen(),
+    // … other routes
+  },
+);
+```
+And a button on HomePage:
+```dart
+ElevatedButton(
+  onPressed: () => Navigator.pushNamed(context, '/record'),
+  child: Text('Record Audio'),
+),
+```
+
+---  
+## 4. Create `RecordingScreen`  
+Make a new file `lib/screens/recording_screen.dart`:
+
+```dart
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
+import '../services/prefs_service.dart';
+
+class RecordingScreen extends StatefulWidget {
+  @override
+  _RecordingScreenState createState() => _RecordingScreenState();
+}
+
+class _RecordingScreenState extends State<RecordingScreen> {
+  final _recorder = Record();
+  late int _maxSec;
+  Timer? _timer;
+  int _elapsed = 0;
+  String? _filePath;
+  bool _isRecording = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMaxDuration();
+  }
+
+  Future<void> _loadMaxDuration() async {
+    _maxSec = await PrefsService().getMaxRecordingSec();
+    setState(() {});
+  }
+
+  Future<String> _buildFilePath() async {
+    final dir = await getTemporaryDirectory();
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    return '${dir.path}/audio_$ts.m4a';
+  }
+
+  Future<void> _startRecording() async {
+    if (await _recorder.hasPermission()) {
+      _filePath = await _buildFilePath();
+      await _recorder.start(
+        path: _filePath,
+        encoder: AudioEncoder.aacLc, // good compression
+        bitRate: 128000,
+        samplingRate: 44100,
+      );
+      setState(() { _isRecording = true; _elapsed = 0; });
+      _timer = Timer.periodic(Duration(seconds: 1), (t) {
+        setState(() => _elapsed++);
+        if (_elapsed >= _maxSec) _stopRecording();
+      });
+    } else {
+      // handle permission denied
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Microphone permission denied'))
+      );
+    }
+  }
+
+  Future<void> _stopRecording() async {
+    _timer?.cancel();
+    await _recorder.stop();
+    setState(() { _isRecording = false; });
+    if (_filePath != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Saved: $_filePath'))
+      );
+      // TODO: upload or hand off _filePath
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _recorder.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = _isRecording
+      ? 'Recording… ($_elapsed / $_maxSec s)'
+      : 'Press ▶️ to record ($_maxSec s max)';
+    return Scaffold(
+      appBar: AppBar(title: Text('Audio Recorder')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(text, style: TextStyle(fontSize: 18)),
+            SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: Icon(_isRecording ? Icons.stop : Icons.mic),
+              label: Text(_isRecording ? 'Stop' : 'Record'),
+              style: ElevatedButton.styleFrom(
+                primary: _isRecording ? Colors.red : Colors.green
+              ),
+              onPressed: _isRecording ? _stopRecording : _startRecording,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+### Key points  
+- Uses `record` plugin for simplicity.  
+- Auto-stops after `_maxSec` seconds.  
+- Saves to temp dir with timestamped filename.  
+- Displays live timer.  
+- Shows a SnackBar on save; you can replace that with your own UI.  
+
+---  
+## 5. Sending the file (next step)  
+Once recording is done you have `_filePath`. To upload via multipart:
+
+```dart
+import 'package:dio/dio.dart';
+
+Future<void> uploadAudio(String path) async {
+  final dio = Dio();
+  final form = FormData.fromMap({
+    'file': await MultipartFile.fromFile(path, filename: 'audio.m4a'),
+    'userId': 'YOUR_ID',
+  });
+  final resp = await dio.post(
+    'https://your-backend.example.com/upload',
+    data: form
+  );
+  if (resp.statusCode == 200) {
+    print('Upload successful');
+  }
+}
+```
+Call `await uploadAudio(_filePath!)` after you stop recording—or hand it off to whichever service you use.  
+
+---  
+## 6. Testing & Edge-cases  
+- Denied mic permission → prompt user or open settings  
+- Disk space full → catch IO exceptions  
+- User leaves screen mid-recording → `dispose()` cancels timer & recorder  
+- Very short recordings (<1 s) → optional discard logic  
+
+---
+
+🎉 You now have a fully working audio recorder screen with a configurable max length. Next up: integrate transcription (Whisper/AWS Transcribe) or real-time streaming. Let me know which direction you want!

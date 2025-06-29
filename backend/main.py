@@ -1,7 +1,7 @@
 """FastAPI application entry point."""
 from fastapi import FastAPI
 
-from .api import chat_router, webhook_router
+from api import chat_router, webhook_router
 
 app = FastAPI(title="Pegasus Backend")
 
@@ -18,4 +18,4 @@ def health() -> dict:
 if __name__ == "__main__":  # pragma: no cover - manual launch
     import uvicorn
 
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

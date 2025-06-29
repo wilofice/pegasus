@@ -1,5 +1,5 @@
 """Engine that reacts to pipeline notifications."""
-from ..services import vector_db_client, llm_client
+from services import vector_db_client, llm_client
 
 
 def process_notification(payload: dict) -> None:

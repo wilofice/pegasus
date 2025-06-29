@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel
 
-from ..core import proactive_engine
+from core import proactive_engine
 
 router = APIRouter(prefix="/webhook", tags=["webhook"])
 

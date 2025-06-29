@@ -1,8 +1,12 @@
 """Chat router handling user messages."""
+from __future__ import annotations
+
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import BaseModel
 
-from ..core import orchestrator
+from core import orchestrator
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -12,7 +16,7 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    response: str
+    response: Optional[str] = None
 
 
 def _auth(authorization: str | None = Header(default=None)) -> None:

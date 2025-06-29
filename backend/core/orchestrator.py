@@ -1,5 +1,5 @@
 """Reactive orchestrator combining context and user messages."""
-from ..services import vector_db_client, llm_client
+from services import vector_db_client, llm_client
 
 
 def handle_chat(message: str) -> str:
