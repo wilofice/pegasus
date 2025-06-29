@@ -19,3 +19,10 @@ backend/audio_files/2025/06/29/audio_20250629_192954_a09691e5.m4a
 backend/audio_files/2025/06/29/audio_20250629_193040_ac0c0e9a.m4a
 backend/*.env
 *.env
+backend/audio_files/2025/.DS_Store
+backend/audio_files/2025/06/29/audio_20250629_195136_fed4a29a.m4a
+backend/audio_files/2025/06/29/audio_20250629_195749_38861161.m4a
+backend/audio_files/2025/06/29/audio_20250629_200116_63bbfc56.m4a
+backend/audio_files/2025/06/29/audio_20250629_200329_db7fba0b.m4a
+backend/audio_files/2025/06/29/audio_20250629_200456_4ecbae26.m4a
+backend/audio_files/*
