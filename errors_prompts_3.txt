@@ -1,0 +1,85 @@
+(chatbot) ~/Dev/pegasus/backend git:[main]
+alembic upgrade 002
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 001, Create audio_files table
+Traceback (most recent call last):
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DuplicateObject: type "processingstatus" already exists
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/miniconda3/envs/chatbot/bin/alembic", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/config.py", line 1001, in main
+    CommandLine(prog=prog).main(argv=argv)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/config.py", line 991, in main
+    self.run_cmd(cfg, options)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/config.py", line 925, in run_cmd
+    fn(
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/command.py", line 483, in upgrade
+    script.run_env()
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/script/base.py", line 551, in run_env
+    util.load_python_file(self.dir, "env.py")
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/util/pyfiles.py", line 116, in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/util/pyfiles.py", line 136, in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/galahassa/Dev/pegasus/backend/alembic/env.py", line 88, in <module>
+    run_migrations_online()
+  File "/Users/galahassa/Dev/pegasus/backend/alembic/env.py", line 82, in run_migrations_online
+    context.run_migrations()
+  File "<string>", line 8, in run_migrations
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/runtime/environment.py", line 946, in run_migrations
+    self.get_context().run_migrations(**kw)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/alembic/runtime/migration.py", line 627, in run_migrations
+    step.migration_fn(**kw)
+  File "/Users/galahassa/Dev/pegasus/backend/alembic/versions/001_create_audio_files_table.py", line 27, in upgrade
+    processing_status_enum.create(op.get_bind())
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/sql/sqltypes.py", line 1105, in create
+    t.create(bind, checkfirst=checkfirst)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/named_types.py", line 338, in create
+    super().create(bind, checkfirst=checkfirst)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/named_types.py", line 51, in create
+    bind._run_ddl_visitor(self.DDLGenerator, self, checkfirst=checkfirst)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2457, in _run_ddl_visitor
+    visitorcallable(self.dialect, self, **kwargs).traverse_single(element)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/named_types.py", line 153, in visit_enum
+    self.connection.execute(CreateEnumType(enum))
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/sql/ddl.py", line 180, in _execute_on_connection
+    return connection._execute_ddl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1529, in _execute_ddl
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2353, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.DuplicateObject) type "processingstatus" already exists
+
+[SQL: CREATE TYPE processingstatus AS ENUM ('uploaded', 'transcribing', 'improving', 'completed', 'failed')]
+(Background on this error at: https://sqlalche.me/e/20/f405)
