@@ -1,0 +1,13 @@
+Previously, You added a recoring audio feature to Pegasus. Details of implementations are in "AUDIO_RECORDING.md'
+We need to implement the web api route on the backend api (folder /backend) that will receive the audio file recorded from the frontend. 
+The current state of our backend api can found in "openapi.json" at the route of the project. 
+I want you to craft a detail of implementations before getting start to work. 
+The backend api is going to save the audio files to a folder using a smart way to store and retrieve the later. 
+Also all audio files informations (path, name, datetime, and transcripts) will be saved in a postgresql database.
+Each audio file  will be processed in two steps : 
+    - first we will transcript the audio using either "whisper" ai in local or Deepgram API for speech-to-text. The choice will be defined by a setting.
+    - Secondly we are going to use a local llm (ollama) to correct the transcript because sometimes transcription of audio file of spoken language can be 
+    approximative. The LLM will not change the meaning of the transcript but it will add missing ponctuactions, correct any grammatical errors. 
+
+The original transcript will be saved in the database. and the improved transcript will also be saved in the database. 
+After processing the audio file, the api will return both the transcript and the improved one;
