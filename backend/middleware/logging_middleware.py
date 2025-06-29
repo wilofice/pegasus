@@ -190,25 +190,35 @@ class RequestResponseLoggingMiddleware(BaseHTTPMiddleware):
     async def _get_response_body(self, response: Response) -> Optional[str]:
         """Safely extract response body."""
         try:
-            # Skip streaming responses
-            if isinstance(response, StreamingResponse):
+            # For error responses (4xx, 5xx), try harder to get the body
+            is_error = response.status_code >= 400
+            
+            # Skip streaming responses (unless it's an error)
+            if isinstance(response, StreamingResponse) and not is_error:
                 return "<STREAMING_RESPONSE>"
             
             # Check content type
             content_type = response.headers.get("content-type", "")
             
-            # Skip binary content
-            if any(t in content_type.lower() for t in ["image/", "video/", "audio/", "application/octet-stream"]):
+            # Skip binary content (unless it's an error)
+            if not is_error and any(t in content_type.lower() for t in ["image/", "video/", "audio/", "application/octet-stream"]):
                 return f"<BINARY_CONTENT: {content_type}>"
             
-            # Get body if available
+            # For FastAPI responses, try to get the actual content
             if hasattr(response, 'body') and response.body:
-                return response.body.decode('utf-8', errors='replace')
+                if isinstance(response.body, bytes):
+                    return response.body.decode('utf-8', errors='replace')
+                else:
+                    return str(response.body)
+            
+            # For streaming responses with errors, try to read the content
+            if isinstance(response, StreamingResponse) and is_error:
+                return "<ERROR_STREAMING_RESPONSE>"
             
             return None
             
-        except Exception:
-            return None
+        except Exception as e:
+            return f"<BODY_READ_ERROR: {str(e)}>"
     
     def _sanitize_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
         """Remove sensitive information from headers."""

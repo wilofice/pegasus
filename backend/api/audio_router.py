@@ -121,6 +121,31 @@ async def upload_audio(
         raise HTTPException(status_code=500, detail="Failed to upload file")
 
 
+@router.get("/tags", response_model=AudioTagsResponse)
+async def get_available_tags(
+    user_id: Optional[str] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get list of available tags and categories.
+    
+    Args:
+        user_id: Optional user ID filter
+        
+    Returns:
+        AudioTagsResponse with available tags and categories
+    """
+    audio_repo = AudioRepository(db)
+    
+    # Get available tags and categories
+    tags = await audio_repo.get_available_tags(user_id)
+    categories = await audio_repo.get_available_categories(user_id)
+    
+    return AudioTagsResponse(
+        tags=sorted(tags),
+        categories=sorted(categories)
+    )
+
+
 @router.get("/{audio_id}", response_model=AudioFileResponse)
 async def get_audio_file(
     audio_id: UUID,
@@ -419,28 +444,3 @@ async def update_audio_tags(
             return AudioFileResponse.from_orm(updated_file)
     
     return AudioFileResponse.from_orm(audio_file)
-
-
-@router.get("/tags", response_model=AudioTagsResponse)
-async def get_available_tags(
-    user_id: Optional[str] = None,
-    db: AsyncSession = Depends(get_db)
-):
-    """Get list of available tags and categories.
-    
-    Args:
-        user_id: Optional user ID filter
-        
-    Returns:
-        AudioTagsResponse with available tags and categories
-    """
-    audio_repo = AudioRepository(db)
-    
-    # Get available tags and categories
-    tags = await audio_repo.get_available_tags(user_id)
-    categories = await audio_repo.get_available_categories(user_id)
-    
-    return AudioTagsResponse(
-        tags=sorted(tags),
-        categories=sorted(categories)
-    )

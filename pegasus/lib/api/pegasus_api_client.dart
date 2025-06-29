@@ -193,7 +193,8 @@ class PegasusApiClient {
       }
       return {'tags': [], 'categories': []};
     } catch (e) {
-      throw Exception('Failed to get available tags: $e');
+      print('Failed to get available tags: $e');
+      throw Exception('Tag retrieval failed. See logs');
     }
   }
 
