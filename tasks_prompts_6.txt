@@ -1,0 +1,12 @@
+Following your detailed implementations in "backend/AUDIO_UPLOAD_IMPLEMENTATION_PLAN.md",
+and  adaptations of the frontend (/pegasus folder). We've implemented the recording screen upload feature. 
+- Add the posibility on the recording screen, in the settings where the user the recording length , the ability to indicate the language used as I am billingual (I can use either French or English). 
+I want the whisper ai to know this information in order to transcript properly the audio; 
+I want to send this information to the AI when asking him to improve the transcript as well.
+We need to prompt the model in a way that he avoids adding additional explations ;  
+I want also this information to be saved for each audio record file data in database. 
+- On the Transcript/tag screen, I need you show the orginal transcript as well just below the improved transcript.
+- Modify the way , the backend API url is set up in the Pegasus frontend app. It needs to be one settings to be used everywhere in the project or dart files;
+
+
+
