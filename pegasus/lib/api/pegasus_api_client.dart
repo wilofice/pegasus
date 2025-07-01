@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import '../config/api_config.dart';
+import '../models/game_model.dart';
 
 class PegasusApiClient {
   final String baseUrl;
@@ -251,6 +252,88 @@ class PegasusApiClient {
       return response.statusCode == 200;
     } catch (e) {
       throw Exception('Failed to delete audio file: $e');
+    }
+  }
+
+  // GAME API METHODS
+
+  /// Start a new game session
+  Future<GameStartResponse> startGame(GameStartRequest request) async {
+    try {
+      final response = await _dio.post('/game/start', data: request.toJson());
+      if (response.statusCode == 200) {
+        return GameStartResponse.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw Exception('Failed to start game: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to start game: $e');
+    }
+  }
+
+  /// Submit an answer for the current question
+  Future<GameAnswerResponse> submitAnswer(String sessionId, GameAnswerRequest request) async {
+    try {
+      final response = await _dio.post('/game/answer/$sessionId', data: request.toJson());
+      if (response.statusCode == 200) {
+        return GameAnswerResponse.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw Exception('Failed to submit answer: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to submit answer: $e');
+    }
+  }
+
+  /// Get game summary and final results
+  Future<GameSummary> getGameSummary(String sessionId) async {
+    try {
+      final response = await _dio.get('/game/summary/$sessionId');
+      if (response.statusCode == 200) {
+        return GameSummary.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw Exception('Failed to get game summary: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to get game summary: $e');
+    }
+  }
+
+  /// Get current game session details (for debugging)
+  Future<Map<String, dynamic>?> getGameSession(String sessionId) async {
+    try {
+      final response = await _dio.get('/game/session/$sessionId');
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw Exception('Failed to get game session: $e');
+    }
+  }
+
+  /// Delete a game session
+  Future<bool> deleteGameSession(String sessionId) async {
+    try {
+      final response = await _dio.delete('/game/session/$sessionId');
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Failed to delete game session: $e');
+    }
+  }
+
+  /// Check game service health
+  Future<Map<String, dynamic>?> checkGameHealth() async {
+    try {
+      final response = await _dio.get('/game/health');
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw Exception('Failed to check game health: $e');
     }
   }
 }
