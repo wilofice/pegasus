@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 
 from api import chat_router, webhook_router, audio_router, game_router
+from routers import context
 from core.config import settings
 from middleware import SelectiveLoggingMiddleware, RequestLoggingConfig
 
@@ -22,6 +23,7 @@ app.include_router(chat_router.router)
 app.include_router(webhook_router.router)
 app.include_router(audio_router.router)
 app.include_router(game_router.router)
+app.include_router(context.router)
 
 
 @app.get("/health")
