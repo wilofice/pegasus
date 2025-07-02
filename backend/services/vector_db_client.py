@@ -66,10 +66,14 @@ class ChromaDBClient:
             )
             logger.info(f"Connected to ChromaDB with persistent client at {db_path}")
         
-        # Initialize embedding function
-        self._embedder = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name=self.embedding_model
-        )
+        # Initialize embedding function with fallback
+        try:
+            self._embedder = embedding_functions.SentenceTransformerEmbeddingFunction(
+                model_name=self.embedding_model
+            )
+        except Exception as e:
+            logger.warning(f"Failed to initialize SentenceTransformer, using default: {e}")
+            self._embedder = embedding_functions.DefaultEmbeddingFunction()
         
         # Initialize collection
         self._collection = self._client.get_or_create_collection(
