@@ -1,8 +1,9 @@
 """Audio file database model."""
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Float, BigInteger, Text, DateTime, Enum
+from sqlalchemy import Column, String, Float, BigInteger, Text, DateTime, Enum, Boolean
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 import enum
 
 from .base import Base
@@ -57,9 +58,20 @@ class AudioFile(Base):
     tag = Column(String(100), index=True)  # User-defined tag (e.g., "Work", "Family", "Groceries")
     category = Column(String(100), index=True)  # System category (optional)
     
+    # Brain indexing status
+    vector_indexed = Column(Boolean, nullable=False, default=False, index=True)
+    vector_indexed_at = Column(DateTime, nullable=True)
+    graph_indexed = Column(Boolean, nullable=False, default=False, index=True)
+    graph_indexed_at = Column(DateTime, nullable=True)
+    entities_extracted = Column(Boolean, nullable=False, default=False, index=True)
+    entities_extracted_at = Column(DateTime, nullable=True)
+    
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    processing_jobs = relationship("ProcessingJob", back_populates="audio_file")
     
     def to_dict(self):
         """Convert model to dictionary."""
@@ -80,6 +92,12 @@ class AudioFile(Base):
             "error_message": self.error_message,
             "tag": self.tag,
             "category": self.category,
+            "vector_indexed": self.vector_indexed,
+            "vector_indexed_at": self.vector_indexed_at.isoformat() if self.vector_indexed_at else None,
+            "graph_indexed": self.graph_indexed,
+            "graph_indexed_at": self.graph_indexed_at.isoformat() if self.graph_indexed_at else None,
+            "entities_extracted": self.entities_extracted,
+            "entities_extracted_at": self.entities_extracted_at.isoformat() if self.entities_extracted_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
