@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Existing database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pegasus_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pegasus_db}
+      POSTGRES_USER: ${POSTGRES_USER:-pegasus_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pegasus_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pegasus_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pegasus_network
+
+  # Redis - Job queue broker
+  redis:
+    image: redis:7-alpine
+    container_name: pegasus_redis
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pegasus_network
+
+  # Neo4j - Graph database
+  neo4j:
+    image: neo4j:5-community
+    container_name: pegasus_neo4j
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-pegasus_neo4j_password}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
+      NEO4J_apoc_import_file_use__neo4j__config: "true"
+      NEO4J_dbms_memory_heap_initial__size: "512M"
+      NEO4J_dbms_memory_heap_max__size: "1G"
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - pegasus_network
+
+  # ChromaDB - Vector database
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: pegasus_chromadb
+    environment:
+      ANONYMIZED_TELEMETRY: "false"
+      PERSIST_DIRECTORY: "/chroma/data"
+      IS_PERSISTENT: "TRUE"
+    ports:
+      - "8001:8000"  # Map to 8001 to avoid conflict with backend
+    volumes:
+      - chromadb_data:/chroma/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/heartbeat || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pegasus_network
+
+  # Ollama - Local LLM (existing service)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: pegasus_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/tags || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pegasus_network
+
+networks:
+  pegasus_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+  chromadb_data:
+  ollama_data:
