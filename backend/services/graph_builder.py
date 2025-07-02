@@ -1,16 +1,50 @@
 """Graph building service for Neo4j knowledge graph construction."""
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 from uuid import UUID
+import re
 
 from services.neo4j_client import Neo4jClient
 
 logger = logging.getLogger(__name__)
 
 
+class Entity:
+    """Entity data structure for graph building."""
+    
+    def __init__(self, text: str, label: str, start: int = 0, end: int = 0, 
+                 confidence: float = 1.0, metadata: Dict[str, Any] = None):
+        self.text = text.strip()
+        self.label = label
+        self.start = start
+        self.end = end
+        self.confidence = confidence
+        self.metadata = metadata or {}
+        self.normalized_text = self._normalize_text(text)
+    
+    def _normalize_text(self, text: str) -> str:
+        """Normalize entity text for consistent matching."""
+        # Convert to lowercase, replace punctuation with spaces, then normalize spaces
+        normalized = re.sub(r'[^\w\s]', ' ', text.lower())
+        normalized = ' '.join(normalized.split())
+        return normalized
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert entity to dictionary."""
+        return {
+            'text': self.text,
+            'label': self.label,
+            'start': self.start,
+            'end': self.end,
+            'confidence': self.confidence,
+            'normalized_text': self.normalized_text,
+            'metadata': self.metadata
+        }
+
+
 class GraphBuilder:
-    """Service for building knowledge graph in Neo4j."""
+    """Enhanced service for building knowledge graph in Neo4j with comprehensive entity and relationship management."""
     
     def __init__(self, neo4j_client: Neo4jClient):
         """Initialize graph builder.
@@ -19,6 +53,299 @@ class GraphBuilder:
             neo4j_client: Neo4j client instance
         """
         self.neo4j_client = neo4j_client
+        
+        # Entity type mapping for graph labels
+        self.entity_type_mapping = {
+            'PERSON': 'Person',
+            'PER': 'Person',
+            'ORG': 'Organization',
+            'ORGANIZATION': 'Organization',
+            'LOC': 'Location',
+            'LOCATION': 'Location',
+            'GPE': 'Location',  # Geopolitical entity
+            'MISC': 'Entity',
+            'MONEY': 'MonetaryValue',
+            'DATE': 'Date',
+            'TIME': 'Time',
+            'PERCENT': 'Percentage',
+            'EVENT': 'Event',
+            'PRODUCT': 'Product',
+            'WORK_OF_ART': 'WorkOfArt',
+            'LAW': 'Law',
+            'LANGUAGE': 'Language'
+        }
+    
+    async def create_entity_nodes(self, entities: List[Entity], chunk_id: str, 
+                                 user_id: str = None, audio_id: str = None) -> Dict[str, Any]:
+        """Create entity nodes and relationships with comprehensive mapping.
+        
+        This is the main method required by Task 13.
+        
+        Args:
+            entities: List of Entity objects to create
+            chunk_id: ID of the chunk containing these entities
+            user_id: User ID for data isolation
+            audio_id: Audio file ID for tracking
+            
+        Returns:
+            Dictionary with creation results and statistics
+        """
+        if not entities:
+            return {"success": True, "entities_created": 0, "relationships_created": 0}
+        
+        try:
+            # Ensure chunk node exists
+            await self._ensure_chunk_node(chunk_id, user_id, audio_id)
+            
+            # Create entities and relationships
+            entities_created = 0
+            relationships_created = 0
+            entity_relationships = []
+            
+            for entity in entities:
+                # Create individual entity and relationship
+                entity_result = await self._create_single_entity_node(entity, chunk_id, user_id)
+                if entity_result['success']:
+                    entities_created += entity_result.get('entities_created', 0)
+                    relationships_created += entity_result.get('relationships_created', 0)
+                    
+                    # Store for relationship inference
+                    entity_relationships.append({
+                        'entity': entity,
+                        'node_id': entity_result.get('node_id'),
+                        'node_type': entity_result.get('node_type')
+                    })
+            
+            # Infer relationships between entities in the same chunk
+            inferred_relationships = await self._infer_entity_relationships(
+                entity_relationships, chunk_id, user_id
+            )
+            relationships_created += inferred_relationships
+            
+            logger.info(f"Created {entities_created} entities and {relationships_created} relationships for chunk {chunk_id}")
+            
+            return {
+                "success": True,
+                "entities_created": entities_created,
+                "relationships_created": relationships_created,
+                "inferred_relationships": inferred_relationships,
+                "chunk_id": chunk_id
+            }
+            
+        except Exception as e:
+            logger.error(f"Error creating entity nodes for chunk {chunk_id}: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "entities_created": 0,
+                "relationships_created": 0
+            }
+    
+    async def _ensure_chunk_node(self, chunk_id: str, user_id: str = None, 
+                                audio_id: str = None) -> bool:
+        """Ensure the chunk node exists before creating relationships."""
+        try:
+            query = """
+            MERGE (c:AudioChunk {id: $chunk_id})
+            ON CREATE SET 
+                c.created_at = datetime(),
+                c.user_id = $user_id,
+                c.audio_id = $audio_id
+            RETURN c.id as chunk_id
+            """
+            
+            params = {
+                "chunk_id": chunk_id,
+                "user_id": user_id,
+                "audio_id": audio_id
+            }
+            
+            result = await self.neo4j_client.execute_write_query(query, params)
+            return bool(result)
+            
+        except Exception as e:
+            logger.error(f"Error ensuring chunk node {chunk_id}: {e}")
+            return False
+    
+    async def _create_single_entity_node(self, entity: Entity, chunk_id: str, 
+                                        user_id: str = None) -> Dict[str, Any]:
+        """Create a single entity node with proper typing and relationships."""
+        try:
+            # Determine the appropriate graph label for this entity type
+            graph_label = self.entity_type_mapping.get(entity.label.upper(), 'Entity')
+            
+            # Use MERGE to avoid duplicates, with proper normalization
+            query = f"""
+            MATCH (c:AudioChunk {{id: $chunk_id}})
+            MERGE (e:{graph_label} {{normalized_name: $normalized_text}})
+            ON CREATE SET 
+                e.name = $entity_text,
+                e.type = $entity_type,
+                e.created_at = datetime(),
+                e.first_seen_at = datetime(),
+                e.mention_count = 1,
+                e.user_id = $user_id,
+                e.confidence_sum = $confidence,
+                e.metadata = $metadata
+            ON MATCH SET 
+                e.mention_count = e.mention_count + 1,
+                e.last_seen_at = datetime(),
+                e.confidence_sum = e.confidence_sum + $confidence,
+                e.updated_at = datetime()
+            
+            MERGE (c)-[r:MENTIONS]->(e)
+            ON CREATE SET 
+                r.start_position = $start_pos,
+                r.end_position = $end_pos,
+                r.confidence = $confidence,
+                r.mention_text = $entity_text,
+                r.created_at = datetime()
+            
+            RETURN e.name as entity_name, 
+                   e.mention_count as mention_count,
+                   id(e) as node_id,
+                   labels(e) as node_labels
+            """
+            
+            params = {
+                "chunk_id": chunk_id,
+                "normalized_text": entity.normalized_text,
+                "entity_text": entity.text,
+                "entity_type": entity.label,
+                "user_id": user_id,
+                "confidence": entity.confidence,
+                "start_pos": entity.start,
+                "end_pos": entity.end,
+                "metadata": entity.metadata
+            }
+            
+            result = await self.neo4j_client.execute_write_query(query, params)
+            
+            if result and len(result) > 0:
+                return {
+                    "success": True,
+                    "entities_created": 1,
+                    "relationships_created": 1,
+                    "node_id": result[0].get('node_id'),
+                    "node_type": graph_label,
+                    "mention_count": result[0].get('mention_count', 1)
+                }
+            else:
+                return {"success": False, "entities_created": 0, "relationships_created": 0}
+                
+        except Exception as e:
+            logger.error(f"Error creating entity node for {entity.text}: {e}")
+            return {"success": False, "error": str(e), "entities_created": 0, "relationships_created": 0}
+    
+    async def _infer_entity_relationships(self, entity_relationships: List[Dict[str, Any]], 
+                                         chunk_id: str, user_id: str = None) -> int:
+        """Infer relationships between entities based on co-occurrence and types."""
+        if len(entity_relationships) < 2:
+            return 0
+        
+        relationships_created = 0
+        
+        try:
+            # Define relationship inference rules
+            relationship_rules = [
+                # Person-Organization relationships
+                {
+                    'from_type': 'Person',
+                    'to_type': 'Organization',
+                    'relationship': 'WORKS_FOR',
+                    'strength': 0.7
+                },
+                # Person-Location relationships
+                {
+                    'from_type': 'Person',
+                    'to_type': 'Location',
+                    'relationship': 'LOCATED_IN',
+                    'strength': 0.6
+                },
+                # Organization-Location relationships
+                {
+                    'from_type': 'Organization',
+                    'to_type': 'Location',
+                    'relationship': 'BASED_IN',
+                    'strength': 0.8
+                },
+                # Person-Person relationships (co-mentioned)
+                {
+                    'from_type': 'Person',
+                    'to_type': 'Person',
+                    'relationship': 'ASSOCIATED_WITH',
+                    'strength': 0.5
+                },
+                # Generic co-occurrence for other types
+                {
+                    'from_type': '*',
+                    'to_type': '*',
+                    'relationship': 'CO_OCCURS_WITH',
+                    'strength': 0.3
+                }
+            ]
+            
+            # Apply relationship rules
+            for i, entity_a in enumerate(entity_relationships):
+                for j, entity_b in enumerate(entity_relationships):
+                    if i >= j:  # Avoid duplicates and self-relationships
+                        continue
+                    
+                    # Find applicable rule
+                    applicable_rule = None
+                    for rule in relationship_rules:
+                        if (rule['from_type'] == '*' or rule['from_type'] == entity_a['node_type']) and \
+                           (rule['to_type'] == '*' or rule['to_type'] == entity_b['node_type']):
+                            applicable_rule = rule
+                            break
+                    
+                    if applicable_rule:
+                        success = await self._create_entity_relationship(
+                            entity_a, entity_b, applicable_rule, chunk_id, user_id
+                        )
+                        if success:
+                            relationships_created += 1
+            
+            return relationships_created
+            
+        except Exception as e:
+            logger.error(f"Error inferring entity relationships for chunk {chunk_id}: {e}")
+            return 0
+    
+    async def _create_entity_relationship(self, entity_a: Dict[str, Any], entity_b: Dict[str, Any],
+                                         rule: Dict[str, Any], chunk_id: str, user_id: str = None) -> bool:
+        """Create a relationship between two entities based on inference rule."""
+        try:
+            query = """
+            MATCH (a) WHERE id(a) = $node_a_id
+            MATCH (b) WHERE id(b) = $node_b_id
+            MERGE (a)-[r:""" + rule['relationship'] + """]->(b)
+            ON CREATE SET 
+                r.strength = $strength,
+                r.inferred_from_chunk = $chunk_id,
+                r.created_at = datetime(),
+                r.user_id = $user_id,
+                r.co_occurrence_count = 1
+            ON MATCH SET 
+                r.co_occurrence_count = r.co_occurrence_count + 1,
+                r.updated_at = datetime()
+            RETURN r
+            """
+            
+            params = {
+                "node_a_id": entity_a['node_id'],
+                "node_b_id": entity_b['node_id'],
+                "strength": rule['strength'],
+                "chunk_id": chunk_id,
+                "user_id": user_id
+            }
+            
+            result = await self.neo4j_client.execute_write_query(query, params)
+            return bool(result)
+            
+        except Exception as e:
+            logger.error(f"Error creating relationship between entities: {e}")
+            return False
     
     async def create_chunk_node(
         self,
