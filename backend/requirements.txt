@@ -9,6 +9,18 @@ asyncpg>=0.29.0
 alembic>=1.13.0
 psycopg2-binary>=2.9.9
 
+# Neo4j
+neo4j>=5.15.0
+
+# Job Queue
+celery>=5.3.0
+redis>=5.0.0
+
+# NLP and ML
+spacy>=3.7.0
+sentence-transformers>=2.2.0
+tiktoken>=0.5.0
+
 # Audio processing
 python-multipart>=0.0.6
 openai-whisper>=20231117
