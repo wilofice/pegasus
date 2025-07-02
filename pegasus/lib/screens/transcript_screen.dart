@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api/pegasus_api_client.dart';
+import 'review_reflection_screen.dart';
 
 // Providers for transcript screen
 final transcriptDataProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
@@ -131,6 +132,21 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
       );
     }
   }
+
+  void _navigateToReviewReflection() {
+    final transcriptData = ref.read(transcriptDataProvider);
+    final audioTitle = transcriptData?['file_name'] as String?;
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReviewReflectionScreen(
+          audioId: widget.audioId,
+          audioTitle: audioTitle,
+        ),
+      ),
+    );
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -167,6 +183,13 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
       appBar: AppBar(
         title: const Text('Transcript & Tags'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.psychology),
+            tooltip: 'Review & Reflection',
+            onPressed: () => _navigateToReviewReflection(),
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -270,18 +293,33 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
           
           const SizedBox(height: 16),
           
-          // Copy improved transcript button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _copyToClipboard(improvedTranscript),
-              icon: const Icon(Icons.copy),
-              label: const Text('Copy Improved Transcript'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+          // Action buttons row
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _copyToClipboard(improvedTranscript),
+                  icon: const Icon(Icons.copy),
+                  label: const Text('Copy'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _navigateToReviewReflection(),
+                  icon: const Icon(Icons.psychology),
+                  label: const Text('Analyze'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
           
           // Original Transcript Section (if available)

@@ -112,6 +112,33 @@ class JobRepository:
             .all()
         )
     
+    def get_jobs_by_audio_id(
+        self,
+        audio_file_id: UUID,
+        status: str = None,
+        limit: int = 100
+    ) -> List[ProcessingJob]:
+        """Get jobs for a specific audio file."""
+        query = self.db.query(ProcessingJob).filter(ProcessingJob.audio_file_id == audio_file_id)
+        
+        if status:
+            # Handle both string and JobStatus enum
+            if isinstance(status, str):
+                try:
+                    status_enum = JobStatus(status)
+                    query = query.filter(ProcessingJob.status == status_enum)
+                except ValueError:
+                    # If invalid status string, return empty list
+                    return []
+            else:
+                query = query.filter(ProcessingJob.status == status)
+        
+        return (
+            query.order_by(desc(ProcessingJob.created_at))
+            .limit(limit)
+            .all()
+        )
+    
     def get_pending_jobs(self, limit: int = 100) -> List[ProcessingJob]:
         """Get pending jobs ordered by priority."""
         return (

@@ -27,6 +27,14 @@ class ApiConfig {
   static const String updateTagsEndpoint = '/api/audio/';    // append /{id}/tags
   static const String deleteAudioEndpoint = '/api/audio/';   // append /{id}
   
+  /// Plugin endpoints
+  static const String pluginsEndpoint = '/plugins';
+  static const String pluginExecuteEndpoint = '/plugins/execute';
+  static const String pluginExecuteSingleEndpoint = '/plugins/execute-single';
+  static const String pluginStatusEndpoint = '/plugins/status/overview';
+  static const String pluginResultsEndpoint = '/plugins/results/';  // append /{audio_id}
+  static const String contextSearchEndpoint = '/context/search';
+  
   /// Get the full URL for an endpoint
   static String getFullUrl(String endpoint) {
     if (endpoint.startsWith('http')) {

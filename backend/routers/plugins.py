@@ -366,6 +366,59 @@ async def get_available_plugin_types():
     }
 
 
+@router.get("/results/{audio_id}")
+async def get_plugin_results(audio_id: str, plugin_name: Optional[str] = None):
+    """Get plugin execution results for a specific audio file.
+    
+    **Parameters:**
+    - `audio_id`: ID of the audio file to get results for
+    - `plugin_name`: Optional plugin name to filter results
+    
+    **Returns:**
+    Plugin execution results including insights, analyses, and metadata.
+    """
+    try:
+        from repositories.job_repository import JobRepository
+        from core.database import get_db_session
+        
+        with get_db_session() as db:
+            job_repo = JobRepository(db)
+            
+            # Get completed plugin jobs for this audio file
+            jobs = job_repo.get_jobs_by_audio_id(audio_id, status="completed")
+            
+            # Filter by plugin name if specified
+            if plugin_name:
+                jobs = [job for job in jobs if job.job_type == f"plugin_{plugin_name}"]
+            
+            results = []
+            for job in jobs:
+                if job.result_data:
+                    # Extract plugin name from job type
+                    plugin_name_from_job = job.job_type.replace("plugin_", "") if job.job_type.startswith("plugin_") else job.job_type
+                    
+                    result = {
+                        "plugin_name": plugin_name_from_job,
+                        "execution_time": job.updated_at.isoformat() if job.updated_at else None,
+                        "processing_time_ms": job.result_data.get("metadata", {}).get("processing_time_ms", 0),
+                        "result_data": job.result_data
+                    }
+                    results.append(result)
+            
+            return {
+                "audio_id": audio_id,
+                "total_results": len(results),
+                "results": results
+            }
+    
+    except Exception as e:
+        logger.error(f"Error getting plugin results for {audio_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get plugin results: {str(e)}"
+        )
+
+
 @router.get("/health")
 async def plugins_health_check():
     """Health check for plugin system.

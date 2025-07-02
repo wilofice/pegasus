@@ -336,4 +336,133 @@ class PegasusApiClient {
       throw Exception('Failed to check game health: $e');
     }
   }
+
+  // PLUGIN API METHODS
+
+  /// Execute plugins for a transcript
+  Future<Map<String, dynamic>> executePlugins(String audioId, {List<String>? pluginTypes}) async {
+    try {
+      final data = {
+        'audio_id': audioId,
+        if (pluginTypes != null) 'plugin_types': pluginTypes,
+      };
+      
+      final response = await _dio.post(ApiConfig.pluginExecuteEndpoint, data: data);
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception('Plugin execution failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to execute plugins: $e');
+    }
+  }
+
+  /// Execute a single plugin
+  Future<Map<String, dynamic>> executeSinglePlugin(
+    String audioId, 
+    String pluginName, 
+    {Map<String, dynamic>? pluginConfig}
+  ) async {
+    try {
+      final data = {
+        'audio_id': audioId,
+        'plugin_name': pluginName,
+        if (pluginConfig != null) 'plugin_config': pluginConfig,
+      };
+      
+      final response = await _dio.post(ApiConfig.pluginExecuteSingleEndpoint, data: data);
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception('Single plugin execution failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to execute single plugin: $e');
+    }
+  }
+
+  /// Get plugin execution results for an audio file
+  Future<Map<String, dynamic>> getPluginResults(String audioId, {String? pluginName}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (pluginName != null) queryParams['plugin_name'] = pluginName;
+      
+      final response = await _dio.get(
+        '${ApiConfig.pluginResultsEndpoint}$audioId',
+        queryParameters: queryParams
+      );
+      
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to get plugin results with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to get plugin results: $e');
+    }
+  }
+
+  /// Get available plugins list
+  Future<List<Map<String, dynamic>>> getPluginsList({String? pluginType, String? status}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (pluginType != null) queryParams['plugin_type'] = pluginType;
+      if (status != null) queryParams['status'] = status;
+      
+      final response = await _dio.get(ApiConfig.pluginsEndpoint, queryParameters: queryParams);
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data ?? []);
+      }
+      return [];
+    } catch (e) {
+      throw Exception('Failed to get plugins list: $e');
+    }
+  }
+
+  /// Get plugin status overview
+  Future<Map<String, dynamic>> getPluginStatus() async {
+    try {
+      final response = await _dio.get(ApiConfig.pluginStatusEndpoint);
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to get plugin status with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to get plugin status: $e');
+    }
+  }
+
+  /// Search context using the context aggregator
+  Future<Map<String, dynamic>> searchContext(
+    String query, {
+    int maxResults = 20,
+    String strategy = 'hybrid',
+    double? vectorWeight,
+    double? graphWeight,
+    bool includeRelated = true,
+    Map<String, dynamic>? filters,
+  }) async {
+    try {
+      final data = {
+        'query': query,
+        'max_results': maxResults,
+        'strategy': strategy,
+        'include_related': includeRelated,
+        if (vectorWeight != null) 'vector_weight': vectorWeight,
+        if (graphWeight != null) 'graph_weight': graphWeight,
+        if (filters != null) 'filters': filters,
+      };
+      
+      final response = await _dio.post(ApiConfig.contextSearchEndpoint, data: data);
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception('Context search failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to search context: $e');
+    }
+  }
 }
