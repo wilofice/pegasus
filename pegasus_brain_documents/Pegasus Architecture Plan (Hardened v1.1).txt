@@ -1,0 +1,91 @@
+Pegasus Architecture Plan (Hardened v1.1)
+Executive Summary
+This revision incorporates two visionary concepts into the foundation: a phased integration of a Neo4j Graph Database for explicit relationship mapping, and a Plugin Manager to ensure long-term evolvability. The core principles of a resilient job queue and user-controlled insights remain central.
+
+1. Core Components (Refined)
+Transcript Processing Pipeline (with Job Queue)
+
+Trigger: Transcription completion adds a process_transcript job to a queue (e.g., Redis).
+
+Worker Process: A dedicated background worker picks up jobs.
+
+Processing Steps:
+
+Chunking: Fixed-size chunking with overlap for vector storage.
+
+Metadata & Entity Extraction (NER): Identifies key entities (people, projects) to serve as nodes for the graph.
+
+Vectorization: Embeds chunks and stores them in ChromaDB.
+
+Graph Modeling: Stores extracted entities and simple relationships in Neo4j.
+
+Dual-Memory System
+
+Vector Storage (ChromaDB): For semantic search ("What is similar?").
+
+Graph Storage (Neo4j): For explicit connections ("How is this related?").
+
+Contextual Intelligence Engine
+
+Context Aggregator: Retrieves context from both ChromaDB (for semantic content) and Neo4j (for related entities and structural context).
+
+"Review & Reflection" Module: A user-initiated mode for deep analysis.
+
+Plugin Manager
+
+A core component of the backend orchestrator.
+
+Maintains a registry of available plugins.
+
+Routes user requests to the appropriate plugin based on triggers.
+
+2. Implementation Phases (Revised with Neo4j & Plugins)
+Phase 1: The Dual-Memory Foundation (Weeks 1-4)
+
+Goal: Build a scalable pipeline that feeds both the vector and graph databases.
+
+Tasks:
+
+Setup Infrastructure: Install and configure Redis, ChromaDB, and Neo4j.
+
+Develop the Worker: Create the background worker to manage the multi-step ingestion process.
+
+Implement NER: Integrate a library (e.g., spaCy) for basic Named Entity Recognition.
+
+Dual-DB Ingestion: The worker must write to both ChromaDB (chunks) and Neo4j (nodes and basic relationships like MENTIONED_IN).
+
+Database Schema: Update PostgreSQL to track the status of this more complex job.
+
+Phase 2: Intelligent Retrieval & Chat Integration (Weeks 5-7)
+
+Goal: Enable the chat to leverage the dual-memory system.
+
+Tasks:
+
+Enhance Context Aggregator: Upgrade the orchestrator to query both databases and combine the results into a rich context for the LLM.
+
+Implement Basic Graph Queries: Enable retrieval of directly connected entities (e.g., "Who else is mentioned in this note?").
+
+User Testing: Test the core chat with the enhanced context.
+
+Phase 3: The Plugin Ecosystem & User Insights (Weeks 8-10)
+
+Goal: Introduce the plugin architecture and the first user-driven insight features.
+
+Tasks:
+
+Develop the Plugin Manager: Build the core logic in the orchestrator to register and call plugins.
+
+Create the First Plugin: Implement the "Review & Reflection" Module as the first official plugin.
+
+Develop the "Review" API Endpoint: Create the API for the frontend to call this plugin.
+
+Frontend Integration: Create the UI for initiating review sessions.
+
+Phase 4: Future Vision (Post-V1.0)
+
+Advanced Graph Analytics: Implement complex pathfinding and community detection queries in Neo4j.
+
+New Plugins: Develop more plugins (e.g., Summarizer, Task Extractor, Visualizer).
+
+True Proactivity: Evolve the "Review" module into a more proactive suggestion engine based on patterns detected in the graph.

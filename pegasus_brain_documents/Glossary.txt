@@ -1,0 +1,78 @@
+Glossaire du Projet Pegasus
+Ce document définit les termes et concepts clés utilisés dans l'architecture et la planification du projet Pegasus. Son objectif est d'établir un vocabulaire commun pour assurer une compréhension claire à chaque étape du développement.
+
+1. Concepts Architecturaux Fondamentaux
+Dual-Memory System (Système à Double Mémoire)
+
+Définition : L'architecture centrale de Pegasus qui utilise deux types de bases de données fonctionnant en tandem : une base de données vectorielle (ChromaDB) et une base de données de graphe (Neo4j).
+
+Rôle dans Pegasus : Ce n'est pas l'un ou l'autre, mais l'un et l'autre. ChromaDB trouve des informations sémantiquement similaires ("Qu'est-ce qui ressemble à ça ?"), tandis que Neo4j comprend les relations explicites entre les informations ("Comment est-ce que ceci est connecté à cela ?"). Cette combinaison permet à Pegasus de comprendre à la fois le contenu et le contexte.
+
+Job Queue (File d'Attente de Tâches)
+
+Définition : Un système (comme Redis) qui gère une liste de tâches à exécuter en arrière-plan. Au lieu de traiter une tâche immédiatement, on l'ajoute à une "file d'attente".
+
+Rôle dans Pegasus : C'est le garant de la stabilité et de la scalabilité du pipeline de données. Quand vous ajoutez plusieurs fichiers, ils ne sont pas traités tous en même temps (ce qui surchargerait le système), mais sont mis en file d'attente et traités un par un par un "Worker".
+
+Worker Process (Processus Travailleur)
+
+Définition : Un script ou un service qui tourne en arrière-plan et dont le seul travail est de prendre des tâches dans la Job Queue et de les exécuter.
+
+Rôle dans Pegasus : C'est le moteur du data_pipeline. Il est responsable de la transcription, du chunking, de la vectorisation et du stockage de chaque fichier, un par un, de manière fiable.
+
+Pluggable Plugin Architecture (Architecture à Plugins)
+
+Définition : Une conception logicielle où le "cœur" de l'application est stable et minimaliste, et où de nouvelles fonctionnalités peuvent être ajoutées via des modules indépendants appelés "plugins".
+
+Rôle dans Pegasus : C'est la clé de l'évolutivité de Pegasus. Cela nous permet d'ajouter de nouvelles capacités (comme un "Summarizer", un "Task Extractor", etc.) à l'avenir sans avoir à modifier le système central. Cela garantit que Pegasus peut grandir et s'adapter au fil du temps.
+
+2. Traitement des Données et NLP (Traitement du Langage Naturel)
+Chunking (Segmentation)
+
+Définition : Le processus de découpage d'un long document (transcription, email) en morceaux plus petits et gérables appelés "chunks". Notre stratégie est le "fixed-size chunking with overlap" (segmentation de taille fixe avec chevauchement), où chaque morceau partage quelques mots avec le précédent et le suivant.
+
+Rôle dans Pegasus : Les modèles de langage ont une limite de contexte. Le chunking nous permet de leur fournir des informations pertinentes sans dépasser cette limite. Le chevauchement garantit qu'une idée mentionnée à la frontière entre deux chunks n'est pas perdue.
+
+Vectorization / Embedding (Vectorisation)
+
+Définition : Le processus de conversion d'un morceau de texte (un chunk) en une liste de nombres, appelée un "vecteur" ou "embedding". Ce vecteur représente la signification sémantique du texte dans un espace mathématique.
+
+Rôle dans Pegasus : C'est le fondement de la recherche sémantique. En transformant le texte en nombres, nous pouvons trouver des chunks qui sont "proches" en signification, même s'ils n'utilisent pas les mêmes mots.
+
+NER (Named Entity Recognition / Reconnaissance d'Entités Nommées)
+
+Définition : Une technique de NLP qui identifie automatiquement les "entités" dans un texte, comme les noms de personnes, de lieux, d'organisations, de projets, et les dates.
+
+Rôle dans Pegasus : C'est le pont entre le texte et la base de données de graphe. Les entités extraites deviennent les "nœuds" (les points) dans notre graphe Neo4j, nous permettant de créer des liens entre elles.
+
+RAG (Retrieval-Augmented Generation / Génération Augmentée par Récupération)
+
+Définition : Le modèle architectural que nous utilisons. C'est un processus en deux étapes : 1) Récupération (Retrieval) : D'abord, nous allons chercher les informations les plus pertinentes dans nos bases de données (ChromaDB et Neo4j). 2) Génération (Generation) : Ensuite, nous donnons ces informations, ainsi que votre question, au LLM pour qu'il génère une réponse "augmentée" et factuelle.
+
+Rôle dans Pegasus : C'est ce qui fait de Pegasus votre second cerveau. Ses réponses ne sont pas basées sur des connaissances générales d'Internet, mais sur le contexte factuel récupéré de vos propres données.
+
+3. Bases de Données et Stockage
+Vector Storage (ChromaDB)
+
+Définition : Une base de données spécialisée conçue pour stocker des vecteurs et effectuer des recherches de similarité sémantique ultra-rapides.
+
+Rôle dans Pegasus : C'est la mémoire sémantique. Elle répond à la question : "Trouve-moi les passages de mes notes qui parlent de la même idée que cette question."
+
+Graph Storage (Neo4j)
+
+Définition : Une base de données qui stocke les informations non pas sous forme de tables, mais sous forme de nœuds (points) et de relations (flèches) qui les relient.
+
+Rôle dans Pegasus : C'est la mémoire contextuelle et structurelle. Elle répond à la question : "Montre-moi comment cette personne, ce projet et cette réunion sont connectés."
+
+4. Modules Fonctionnels et Fonctionnalités
+Context Aggregator (Agrégateur de Contexte)
+
+Définition : Un composant central du backend de Pegasus.
+
+Rôle dans Pegasus : Avant de parler au LLM, c'est lui qui a la responsabilité d'interroger à la fois ChromaDB et Neo4j pour rassembler toutes les informations pertinentes (sémantiques et relationnelles) afin de construire le contexte le plus riche possible.
+
+"Review & Reflection" Module (Module de Revue et Réflexion)
+
+Définition : Une fonctionnalité clé, implémentée comme un plugin, que vous activez explicitement.
+
+Rôle dans Pegasus : C'est notre approche de la "proactivité contrôlée". Au lieu que Pegasus vous interrompe avec des "insights", vous lui demandez ("Faisons ma revue hebdomadaire") de lancer une analyse profonde sur vos données et de vous présenter une synthèse structurée des thèmes, des progrès et des points en suspens.

@@ -1,0 +1,67 @@
+Pegasus - User Experience Functional Test Scenarios
+Objective: To define a set of user-centric scenarios to validate that Pegasus delivers on its promise of being an effective "second brain." These tests focus on the quality and relevance of the experience, not just technical success.
+
+Phase 1: Testing the Foundation (Dual-Memory Ingestion)
+Scenario 1.1: Basic Audio Recall
+
+Action: The user records a 2-minute voice note: "Idea for Pegasus: I need to remember to research job queues like Redis for the ingestion pipeline. It's important for scalability. I should also check out the spaCy library for NER."
+
+Test: A day later, the user asks Pegasus: "What did I say about the ingestion pipeline?"
+
+Success Criteria: Pegasus's response includes the key concepts: "job queues," "Redis," "scalability," and "spaCy." The source is correctly identified as the voice note from yesterday.
+
+Scenario 1.2: Cross-Referenced Entity Recognition
+
+Action: The user saves an email thread discussing a meeting with "Danielle Rose" about the "Q3 budget." Later, the user records a voice note: "I need to follow up with Danielle about the Q3 numbers."
+
+Test: The user asks: "What do I need to do regarding Danielle Rose?"
+
+Success Criteria: Pegasus retrieves context from both the email and the voice note, understanding that "Danielle" and "Danielle Rose" are the same entity. The response should synthesize the need to follow up on the "Q3 budget."
+
+Scenario 1.3: Graph Connection Verification
+
+Action: The user has multiple notes mentioning "Project Atlas" and "Maria Garcia."
+
+Test: The user asks: "Who is involved with Project Atlas?"
+
+Success Criteria: Pegasus queries the Neo4j graph and correctly responds with "Maria Garcia," even if no single document explicitly states "Maria is involved with Project Atlas." The connection is inferred from co-occurrence.
+
+Phase 2: Testing Intelligent Retrieval in Chat
+Scenario 2.1: Contextual Conversation Continuity
+
+Action: The user is chatting with Pegasus about planning a vacation. They close the app.
+
+Test: Hours later, the user re-opens the app and says: "What was the last hotel we were looking at?"
+
+Success Criteria: Pegasus correctly recalls the last hotel discussed and continues the conversation seamlessly, without the user needing to restate the entire context.
+
+Scenario 2.2: Vague Query Resolution
+
+Action: The user had a meeting about "marketing" last week and took some notes.
+
+Test: The user asks: "Remind me about that marketing thing last week."
+
+Success Criteria: Pegasus uses a combination of semantic search (for "marketing") and metadata filtering (for "last week") to retrieve the correct notes and asks a clarifying question: "Are you referring to the discussion about the Q4 campaign?"
+
+Phase 3: Testing User-Driven Insights (Plugins)
+Scenario 3.1: The Weekly Review Plugin
+
+Action: The user says: "Pegasus, let's do my weekly review."
+
+Test: Pegasus initiates the review process.
+
+Success Criteria: Pegasus returns a structured summary that includes:
+
+Recurring Themes: "I've noticed you've mentioned 'backend performance' in 5 different notes this week."
+
+Key People: "You interacted most with 'John Doe' and 'Maria Garcia'."
+
+Potential Action Items: "You mentioned needing to 'finalize the report' and 'schedule the demo'. Have these been completed?"
+
+Scenario 3.2: The Topic Deep-Dive Plugin
+
+Action: The user says: "Give me a summary of all my thoughts on 'user authentication'."
+
+Test: Pegasus activates the insight module for a specific topic.
+
+Success Criteria: Pegasus synthesizes information from voice notes, emails, and documents related to "user authentication" into a single, coherent brief, highlighting how the user's thinking on the topic may have evolved over time.
