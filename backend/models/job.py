@@ -140,7 +140,7 @@ class JobStatusHistory(Base):
     old_status = Column(SQLEnum(JobStatus), nullable=True)
     new_status = Column(SQLEnum(JobStatus), nullable=False)
     message = Column(Text, nullable=True)
-    metadata = Column(JSONB, nullable=True)
+    status_metadata = Column(JSONB, nullable=True)
     
     # Timestamp
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
@@ -159,6 +159,6 @@ class JobStatusHistory(Base):
             "old_status": self.old_status.value if self.old_status else None,
             "new_status": self.new_status.value,
             "message": self.message,
-            "metadata": self.metadata,
+            "status_metadata": self.status_metadata,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }

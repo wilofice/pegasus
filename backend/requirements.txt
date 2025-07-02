@@ -21,6 +21,12 @@ spacy>=3.7.0
 sentence-transformers>=2.2.0
 tiktoken>=0.5.0
 
+# spaCy language models (these may need to be installed separately)
+# Run: python -m spacy download en_core_web_sm
+# Run: python -m spacy download fr_core_news_sm (optional)
+# Run: python -m spacy download es_core_news_sm (optional)
+# Run: python -m spacy download de_core_news_sm (optional)
+
 # Audio processing
 python-multipart>=0.0.6
 openai-whisper>=20231117

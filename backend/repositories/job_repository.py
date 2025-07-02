@@ -191,7 +191,7 @@ class JobRepository:
         old_status: JobStatus = None,
         new_status: JobStatus = None,
         message: str = None,
-        metadata: Dict[str, Any] = None
+        status_metadata: Dict[str, Any] = None
     ) -> JobStatusHistory:
         """Add a status history entry."""
         history = JobStatusHistory(
@@ -199,7 +199,7 @@ class JobRepository:
             old_status=old_status,
             new_status=new_status,
             message=message,
-            metadata=metadata
+            status_metadata=status_metadata
         )
         
         self.db.add(history)
