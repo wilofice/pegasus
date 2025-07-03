@@ -87,7 +87,7 @@ wait_for_service "neo4j" \
 
 # ChromaDB
 wait_for_service "chromadb" \
-    "curl -f http://localhost:8001/api/v1/heartbeat -o /dev/null -s" \
+    "curl -f http://localhost:8001/api/v2/heartbeat -o /dev/null -s" \
     "ChromaDB"
 
 # Ollama
@@ -114,7 +114,7 @@ check_service "neo4j" \
     "Neo4j Graph Database" || health_status=1
 
 check_service "chromadb" \
-    "curl -f http://localhost:8001/api/v1/heartbeat -o /dev/null -s" \
+    "curl -f http://localhost:8001/api/v2/heartbeat -o /dev/null -s" \
     "ChromaDB Vector Database" || health_status=1
 
 check_service "ollama" \
