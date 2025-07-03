@@ -1,15 +1,2 @@
-Traceback (most recent call last):
-  File "/home/mica/Desktop/pegasus/backend/main.py", line 5, in <module>
-    from routers import context, plugins
-  File "/home/mica/Desktop/pegasus/backend/routers/context.py", line 16, in <module>
-    class ContextSearchRequest(BaseModel):
-    ...<7 lines>...
-        filters: Optional[Dict[str, Any]] = Field(default=None, description="Optional metadata filters")
-  File "/home/mica/Desktop/pegasus/backend/routers/context.py", line 20, in ContextSearchRequest
-    strategy: str = Field(default="hybrid", regex="^(vector|graph|hybrid|ensemble)$", description="Search strategy")
-                    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/pydantic/fields.py", line 1090, in Field
-    raise PydanticUserError('`regex` is removed. use `pattern` instead', code='removed-kwargs')
-pydantic.errors.PydanticUserError: `regex` is removed. use `pattern` instead
-
-For further information visit https://errors.pydantic.dev/2.11/u/removed-kwargs
+# Backend Errors Log
+# Fixed: Pydantic v2 compatibility - replaced 'regex' with 'pattern' in routers/context.py

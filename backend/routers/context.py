@@ -17,7 +17,7 @@ class ContextSearchRequest(BaseModel):
     """Request model for context search."""
     query: str = Field(..., description="Search query text")
     max_results: int = Field(default=20, ge=1, le=100, description="Maximum number of results")
-    strategy: str = Field(default="hybrid", regex="^(vector|graph|hybrid|ensemble)$", description="Search strategy")
+    strategy: str = Field(default="hybrid", pattern="^(vector|graph|hybrid|ensemble)$", description="Search strategy")
     vector_weight: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Weight for vector search")
     graph_weight: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Weight for graph search")
     include_related: bool = Field(default=True, description="Include related chunks")
@@ -125,7 +125,7 @@ async def search_context(
 async def search_context_get(
     query: str = Query(..., description="Search query text"),
     max_results: int = Query(default=20, ge=1, le=100, description="Maximum number of results"),
-    strategy: str = Query(default="hybrid", regex="^(vector|graph|hybrid|ensemble)$", description="Search strategy"),
+    strategy: str = Query(default="hybrid", pattern="^(vector|graph|hybrid|ensemble)$", description="Search strategy"),
     vector_weight: Optional[float] = Query(default=None, ge=0.0, le=1.0, description="Weight for vector search"),
     graph_weight: Optional[float] = Query(default=None, ge=0.0, le=1.0, description="Weight for graph search"),
     include_related: bool = Query(default=True, description="Include related chunks"),
