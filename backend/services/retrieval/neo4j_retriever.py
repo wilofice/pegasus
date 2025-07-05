@@ -216,7 +216,7 @@ class Neo4jRetriever(BaseRetriever):
             MATCH (c:AudioChunk)-[:MENTIONS]->(e)
             {user_filter.replace('AND', 'WHERE') if not user_id else user_filter}
             RETURN DISTINCT c, e, 
-                   count{(c)-[:MENTIONS]->()} as entity_count,
+                   count{{(c)-[:MENTIONS]->()}} as entity_count,
                    e.mention_count as entity_frequency
             ORDER BY entity_frequency DESC, entity_count DESC
             LIMIT $limit
@@ -317,7 +317,7 @@ class Neo4jRetriever(BaseRetriever):
                    labels(connected) as types,
                    distance,
                    type(relationships(path)[0]) as first_relationship,
-                   count{(connected)-[]->()) + count{(connected)<-[]-()} as connection_count
+                   count{{(connected)-[]->()}} + count{{(connected)<-[]->()}} as connection_count
             ORDER BY distance ASC, connection_count DESC
             LIMIT $limit
             """
