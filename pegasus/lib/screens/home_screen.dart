@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
+import 'chat_screen_enhanced.dart';
 import 'phi3_chat_screen.dart';
 import 'recording_screen.dart';
 import 'game_screen.dart';
@@ -42,14 +43,38 @@ class HomeScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
+                        builder: (context) => const ChatScreenEnhanced(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.chat_bubble),
+                  label: const Text(
+                    'Pegasus Chat Enhanced',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
                         builder: (context) => const ChatScreen(),
                       ),
                     );
                   },
                   icon: const Icon(Icons.chat),
                   label: const Text(
-                    'Pegasus Chat',
-                    style: TextStyle(fontSize: 18),
+                    'Pegasus Chat (Legacy)',
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
               ),
