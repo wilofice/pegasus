@@ -90,7 +90,6 @@ class Neo4jSchemaManager:
             
             # Audio chunk constraints - essential for data consistency
             "chunk_id": "CREATE CONSTRAINT chunk_id IF NOT EXISTS FOR (c:AudioChunk) REQUIRE c.id IS UNIQUE",
-            "chunk_required_fields": "CREATE CONSTRAINT chunk_audio_id IF NOT EXISTS FOR (c:AudioChunk) REQUIRE c.audio_id IS NOT NULL",
             
             # User constraints - data isolation
             "user_id": "CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE",
@@ -98,8 +97,7 @@ class Neo4jSchemaManager:
             # Audio file constraints
             "audio_file_id": "CREATE CONSTRAINT audio_file_id IF NOT EXISTS FOR (a:AudioFile) REQUIRE a.id IS UNIQUE",
             
-            # Relationship constraints for data quality
-            "mention_unique": "CREATE CONSTRAINT mention_unique IF NOT EXISTS FOR ()-[r:MENTIONS]-() REQUIRE (r.chunk_id, r.entity_id) IS UNIQUE",
+            # Note: Relationship constraints require Neo4j Enterprise Edition
         }
         
         results = {"created": 0, "failed": 0, "errors": []}

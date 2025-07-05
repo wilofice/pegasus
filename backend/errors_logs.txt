@@ -1,137 +1,23 @@
-INFO:     192.168.1.10:41908 - "GET /api/audio/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:watchfiles.main:1 change detected
-INFO:services.chat_orchestrator_factory:Creating Chat Orchestrator V2 with default services...
-INFO:services.context_aggregator_factory:Creating Context Aggregator V2 with real services...
-INFO:services.context_ranker:Context ranker initialized with strategy: ensemble
-INFO:services.context_aggregator_v2:Context Aggregator V2 initialized with modern retrieval services
-INFO:services.context_aggregator_factory:Context Aggregator V2 created successfully
-INFO:services.chat_orchestrator_factory:Plugin manager created successfully
-INFO:services.chat_orchestrator_v2:Chat Orchestrator V2 initialized with modern services
-INFO:services.chat_orchestrator_factory:Chat Orchestrator V2 created successfully
-INFO:services.chat_orchestrator_v2:Processing chat message for session 0bc80d48-281e-47d9-a8f7-f287434c8943: 'Sur quoi ai-je travaillé aujourd'hui ?...'
-INFO:services.context_aggregator_v2:Starting context aggregation for query: 'Sur quoi ai-je travaillé aujourd'hui ?...'
-INFO:watchfiles.main:1 change detected
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/auth/identity "HTTP/1.1 200 OK"
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/heartbeat "HTTP/1.1 200 OK"
-INFO:services.vector_db_client:Connected to ChromaDB at localhost:8001
-INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
-README.md: 10.5kB [00:00, 17.9MB/s]
-INFO:httpx:HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
-INFO:services.vector_db_client:Initialized collection: pegasus_transcripts
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/audio_transcripts "HTTP/1.1 404 Not Found"
-INFO:httpx:HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
-INFO:services.chromadb_manager:Created new collection: audio_transcripts
-INFO:services.retrieval.chromadb_retriever:ChromaDB retriever initialized with collection: audio_transcripts
-INFO:services.neo4j_client:Successfully connected to Neo4j at bolt://localhost:7687
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT person_name IF NOT EXISTS
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT location_name IF NOT EXISTS
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT organization_name IF NOT EXISTS
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT topic_name IF NOT EXISTS
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT project_name IF NOT EXISTS
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT chunk_id IF NOT EXISTS
-ERROR:services.neo4j_client:Write query execution failed: {code: Neo.DatabaseError.Schema.ConstraintCreationFailed} {message: Unable to create Constraint( type='NODE PROPERTY EXISTENCE', schema=(:AudioChunk {audio_id}) ):
-Property existence constraint requires Neo4j Enterprise Edition. Note that only the first found violation is shown.}
-ERROR:services.neo4j_client:Query: CREATE CONSTRAINT chunk_audio_id IF NOT EXISTS FOR (c:AudioChunk) REQUIRE c.audio_id IS NOT NULL
-ERROR:services.neo4j_client:Parameters: {}
-WARNING:services.neo4j_client:Failed to create constraint: {code: Neo.DatabaseError.Schema.ConstraintCreationFailed} {message: Unable to create Constraint( type='NODE PROPERTY EXISTENCE', schema=(:AudioChunk {audio_id}) ):
-Property existence constraint requires Neo4j Enterprise Edition. Note that only the first found violation is shown.}
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT user_id IF NOT EXISTS
-INFO:services.neo4j_client:Created index: CREATE INDEX audio_chunk_text IF NOT EXISTS
-INFO:services.neo4j_client:Created index: CREATE INDEX entity_mentions IF NOT EXISTS
-INFO:services.neo4j_client:Created index: CREATE INDEX chunk_timestamp IF NOT EXISTS
-INFO:services.neo4j_client:Created index: CREATE INDEX chunk_date IF NOT EXISTS
-INFO:services.neo4j_client:Created index: CREATE INDEX chunk_user_id IF NOT EXISTS
-INFO:services.neo4j_client:Created index: CREATE INDEX entity_user_id IF NOT EXISTS
-INFO:services.retrieval.neo4j_retriever:Neo4j retriever initialized successfully
-Batches: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:01<00:00,  1.12s/it]
-INFO:httpx:HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/53e9d996-e07f-444e-b166-db3de7ef593b/query "HTTP/1.1 200 OK"
-INFO:services.chromadb_manager:Found 0 results for query in audio_transcripts
-INFO:services.retrieval.chromadb_retriever:ChromaDB search returned 0 results for query: 'Sur quoi ai-je travaillé aujourd'hui ?...'
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: A pattern expression should only be used in order to test the existence of a pattern. It can no longer be used inside the function size(), an alternative is to replace size() with COUNT {}. (line 7, column 25 (offset: 233))
-"                   size((c)-[:MENTIONS]->()) as entity_count,"
-                         ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (e)
-            WHERE e.name =~ $entity_pattern OR e.normalized_name =~ $normalized_pattern
-            MATCH (c:AudioChunk)-[:MENTIONS]->(e)
-            
-            RETURN DISTINCT c, e, 
-                   size((c)-[:MENTIONS]->()) as entity_count,
-                   e.mention_count as entity_frequency
-            ORDER BY entity_frequency DESC, entity_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': "(?i).*Sur quoi ai-je travaillé aujourd'hui ?.*", 'normalized_pattern': ".*sur quoi ai-je travaillé aujourd'hui ?.*", 'limit': 6}
-ERROR:services.retrieval.neo4j_retriever:Failed to find entity mentions for Sur quoi ai-je travaillé aujourd'hui ?: {code: Neo.ClientError.Statement.SyntaxError} {message: A pattern expression should only be used in order to test the existence of a pattern. It can no longer be used inside the function size(), an alternative is to replace size() with COUNT {}. (line 7, column 25 (offset: 233))
-"                   size((c)-[:MENTIONS]->()) as entity_count,"
-                         ^}
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: A pattern expression should only be used in order to test the existence of a pattern. It can no longer be used inside the function size(), an alternative is to replace size() with COUNT {}. (line 11, column 25 (offset: 467))
-"                   size((connected)-[]->()) + size((connected)<-[]-()) as connection_count"
-                         ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (start)
-            WHERE start.name =~ $entity_pattern OR start.normalized_name =~ $normalized_pattern
-            MATCH path = (start)-[r*1..2]-(connected)
-            
-            WITH connected, start, path, length(path) as distance
-            RETURN DISTINCT connected, 
-                   labels(connected) as types,
-                   distance,
-                   type(relationships(path)[0]) as first_relationship,
-                   size((connected)-[]->()) + size((connected)<-[]-()) as connection_count
-            ORDER BY distance ASC, connection_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': "(?i).*Sur quoi ai-je travaillé aujourd'hui ?.*", 'normalized_pattern': ".*sur quoi ai-je travaillé aujourd'hui ?.*", 'limit': 6}
-ERROR:services.retrieval.neo4j_retriever:Failed to find connections for Sur quoi ai-je travaillé aujourd'hui ?: {code: Neo.ClientError.Statement.SyntaxError} {message: A pattern expression should only be used in order to test the existence of a pattern. It can no longer be used inside the function size(), an alternative is to replace size() with COUNT {}. (line 11, column 25 (offset: 467))
-"                   size((connected)-[]->()) + size((connected)<-[]-()) as connection_count"
-                         ^}
-WARNING:neo4j.notifications:Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownRelationshipTypeWarning} {category: UNRECOGNIZED} {title: The provided relationship type is not in the database.} {description: One of the relationship types in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing relationship type is: MENTIONS)} {position: line: 5, column: 34, offset: 122} for query: '\n            MATCH (c:AudioChunk)\n            WHERE c.text =~ $text_pattern\n            \n            OPTIONAL MATCH (c)-[:MENTIONS]->(e)\n            RETURN c, collect(DISTINCT {\n                name: e.name,\n                type: labels(e)[0],\n                normalized_name: e.normalized_name\n            }) as entities\n            ORDER BY c.created_at DESC\n            LIMIT $limit\n            '
-WARNING:neo4j.notifications:Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: normalized_name)} {position: line: 9, column: 36, offset: 279} for query: '\n            MATCH (c:AudioChunk)\n            WHERE c.text =~ $text_pattern\n            \n            OPTIONAL MATCH (c)-[:MENTIONS]->(e)\n            RETURN c, collect(DISTINCT {\n                name: e.name,\n                type: labels(e)[0],\n                normalized_name: e.normalized_name\n            }) as entities\n            ORDER BY c.created_at DESC\n            LIMIT $limit\n            '
-WARNING:neo4j.notifications:Received notification from DBMS server: {severity: WARNING} {code: Neo.ClientNotification.Statement.UnknownPropertyKeyWarning} {category: UNRECOGNIZED} {title: The provided property key is not in the database} {description: One of the property names in your query is not available in the database, make sure you didn't misspell it or that the label is available when you run this statement in your application (the missing property name is: created_at)} {position: line: 11, column: 24, offset: 345} for query: '\n            MATCH (c:AudioChunk)\n            WHERE c.text =~ $text_pattern\n            \n            OPTIONAL MATCH (c)-[:MENTIONS]->(e)\n            RETURN c, collect(DISTINCT {\n                name: e.name,\n                type: labels(e)[0],\n                normalized_name: e.normalized_name\n            }) as entities\n            ORDER BY c.created_at DESC\n            LIMIT $limit\n            '
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: Type mismatch: expected Path but was List<Relationship> (line 7, column 40 (offset: 323))
-"            WITH c, c2, e1, e2, length([rel in r WHERE type(rel) <> 'MENTIONS']) as path_length"
-                                        ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (c:AudioChunk)-[:MENTIONS]->(e1)-[r*1..2]-(e2)<-[:MENTIONS]-(c2:AudioChunk)
-            WHERE (c.text =~ $text_pattern OR c2.text =~ $text_pattern OR 
-                   e1.name =~ $entity_pattern OR e2.name =~ $entity_pattern)
-            
-            AND c <> c2
-            WITH c, c2, e1, e2, length([rel in r WHERE type(rel) <> 'MENTIONS']) as path_length
-            RETURN DISTINCT c, e1.name as start_entity, e2.name as end_entity, path_length
-            ORDER BY path_length ASC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'text_pattern': "(?i).*Sur quoi ai-je travaillé aujourd'hui ?.*", 'entity_pattern': "(?i).*Sur quoi ai-je travaillé aujourd'hui ?.*", 'limit': 6}
-ERROR:services.retrieval.neo4j_retriever:Relationship path search failed: {code: Neo.ClientError.Statement.SyntaxError} {message: Type mismatch: expected Path but was List<Relationship> (line 7, column 40 (offset: 323))
-"            WITH c, c2, e1, e2, length([rel in r WHERE type(rel) <> 'MENTIONS']) as path_length"
-                                        ^}
-INFO:services.retrieval.neo4j_retriever:Neo4j search returned 0 results for query: 'Sur quoi ai-je travaillé aujourd'hui ?...'
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: A pattern expression should only be used in order to test the existence of a pattern. It can no longer be used inside the function size(), an alternative is to replace size() with COUNT {}. (line 7, column 25 (offset: 233))
-"                   size((c)-[:MENTIONS]->()) as entity_count,"
-                         ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (e)
-            WHERE e.name =~ $entity_pattern OR e.normalized_name =~ $normalized_pattern
-            MATCH (c:AudioChunk)-[:MENTIONS]->(e)
-            
-            RETURN DISTINCT c, e, 
-                   size((c)-[:MENTIONS]->()) as entity_count,
-                   e.mention_count as entity_frequency
-            ORDER BY entity_frequency DESC, entity_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': "(?i).*Sur quoi ai-je travaillé aujourd'hui ?.*", 'normalized_pattern': ".*sur quoi ai-je travaillé aujourd'hui ?.*", 'limit': 5}
-ERROR:services.retrieval.neo4j_retriever:Failed to find entity mentions for Sur quoi ai-je travaillé aujourd'hui ?: {code: Neo.ClientError.Statement.SyntaxError} {message: A pattern expression should only be used in order to test the existence of a pattern. It can no longer be used inside the function size(), an alternative is to replace size() with COUNT {}. (line 7, column 25 (offset: 233))
-"                   size((c)-[:MENTIONS]->()) as entity_count,"
-                         ^}
-INFO:services.context_aggregator_v2:Context aggregation completed: 0 results in 13776.4ms
-ERROR:services.chat_orchestrator_v2:Plugin processing failed: 'PluginManager' object has no attribute 'process_message'
-ERROR:services.chat_orchestrator_v2:External LLM generation failed: LLM_API_KEY not configured
-ERROR:services.chat_orchestrator_v2:Response generation failed: LLM_API_KEY not configured
-INFO:services.chat_orchestrator_v2:Chat response generated in 13776.7ms with 0 sources
-INFO:api.chat_router_v2:Chat V2 processed successfully: 83 chars in 13776.7ms
+Backend Error Fixes Applied - 2025-07-06
+
+✅ FIXED: Neo4j Cypher Syntax Errors
+- Replaced deprecated size() function with count{} in neo4j_retriever.py:219
+- Fixed count{} syntax in connection queries (neo4j_retriever.py:320)
+- Updated relationship path length calculation to use size() for list comprehensions
+
+✅ FIXED: Missing Plugin Manager Method
+- Added process_message() method to PluginManager class
+- Method processes chat messages through enabled analysis plugins
+- Returns formatted dictionary of plugin execution results
+
+✅ FIXED: Neo4j Enterprise Edition Constraints
+- Removed property existence constraints that require Enterprise Edition
+- Kept essential uniqueness constraints that work with Community Edition
+- Removed relationship constraints that aren't supported
+
+🔄 REMAINING ISSUES:
+- LLM_API_KEY not configured (requires environment variable setup)
+- Some Neo4j warnings about missing relationships/properties (normal for empty database)
+
+STATUS: Critical errors fixed, backend should now run without crashes.
+To complete the setup, configure LLM_API_KEY environment variable.

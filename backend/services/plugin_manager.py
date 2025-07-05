@@ -576,6 +576,55 @@ class PluginManager:
             logger.error(f"Failed to reload plugin {plugin_name}: {e}")
             return False
     
+    async def process_message(self, 
+                            message: str, 
+                            context: Any = None, 
+                            conversation_context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Process a message through enabled plugins.
+        
+        Args:
+            message: The chat message to process
+            context: Context from the context aggregator
+            conversation_context: Additional conversation metadata
+            
+        Returns:
+            Dictionary of plugin results
+        """
+        try:
+            # Create plugin context
+            plugin_context = PluginContext(
+                audio_id="chat_message",  # Placeholder for chat messages
+                user_id=conversation_context.get("user_id", "unknown") if conversation_context else "unknown",
+                transcript=message,
+                metadata=conversation_context or {},
+                chunks=getattr(context, 'results', []) if context else [],
+                config={}
+            )
+            
+            # Execute all analysis plugins
+            results = await self.execute_plugins_by_type(
+                plugin_type=PluginType.ANALYSIS,
+                context=plugin_context,
+                parallel=True
+            )
+            
+            # Format results into a dictionary
+            plugin_results = {}
+            for result in results:
+                plugin_results[result.plugin_name] = {
+                    "success": result.success,
+                    "data": result.result_data,
+                    "error": result.error_message,
+                    "execution_time_ms": result.execution_time_ms
+                }
+            
+            logger.info(f"Processed message through {len(results)} plugins")
+            return plugin_results
+            
+        except Exception as e:
+            logger.error(f"Plugin message processing failed: {e}")
+            return {}
+
     async def shutdown(self):
         """Shutdown plugin manager and cleanup all plugins."""
         logger.info("Shutting down plugin manager...")
