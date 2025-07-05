@@ -9,14 +9,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../widgets/message_bubble.dart';
-import '../widgets/message_composer.dart';
-import '../models/message_model.dart';
+import '../widgets/enhanced_message_bubble.dart';
+import '../widgets/context_search_panel.dart';
+import '../widgets/suggestion_chips.dart';
+import '../widgets/citation_card.dart';
 import '../models/api_enums.dart';
 import '../models/chat_v2_models.dart';
-import '../providers/chat_provider.dart';
+import '../models/context_search_models.dart';
+import '../providers/chat_v2_provider.dart';
 import '../api/pegasus_api_client_v2.dart';
-import '../services/voice_service.dart';
 
 /// Enhanced chat screen with Chat V2 features
 class ChatScreenEnhanced extends ConsumerStatefulWidget {
@@ -28,37 +29,420 @@ class ChatScreenEnhanced extends ConsumerStatefulWidget {
 
 class _ChatScreenEnhancedState extends ConsumerState<ChatScreenEnhanced> {
   late final ScrollController _scrollController;
-  late final PegasusApiClientV2 _apiClient;
-  late final VoiceService _voiceService;
+  late final TextEditingController _messageController;
+  late final FocusNode _messageFocusNode;
   
-  String? _currentSessionId;
-  ConversationMode _conversationMode = ConversationMode.standard;
-  ResponseStyle _responseStyle = ResponseStyle.professional;
-  bool _includeSources = true;
-  bool _enablePlugins = true;
-  bool _isLoading = false;
+  bool _showContextSearch = false;
+  bool _showSettings = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _apiClient = PegasusApiClientV2.defaultConfig();
-    _voiceService = VoiceService();
+    _messageController = TextEditingController();
+    _messageFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _apiClient.close();
+    _messageController.dispose();
+    _messageFocusNode.dispose();
     super.dispose();
   }
 
-  void _addMessage(String text, bool isUser, {List<SourceInfo>? sources, List<String>? suggestions}) {
-    // For now, we'll use the existing simple message model
-    // In Phase 2, we'll create enhanced message models with sources and suggestions
-    ref.read(chatProvider.notifier).addMessage(Message(text: text, isUser: isUser));
+  @override
+  Widget build(BuildContext context) {
+    final chatState = ref.watch(chatV2Provider);
     
-    // Auto-scroll to bottom
+    return Scaffold(
+      appBar: _buildAppBar(chatState),
+      body: Column(
+        children: [
+          if (_showSettings) _buildSettingsPanel(chatState),
+          if (_showContextSearch) 
+            Expanded(
+              flex: 2,
+              child: ContextSearchPanel(
+                showInline: true,
+                onResultSelected: _handleContextResult,
+              ),
+            ),
+          Expanded(
+            flex: _showContextSearch ? 3 : 1,
+            child: _buildMessagesList(chatState),
+          ),
+          _buildInputArea(chatState),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(ChatV2State chatState) {
+    return AppBar(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Enhanced Chat'),
+          if (chatState.currentSessionId != null)
+            Text(
+              'Session: ${chatState.currentSessionId!.substring(0, 8)}...',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+            ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(
+            _showContextSearch ? Icons.search : Icons.search_outlined,
+            color: _showContextSearch ? Theme.of(context).primaryColor : null,
+          ),
+          onPressed: () => setState(() => _showContextSearch = !_showContextSearch),
+          tooltip: 'Context Search',
+        ),
+        IconButton(
+          icon: Icon(
+            _showSettings ? Icons.settings : Icons.settings_outlined,
+            color: _showSettings ? Theme.of(context).primaryColor : null,
+          ),
+          onPressed: () => setState(() => _showSettings = !_showSettings),
+          tooltip: 'Chat Settings',
+        ),
+        PopupMenuButton<String>(
+          onSelected: _handleMenuAction,
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'clear',
+              child: Row(
+                children: [
+                  Icon(Icons.clear_all),
+                  SizedBox(width: 8),
+                  Text('Clear Chat'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'export',
+              child: Row(
+                children: [
+                  Icon(Icons.download),
+                  SizedBox(width: 8),
+                  Text('Export'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSettingsPanel(ChatV2State chatState) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.settings, size: 18),
+              const SizedBox(width: 8),
+              const Text(
+                'Conversation Settings',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () => setState(() => _showSettings = false),
+                child: const Text('Done'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Mode', style: TextStyle(fontWeight: FontWeight.w500)),
+                    DropdownButton<ConversationMode>(
+                      value: chatState.conversationMode,
+                      isExpanded: true,
+                      onChanged: (mode) => ref.read(chatV2Provider.notifier)
+                          .updateSettings(conversationMode: mode),
+                      items: ConversationMode.values.map((mode) =>
+                        DropdownMenuItem(
+                          value: mode,
+                          child: Text(mode.value),
+                        ),
+                      ).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Style', style: TextStyle(fontWeight: FontWeight.w500)),
+                    DropdownButton<ResponseStyle>(
+                      value: chatState.responseStyle,
+                      isExpanded: true,
+                      onChanged: (style) => ref.read(chatV2Provider.notifier)
+                          .updateSettings(responseStyle: style),
+                      items: ResponseStyle.values.map((style) =>
+                        DropdownMenuItem(
+                          value: style,
+                          child: Text(style.value),
+                        ),
+                      ).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: CheckboxListTile(
+                  title: const Text('Include Sources'),
+                  value: chatState.includeSources,
+                  onChanged: (value) => ref.read(chatV2Provider.notifier)
+                      .updateSettings(includeSources: value),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              Expanded(
+                child: CheckboxListTile(
+                  title: const Text('Enable Plugins'),
+                  value: chatState.enablePlugins,
+                  onChanged: (value) => ref.read(chatV2Provider.notifier)
+                      .updateSettings(enablePlugins: value),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessagesList(ChatV2State chatState) {
+    if (chatState.messages.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: chatState.messages.length,
+      itemBuilder: (context, index) {
+        final message = chatState.messages[index];
+        return EnhancedMessageBubble(
+          message: message,
+          onCitationTap: () => _showSourceDetails(message),
+          onSourceTap: () => _showAllSources(message),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.chat_bubble_outline,
+            size: 64,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Start a conversation',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Ask questions and get responses with\ncitations from your documents',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SuggestionChips(
+            suggestions: [
+              SuggestionChipData(
+                text: "What's in my latest meeting notes?",
+                category: SuggestionCategory.followUp,
+                onTap: () => _sendMessage("What's in my latest meeting notes?"),
+              ),
+              SuggestionChipData(
+                text: "Summarize recent project updates",
+                category: SuggestionCategory.action,
+                onTap: () => _sendMessage("Summarize recent project updates"),
+              ),
+              SuggestionChipData(
+                text: "Find information about...",
+                category: SuggestionCategory.related,
+                onTap: () => setState(() => _showContextSearch = true),
+              ),
+            ],
+            onSuggestionTap: (suggestion) => _sendMessage(suggestion.text),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputArea(ChatV2State chatState) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 8,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: Column(
+        children: [
+          if (!_showContextSearch)
+            QuickContextSearch(
+              onQuerySelected: (query) => _sendMessage(query),
+            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _messageController,
+                  focusNode: _messageFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'Ask me anything...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    suffixIcon: chatState.isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : null,
+                  ),
+                  maxLines: null,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: chatState.isLoading ? null : _handleSubmit,
+                ),
+              ),
+              const SizedBox(width: 8),
+              FloatingActionButton(
+                mini: true,
+                onPressed: chatState.isLoading ? null : () => _handleSubmit(_messageController.text),
+                child: const Icon(Icons.send),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleSubmit(String text) {
+    if (text.trim().isEmpty) return;
+    _sendMessage(text.trim());
+  }
+
+  Future<void> _sendMessage(String text) async {
+    if (text.isEmpty) return;
+    
+    _messageController.clear();
+    final messageId = DateTime.now().millisecondsSinceEpoch.toString();
+    
+    // Add user message
+    final userMessage = EnhancedMessage.userMessage(text, messageId);
+    ref.read(chatV2Provider.notifier).addMessage(userMessage);
+    
+    // Scroll to bottom
+    _scrollToBottom();
+    
+    // Set loading state
+    ref.read(chatV2Provider.notifier).setLoading(true);
+    
+    try {
+      final apiClient = ref.read(apiClientV2Provider);
+      final chatState = ref.read(chatV2Provider);
+      
+      final request = ChatRequestV2(
+        message: text,
+        sessionId: chatState.currentSessionId,
+        conversationMode: chatState.conversationMode,
+        responseStyle: chatState.responseStyle,
+        includeSources: chatState.includeSources,
+        enablePlugins: chatState.enablePlugins,
+      );
+      
+      final response = await apiClient.chatV2(request);
+      
+      // Create AI response message
+      final aiMessageId = '${DateTime.now().millisecondsSinceEpoch}_ai';
+      final aiMessage = EnhancedMessage.fromChatResponse(response, aiMessageId);
+      
+      ref.read(chatV2Provider.notifier).addMessage(aiMessage);
+      
+      // Update session ID if provided
+      if (response.sessionId != null) {
+        ref.read(chatV2Provider.notifier).setSessionId(response.sessionId!);
+      }
+      
+    } catch (e) {
+      ref.read(chatV2Provider.notifier).setError('Failed to send message: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      ref.read(chatV2Provider.notifier).setLoading(false);
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -70,182 +454,79 @@ class _ChatScreenEnhancedState extends ConsumerState<ChatScreenEnhanced> {
     });
   }
 
-  Future<void> _sendMessage(String text) async {
-    if (text.trim().isEmpty || _isLoading) return;
+  void _handleContextResult(ContextSearchResult result) {
+    final query = 'Tell me more about: ${result.summary}';
+    _sendMessage(query);
+  }
 
-    setState(() => _isLoading = true);
-    _addMessage(text, true);
+  void _showSourceDetails(EnhancedMessage message) {
+    if (!message.hasSources) return;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Sources (${message.sources!.length})',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: message.sources!.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: CitationCard(
+                      source: message.sources![index],
+                      showMetadata: true,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-    try {
-      // Create Chat V2 request with current settings
-      final request = ChatRequestV2(
-        message: text,
-        sessionId: _currentSessionId,
-        userId: 'flutter_user', // In production, use actual user ID
-        conversationMode: _conversationMode,
-        responseStyle: _responseStyle,
-        aggregationStrategy: AggregationStrategy.hybrid,
-        rankingStrategy: RankingStrategy.ensemble,
-        maxContextResults: 15,
-        includeSources: _includeSources,
-        includeConfidence: true,
-        enablePlugins: _enablePlugins,
-        useLocalLlm: false,
-      );
+  void _showAllSources(EnhancedMessage message) {
+    _showSourceDetails(message);
+  }
 
-      // Send message using Chat V2 API
-      final response = await _apiClient.sendMessageV2(request);
-
-      // Update session ID if this is a new conversation
-      if (_currentSessionId == null) {
-        _currentSessionId = response.sessionId;
-      }
-
-      // Add the response message
-      _addMessage(
-        response.response, 
-        false, 
-        sources: response.sources,
-        suggestions: response.suggestions,
-      );
-
-      // Speak the response if voice is enabled
-      if (response.response.isNotEmpty) {
-        await _voiceService.speak(response.response);
-      }
-
-      // Show additional info in debug mode
-      if (response.confidenceScore != null) {
-        _showResponseInfo(response);
-      }
-
-    } catch (e) {
-      _addMessage('Error: ${e.toString()}', false);
-      _showErrorSnackBar('Failed to send message: ${e.toString()}');
-    } finally {
-      setState(() => _isLoading = false);
+  void _handleMenuAction(String action) {
+    switch (action) {
+      case 'clear':
+        _showClearDialog();
+        break;
+      case 'export':
+        _exportConversation();
+        break;
     }
   }
 
-  void _showResponseInfo(ChatResponseV2 response) {
-    // Show a brief info about the response quality
-    final confidence = response.confidenceScore ?? 0.0;
-    final contextCount = response.contextResultsCount;
-    final processingTime = response.processingTimeMs;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${(confidence * 100).toStringAsFixed(0)}% confidence • '
-          '$contextCount sources • '
-          '${processingTime.toStringAsFixed(0)}ms'
-        ),
-        duration: const Duration(seconds: 2),
-        backgroundColor: confidence >= 0.8 ? Colors.green : Colors.orange,
-      ),
-    );
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 4),
-      ),
-    );
-  }
-
-  void _showSettingsDialog() {
+  void _showClearDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Chat Settings'),
-        content: StatefulBuilder(
-          builder: (context, setDialogState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Conversation Mode
-              DropdownButtonFormField<ConversationMode>(
-                value: _conversationMode,
-                decoration: const InputDecoration(labelText: 'Conversation Mode'),
-                items: ConversationMode.values
-                    .map((mode) => DropdownMenuItem(
-                          value: mode,
-                          child: Text(mode.value),
-                        ))
-                    .toList(),
-                onChanged: (value) => setDialogState(() => _conversationMode = value!),
-              ),
-              const SizedBox(height: 16),
-              
-              // Response Style
-              DropdownButtonFormField<ResponseStyle>(
-                value: _responseStyle,
-                decoration: const InputDecoration(labelText: 'Response Style'),
-                items: ResponseStyle.values
-                    .map((style) => DropdownMenuItem(
-                          value: style,
-                          child: Text(style.value),
-                        ))
-                    .toList(),
-                onChanged: (value) => setDialogState(() => _responseStyle = value!),
-              ),
-              const SizedBox(height: 16),
-              
-              // Include Sources
-              SwitchListTile(
-                title: const Text('Include Sources'),
-                subtitle: const Text('Show source citations in responses'),
-                value: _includeSources,
-                onChanged: (value) => setDialogState(() => _includeSources = value),
-              ),
-              
-              // Enable Plugins
-              SwitchListTile(
-                title: const Text('Enable Plugins'),
-                subtitle: const Text('Use plugins for enhanced analysis'),
-                value: _enablePlugins,
-                onChanged: (value) => setDialogState(() => _enablePlugins = value),
-              ),
-            ],
-          ),
-        ),
+        title: const Text('Clear Chat'),
+        content: const Text('This will delete all messages in the current conversation. Are you sure?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {}); // Update the main state
-              Navigator.of(context).pop();
-            },
-            child: const Text('Apply'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _clearConversation() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear Conversation'),
-        content: const Text('Are you sure you want to clear the current conversation?'),
-        actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
             onPressed: () {
-              ref.read(chatProvider.notifier).clear();
-              setState(() => _currentSessionId = null);
+              ref.read(chatV2Provider.notifier).clear();
               Navigator.of(context).pop();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Clear'),
           ),
         ],
@@ -253,156 +534,40 @@ class _ChatScreenEnhancedState extends ConsumerState<ChatScreenEnhanced> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final messages = ref.watch(chatProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Pegasus Chat Enhanced'),
-            if (_currentSessionId != null)
-              Text(
-                'Session: ${_currentSessionId!.substring(0, 8)}...',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white70,
-                ),
-              ),
-          ],
+  void _exportConversation() {
+    final conversation = ref.read(chatV2Provider.notifier).exportConversation();
+    
+    // In a real app, this would save to file or share
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Exported ${ref.read(chatV2Provider).messages.length} messages'),
+        action: SnackBarAction(
+          label: 'Preview',
+          onPressed: () => _showExportPreview(conversation),
         ),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-        actions: [
-          // Settings button
-          IconButton(
-            icon: const Icon(Icons.tune),
-            onPressed: _showSettingsDialog,
-            tooltip: 'Chat Settings',
-          ),
-          // Clear conversation button
-          IconButton(
-            icon: const Icon(Icons.clear_all),
-            onPressed: _clearConversation,
-            tooltip: 'Clear Conversation',
-          ),
-          // Info button showing current mode
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.info_outline),
-            tooltip: 'Current Settings',
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                enabled: false,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Mode: ${_conversationMode.value}'),
-                    Text('Style: ${_responseStyle.value}'),
-                    Text('Sources: ${_includeSources ? 'On' : 'Off'}'),
-                    Text('Plugins: ${_enablePlugins ? 'On' : 'Off'}'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          // Status bar showing current settings
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
-              border: const Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _conversationMode == ConversationMode.creative 
-                      ? Icons.brush 
-                      : _conversationMode == ConversationMode.analytical
-                          ? Icons.analytics
-                          : Icons.chat,
-                  size: 16,
-                  color: Theme.of(context).primaryColor,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${_conversationMode.value} • ${_responseStyle.value}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                if (_includeSources) ...[
-                  const Icon(Icons.source, size: 16, color: Colors.green),
-                  const SizedBox(width: 4),
-                ],
-                if (_enablePlugins) ...[
-                  const Icon(Icons.extension, size: 16, color: Colors.blue),
-                  const SizedBox(width: 4),
-                ],
-                if (_isLoading) ...[
-                  const SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text('Thinking...', style: TextStyle(fontSize: 12)),
-                ],
-              ],
+    );
+  }
+
+  void _showExportPreview(String conversation) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Export Preview'),
+        content: Container(
+          width: double.maxFinite,
+          height: 400,
+          child: SingleChildScrollView(
+            child: Text(
+              conversation,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
             ),
           ),
-          
-          // Messages list
-          Expanded(
-            child: messages.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          'Start a conversation with enhanced Pegasus Chat',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Features: Context awareness, citations, multiple response styles',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: MessageBubble(
-                          text: message.text,
-                          isUser: message.isUser,
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          
-          // Message composer
-          MessageComposer(
-            onSend: _sendMessage,
-            enabled: !_isLoading,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
           ),
         ],
       ),

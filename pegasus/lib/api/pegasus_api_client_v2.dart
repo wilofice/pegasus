@@ -1,13 +1,11 @@
-/// Enhanced Pegasus API Client V2 for advanced backend integration
-/// 
-/// This client supports all the enhanced backend capabilities including:
-/// - Chat V2 with context awareness and citations
-/// - Context search with multiple strategies
-/// - Plugin system management and execution
-/// - Enhanced audio processing with real-time updates
-/// - Comprehensive error handling and retry logic
-
-import 'dart:convert';
+// Enhanced Pegasus API Client V2 for advanced backend integration
+// 
+// This client supports all the enhanced backend capabilities including:
+// - Chat V2 with context awareness and citations
+// - Context search with multiple strategies
+// - Plugin system management and execution
+// - Enhanced audio processing with real-time updates
+// - Comprehensive error handling and retry logic
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
@@ -83,6 +81,11 @@ class PegasusApiClientV2 {
     }
   }
 
+  /// Alias for sendMessageV2 for backward compatibility
+  Future<ChatResponseV2> chatV2(ChatRequestV2 request) async {
+    return sendMessageV2(request);
+  }
+
   /// Get session information
   Future<SessionInfo> getSessionInfo(String sessionId) async {
     try {
@@ -117,14 +120,24 @@ class PegasusApiClientV2 {
   // =============================================================================
 
   /// Search context using advanced strategies
-  Future<ContextSearchResponse> searchContext(ContextSearchRequest request) async {
+  Future<List<ContextSearchResult>> searchContext(ContextSearchRequest request) async {
     try {
       final response = await _dio.post(
         '/context/search',
         data: request.toJson(),
       );
 
-      return ContextSearchResponse.fromJson(response.data);
+      final searchResponse = ContextSearchResponse.fromJson(response.data);
+      return searchResponse.results.map((result) => 
+        ContextSearchResult(
+          id: result.id,
+          summary: result.previewContent,
+          sources: [result],
+          searchStrategy: request.strategy,
+          overallConfidence: result.relevanceScore,
+          processingTimeMs: searchResponse.totalResults.toDouble(),
+        )
+      ).toList();
     } catch (e) {
       throw _handleApiError(e, 'Failed to search context');
     }

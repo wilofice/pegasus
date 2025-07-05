@@ -1,7 +1,7 @@
-/// Context Search models for intelligent content retrieval
-/// 
-/// These models support the context search API that provides semantic
-/// and graph-based content discovery with advanced ranking strategies.
+// Context Search models for intelligent content retrieval
+// 
+// These models support the context search API that provides semantic
+// and graph-based content discovery with advanced ranking strategies.
 
 import 'api_enums.dart';
 
@@ -13,6 +13,8 @@ class ContextSearchRequest {
   final double? vectorWeight;
   final double? graphWeight;
   final bool includeRelated;
+  final bool includeAudio;
+  final bool includeDocuments;
   final Map<String, dynamic>? filters;
 
   const ContextSearchRequest({
@@ -22,6 +24,8 @@ class ContextSearchRequest {
     this.vectorWeight,
     this.graphWeight,
     this.includeRelated = true,
+    this.includeAudio = true,
+    this.includeDocuments = true,
     this.filters,
   });
 
@@ -32,6 +36,8 @@ class ContextSearchRequest {
       'max_results': maxResults,
       'strategy': strategy.value,
       'include_related': includeRelated,
+      'include_audio': includeAudio,
+      'include_documents': includeDocuments,
     };
 
     if (vectorWeight != null) json['vector_weight'] = vectorWeight;
@@ -345,5 +351,54 @@ class ContextHealthResponse {
   /// Check if specific service is healthy
   bool isServiceHealthy(String serviceName) {
     return getServiceStatus(serviceName)?.toLowerCase() == 'healthy';
+  }
+}
+
+/// Context search result with aggregated information
+class ContextSearchResult {
+  final String id;
+  final String summary;
+  final List<ContextResult> sources;
+  final SearchStrategy searchStrategy;
+  final double overallConfidence;
+  final double processingTimeMs;
+  final Map<String, dynamic>? metadata;
+
+  const ContextSearchResult({
+    required this.id,
+    required this.summary,
+    required this.sources,
+    required this.searchStrategy,
+    required this.overallConfidence,
+    required this.processingTimeMs,
+    this.metadata,
+  });
+
+  /// Get the primary source (highest relevance)
+  ContextResult get primarySource => sources.first;
+
+  /// Check if result has multiple sources
+  bool get hasMultipleSources => sources.length > 1;
+
+  /// Get high-confidence sources only
+  List<ContextResult> get highConfidenceSources => 
+      sources.where((s) => s.isHighQuality).toList();
+
+  /// Create from JSON
+  factory ContextSearchResult.fromJson(Map<String, dynamic> json) {
+    return ContextSearchResult(
+      id: json['id'] as String,
+      summary: json['summary'] as String,
+      sources: (json['sources'] as List<dynamic>)
+          .map((s) => ContextResult.fromJson(s as Map<String, dynamic>))
+          .toList(),
+      searchStrategy: SearchStrategy.values.firstWhere(
+        (s) => s.value == json['search_strategy'],
+        orElse: () => SearchStrategy.hybrid,
+      ),
+      overallConfidence: (json['overall_confidence'] as num).toDouble(),
+      processingTimeMs: (json['processing_time_ms'] as num).toDouble(),
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
   }
 }

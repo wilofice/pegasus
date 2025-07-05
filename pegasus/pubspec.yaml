@@ -50,6 +50,8 @@ dependencies:
   permission_handler: ^11.3.0
   dio: ^5.4.0
   just_audio: ^0.9.36
+  # Markdown rendering for enhanced chat
+  flutter_markdown: ^0.6.18
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
