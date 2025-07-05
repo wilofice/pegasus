@@ -359,7 +359,7 @@ class _GameSummaryScreenState extends ConsumerState<GameSummaryScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: color.shade700,
+              color: color,
             ),
           ),
           const SizedBox(height: 4),
@@ -367,7 +367,7 @@ class _GameSummaryScreenState extends ConsumerState<GameSummaryScreen> {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: color.shade600,
+              color: color.withOpacity(0.8),
             ),
           ),
         ],

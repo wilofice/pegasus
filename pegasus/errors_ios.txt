@@ -1,0 +1,146 @@
+Launching lib/main.dart on sdk gphone64 arm64 in debug mode...
+Running Gradle task 'assembleDebug'...                          
+lib/screens/review_reflection_screen.dart:66:26: Error: The getter 'PegasusTheme' isn't defined for the class '_ReviewReflectionScreenState'.
+ - '_ReviewReflectionScreenState' is from 'package:pegasus/screens/review_reflection_screen.dart' ('lib/screens/review_reflection_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+        backgroundColor: PegasusTheme.primaryColor,
+                         ^^^^^^^^^^^^
+lib/screens/review_reflection_screen.dart:178:32: Error: The getter 'PegasusTheme' isn't defined for the class '_ReviewReflectionScreenState'.
+ - '_ReviewReflectionScreenState' is from 'package:pegasus/screens/review_reflection_screen.dart' ('lib/screens/review_reflection_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+              backgroundColor: PegasusTheme.primaryColor,
+                               ^^^^^^^^^^^^
+lib/screens/review_reflection_screen.dart:229:38: Error: The getter 'PegasusTheme' isn't defined for the class '_ReviewReflectionScreenState'.
+ - '_ReviewReflectionScreenState' is from 'package:pegasus/screens/review_reflection_screen.dart' ('lib/screens/review_reflection_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+                    backgroundColor: PegasusTheme.primaryColor,
+                                     ^^^^^^^^^^^^
+lib/widgets/review_reflection_widgets.dart:25:26: Error: The getter 'PegasusTheme' isn't defined for the class 'ReviewSummaryCard'.
+ - 'ReviewSummaryCard' is from 'package:pegasus/widgets/review_reflection_widgets.dart' ('lib/widgets/review_reflection_widgets.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+                  color: PegasusTheme.primaryColor,
+                         ^^^^^^^^^^^^
+lib/widgets/review_reflection_widgets.dart:72:36: Error: The getter 'PegasusTheme' isn't defined for the class 'ReviewSummaryCard'.
+ - 'ReviewSummaryCard' is from 'package:pegasus/widgets/review_reflection_widgets.dart' ('lib/widgets/review_reflection_widgets.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+                  backgroundColor: PegasusTheme.primaryColor.withOpacity(0.1),
+                                   ^^^^^^^^^^^^
+lib/widgets/review_reflection_widgets.dart:74:28: Error: The getter 'PegasusTheme' isn't defined for the class 'ReviewSummaryCard'.
+ - 'ReviewSummaryCard' is from 'package:pegasus/widgets/review_reflection_widgets.dart' ('lib/widgets/review_reflection_widgets.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+                    color: PegasusTheme.primaryColor,
+                           ^^^^^^^^^^^^
+lib/widgets/review_reflection_widgets.dart:136:48: Error: The getter 'PegasusTheme' isn't defined for the class 'ReviewSummaryCard'.
+ - 'ReviewSummaryCard' is from 'package:pegasus/widgets/review_reflection_widgets.dart' ('lib/widgets/review_reflection_widgets.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+            valueColor: AlwaysStoppedAnimation(PegasusTheme.primaryColor),
+                                               ^^^^^^^^^^^^
+lib/widgets/review_reflection_widgets.dart:168:26: Error: The getter 'PegasusTheme' isn't defined for the class 'InsightsCategoriesOverview'.
+ - 'InsightsCategoriesOverview' is from 'package:pegasus/widgets/review_reflection_widgets.dart' ('lib/widgets/review_reflection_widgets.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+                  color: PegasusTheme.primaryColor,
+                         ^^^^^^^^^^^^
+lib/widgets/review_reflection_widgets.dart:306:26: Error: The getter 'PegasusTheme' isn't defined for the class 'QuickStatsCard'.
+ - 'QuickStatsCard' is from 'package:pegasus/widgets/review_reflection_widgets.dart' ('lib/widgets/review_reflection_widgets.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+                  color: PegasusTheme.primaryColor,
+                         ^^^^^^^^^^^^
+lib/widgets/review_reflection_widgets.dart:729:26: Error: The getter 'PegasusTheme' isn't defined for the class 'AnalyticsMetricsCard'.
+ - 'AnalyticsMetricsCard' is from 'package:pegasus/widgets/review_reflection_widgets.dart' ('lib/widgets/review_reflection_widgets.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+                  color: PegasusTheme.primaryColor,
+                         ^^^^^^^^^^^^
+lib/widgets/review_reflection_widgets.dart:819:26: Error: The getter 'PegasusTheme' isn't defined for the class 'ConfigurationCard'.
+ - 'ConfigurationCard' is from 'package:pegasus/widgets/review_reflection_widgets.dart' ('lib/widgets/review_reflection_widgets.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'PegasusTheme'.
+                  color: PegasusTheme.primaryColor,
+                         ^^^^^^^^^^^^
+lib/screens/game_summary_screen.dart:362:28: Error: The getter 'shade700' isn't defined for the class 'Color'.
+ - 'Color' is from 'dart:ui'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'shade700'.
+              color: color.shade700,
+                           ^^^^^^^^
+lib/screens/game_summary_screen.dart:370:28: Error: The getter 'shade600' isn't defined for the class 'Color'.
+ - 'Color' is from 'dart:ui'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'shade600'.
+              color: color.shade600,
+                           ^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command '/Users/galahassa/sdk/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s
+Running Gradle task 'assembleDebug'...                           2,511ms
+Error: Gradle task assembleDebug failed with exit code 1
+Launching lib/main.dart on sdk gphone64 arm64 in debug mode...
+Running Gradle task 'assembleDebug'...                              6.2s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...          976ms
+I/flutter ( 7329): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(94)] Using the Impeller rendering backend (OpenGLES).
+Syncing files to device sdk gphone64 arm64...                   
+I/TextToSpeech( 7329): Connected to TTS engine
+I/TextToSpeech( 7329): Setting up the connection to TTS engine...
+Syncing files to device sdk gphone64 arm64...                       75ms
+
+Flutter run key commands.
+r Hot reload. 🔥🔥🔥
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on sdk gphone64 arm64 is available at: http://127.0.0.1:49904/sONUrjVdMMQ=/
+The Flutter DevTools debugger and profiler on sdk gphone64 arm64 is available at: http://127.0.0.1:9101?uri=http://127.0.0.1:49904/sONUrjVdMMQ=/
+D/WindowLayoutComponentImpl( 7329): Register WindowLayoutInfoListener on Context=com.pegasus.coach.MainActivity@adcaf85, of which baseContext=android.app.ContextImpl@1464a3d
+I/FirebaseApp( 7329): Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+E/libEGL  ( 7329): called unimplemented OpenGL ES API
+D/ProfileInstaller( 7329): Installing profile for com.pegasus.coach
+
+
+Launching lib/main.dart on sdk gphone64 arm64 in debug mode...
+Running Gradle task 'assembleDebug'...                           2,978ms
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...          896ms
+I/flutter ( 3560): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(94)] Using the Impeller rendering backend (OpenGLES).
+Syncing files to device sdk gphone64 arm64...                   
+I/TextToSpeech( 3560): Connected to TTS engine
+Syncing files to device sdk gphone64 arm64...                       73ms
+
+Flutter run key commands.
+r Hot reload. 🔥🔥🔥
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on sdk gphone64 arm64 is available at: http://127.0.0.1:50448/wmp1nZmAGsM=/
+I/TextToSpeech( 3560): Setting up the connection to TTS engine...
+The Flutter DevTools debugger and profiler on sdk gphone64 arm64 is available at: http://127.0.0.1:9101?uri=http://127.0.0.1:50448/wmp1nZmAGsM=/
+D/WindowLayoutComponentImpl( 3560): Register WindowLayoutInfoListener on Context=com.pegasus.coach.MainActivity@42911c3, of which baseContext=android.app.ContextImpl@f38f63b
+I/FirebaseApp( 3560): Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+D/ProfileInstaller( 3560): Installing profile for com.pegasus.coach
+Lost connection to device.
+Launching lib/main.dart on iPhone 16 Pro Max in debug mode...
+Error: Unable to get Xcode project information:
+ 2025-07-05 22:16:48.233 xcodebuild[83622:69966610] Error Domain=NSCocoaErrorDomain Code=3840 "JSON text did not start with array or object and option to allow fragments not set. around line 1, column 0." UserInfo={NSDebugDescription=JSON text did not start with array or object and option to allow fragments not set. around line 1, column 0., NSJSONSerializationErrorIndex=0}
+2025-07-05 22:16:48.241 xcodebuild[83622:69966610] Writing error result bundle to /var/folders/pb/_cl6j01j2vj04jsvwgpgtvvh0000gn/T/ResultBundle_2025-05-07_22-16-0048.xcresult
+xcodebuild: error: Unable to read project 'Runner.xcodeproj'.
+	Reason: The project ‘Runner’ is damaged and cannot be opened due to a parse error. Examine the project file for invalid edits or unresolved source control conflicts.
+
+Path: /Users/galahassa/Dev/pegasus/pegasus/ios/Runner.xcodeproj
+
+
+
