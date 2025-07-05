@@ -1,8 +1,8 @@
-Traceback (most recent call last):
-  File "/home/mica/Desktop/pegasus/backend/main.py", line 4, in <module>
-    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2
-  File "/home/mica/Desktop/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
-    from services.chat_orchestrator_factory import get_default_chat_orchestrator
-  File "/home/mica/Desktop/pegasus/backend/services/chat_orchestrator_factory.py", line 7, in <module>
-    from services.plugin_manager import PluginManager, get_plugin_manager
-ImportError: cannot import name 'get_plugin_manager' from 'services.plugin_manager' (/home/mica/Desktop/pegasus/backend/services/plugin_manager.py). Did you mean: 'plugin_manager'?
+All import errors fixed!
+
+Fixed issues:
+- Added missing get_plugin_manager() function to services/plugin_manager.py
+- The function now returns the global plugin_manager instance
+- All imports in main.py and API modules now work correctly
+
+Last fix: 2025-07-06 - Added get_plugin_manager function for compatibility with chat_orchestrator_factory.py

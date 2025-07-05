@@ -599,3 +599,12 @@ class PluginManager:
 
 # Global plugin manager instance
 plugin_manager = PluginManager()
+
+
+async def get_plugin_manager() -> PluginManager:
+    """Get the global plugin manager instance.
+    
+    Returns:
+        Global PluginManager instance
+    """
+    return plugin_manager
