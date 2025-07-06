@@ -222,7 +222,7 @@ class AudioSettings(BaseSettings):
     
     # Enhancement
     ollama_model: str = "llama2"
-    ollama_base_url: str = "http://localhost:11434"
+    ollama_base_url: str = "http://localhost:11435"
     enhancement_prompt_template: str = """
     Correct the following transcript by adding proper punctuation and fixing 
     grammatical errors. Do not change the meaning or add new content.

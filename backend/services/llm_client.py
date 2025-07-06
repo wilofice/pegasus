@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 
 import httpx
 from services.ollama_service import OllamaService
-
+from core.config import settings
 LOGGER = logging.getLogger(__name__)
 
 
@@ -416,7 +416,7 @@ def get_llm_client() -> BaseLLMClient:
     """Get the global LLM client instance."""
     global _llm_client
     if _llm_client is None:
-        _llm_client = LLMClientFactory.create_client()
+        _llm_client = LLMClientFactory.create_client(settings.llm_provider)
     return _llm_client
 
 

@@ -5,6 +5,10 @@ from api import chat_router, webhook_router, audio_router, game_router, chat_rou
 from routers import context, plugins
 from core.config import settings
 from middleware import SelectiveLoggingMiddleware, RequestLoggingConfig
+import logging
+logger = logging.getLogger(__name__)
+
+logger.info("Starting Pegasus Brain with settings..." + str(settings))
 
 app = FastAPI(title="Pegasus Backend")
 
