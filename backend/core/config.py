@@ -1,7 +1,9 @@
 """Configuration settings for the Pegasus backend."""
 import os
+from pathlib import Path
 from typing import List, Optional
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -113,13 +115,66 @@ Corrected transcript:"""
     log_excluded_paths: List[str] = ["/health", "/docs", "/redoc", "/openapi.json", "/favicon.ico"]
     log_excluded_methods: List[str] = []
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=[
+            Path(__file__).parent / ".env",  # backend/core/.env
+            Path(__file__).parent.parent / ".env",  # backend/.env
+            ".env"  # Current working directory
+        ],
+        env_file_encoding='utf-8',
+        case_sensitive=False,
+        extra='ignore'
+    )
+    
+    @field_validator('llm_provider')
+    @classmethod
+    def validate_llm_provider(cls, v):
+        """Validate LLM provider is supported."""
+        valid_providers = ['ollama', 'google_generative_ai', 'openai']
+        if v not in valid_providers:
+            raise ValueError(f'LLM provider must be one of: {valid_providers}')
+        return v
+    
+    @field_validator('transcription_engine')
+    @classmethod
+    def validate_transcription_engine(cls, v):
+        """Validate transcription engine is supported."""
+        valid_engines = ['whisper', 'deepgram']
+        if v not in valid_engines:
+            raise ValueError(f'Transcription engine must be one of: {valid_engines}')
+        return v
 
 
 # Create settings instance
 settings = Settings()
 
+# Debug: Print which .env files were found and loaded
+def _debug_env_files():
+    """Debug function to show which .env files are being loaded."""
+    env_files = [
+        Path(__file__).parent / ".env",  # backend/core/.env
+        Path(__file__).parent.parent / ".env",  # backend/.env
+        Path(".env")  # Current working directory
+    ]
+    
+    print("🔧 Environment Configuration Debug:")
+    print(f"Current working directory: {os.getcwd()}")
+    
+    for env_file in env_files:
+        if env_file.exists():
+            print(f"✅ Found .env file: {env_file.absolute()}")
+        else:
+            print(f"❌ Missing .env file: {env_file.absolute()}")
+    
+    print(f"🎯 LLM Provider: {settings.llm_provider}")
+    print(f"🎯 Ollama Model: {settings.ollama_model}")
+    print(f"🎯 Database URL: {settings.database_url[:50]}...")
+    print("=" * 50)
+
+# Run debug if DEBUG env var is set
+if os.getenv("DEBUG_CONFIG"):
+    _debug_env_files()
+
 # Create directories if they don't exist
 os.makedirs(settings.audio_storage_path, exist_ok=True)
+os.makedirs(settings.log_directory, exist_ok=True)
