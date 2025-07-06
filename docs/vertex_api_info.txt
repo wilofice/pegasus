@@ -1,0 +1,263 @@
+https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions/manage-sessions-api
+
+Manage sessions using direct API calls
+This section describes how to use Vertex AI Agent Engine Sessions to manage sessions using direct API calls. You can make direct API calls if you don't want to use an ADK agent to manage sessions.
+
+To manage sessions using the ADK agent, see Manage sessions with Agent Development Kit.
+
+Create a Vertex AI Agent Engine instance
+To access Vertex AI Agent Engine Sessions, you need use an Vertex AI Agent Engine instance. You don't need to deploy any code to start using Sessions. Without code deployment, creating a Vertex AI Agent Engine instance only takes a few seconds.
+
+If you don't have an existing Vertex AI Agent Engine instance, create one using the following code:
+
+See more code actions.
+import vertexai
+from vertexai import agent_engines
+
+# Create an agent engine instance
+agent_engine = agent_engines.create()
+List sessions
+List all sessions associated with your Vertex AI Agent Engine instance.
+
+REST API
+Use the sessions.list method:
+
+
+Before using any of the request data, make the following replacements:
+
+PROJECT_ID: Your project ID.
+LOCATION: The region where you created your Agent Engine instance.
+AGENT_ENGINE_ID: The resource ID of your Agent Engine instance.
+HTTP method and URL:
+
+GET https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions
+To send your request, choose one of these options:
+
+curlPowerShell
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login , or by using Cloud Shell, which automatically logs you into the gcloud CLI . You can check the currently active account by running gcloud auth list.
+Execute the following command:
+
+curl -X GET \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions"
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login . You can check the currently active account by running gcloud auth list.
+Execute the following command:
+
+$cred = gcloud auth print-access-token
+$headers = @{ "Authorization" = "Bearer $cred" }
+
+Invoke-WebRequest `
+    -Method GET `
+    -Headers $headers `
+    -Uri "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions" | Select-Object -Expand Content
+You should see a list of sessions returned.
+
+Create a session
+Create a session associated with a user ID.
+
+REST API
+Use the sessions.create method.
+
+
+Before using any of the request data, make the following replacements:
+
+PROJECT_ID: Your project ID.
+LOCATION: The region where you created your Agent Engine instance.
+AGENT_ENGINE_ID: The resource ID of your Agent Engine instance.
+USER_ID: a user ID
+HTTP method and URL:
+
+POST https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions
+Request JSON body:
+
+{
+  "userId": USER_ID
+}
+
+To send your request, choose one of these options:
+
+curlPowerShell
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login , or by using Cloud Shell, which automatically logs you into the gcloud CLI . You can check the currently active account by running gcloud auth list.
+Save the request body in a file named request.json, and execute the following command:
+
+curl -X POST \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     -H "Content-Type: application/json; charset=utf-8" \
+     -d @request.json \
+     "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions"
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login . You can check the currently active account by running gcloud auth list.
+Save the request body in a file named request.json, and execute the following command:
+
+$cred = gcloud auth print-access-token
+$headers = @{ "Authorization" = "Bearer $cred" }
+
+Invoke-WebRequest `
+    -Method POST `
+    -Headers $headers `
+    -ContentType: "application/json; charset=utf-8" `
+    -InFile request.json `
+    -Uri "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions" | Select-Object -Expand Content
+You should receive a long-running operation that you can query to check the creation status of your session.
+
+Get a session
+Get a specific session associated with your Vertex AI Agent Engine instance.
+
+REST API
+Use the sessions.get method.
+
+
+Before using any of the request data, make the following replacements:
+
+PROJECT_ID: Your project ID.
+LOCATION: The region where you created your Agent Engine instance.
+AGENT_ENGINE_ID: The resource ID of your Agent Engine instance.
+SESSION_ID: The resource ID of the session you want to retrieve. You can get the session ID from the response you received when you created the session.
+HTTP method and URL:
+
+GET https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID
+To send your request, choose one of these options:
+
+curlPowerShell
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login , or by using Cloud Shell, which automatically logs you into the gcloud CLI . You can check the currently active account by running gcloud auth list.
+Execute the following command:
+
+curl -X GET \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID"
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login . You can check the currently active account by running gcloud auth list.
+Execute the following command:
+
+$cred = gcloud auth print-access-token
+$headers = @{ "Authorization" = "Bearer $cred" }
+
+Invoke-WebRequest `
+    -Method GET `
+    -Headers $headers `
+    -Uri "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID" | Select-Object -Expand Content
+In the response, you should see information about your session.
+
+Delete a session
+Delete a session associated with your Vertex AI Agent Engine instance.
+
+REST API
+Use the sessions.delete method.
+
+
+Before using any of the request data, make the following replacements:
+
+PROJECT_ID: Your project ID.
+LOCATION: The region where you want to create the Example Store instance.
+AGENT_ENGINE_ID: The resource ID of your Agent Engine instance.
+SESSION_ID: The resource ID of the session you want to retrieve.
+HTTP method and URL:
+
+DELETE https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/sessions/SESSION_ID
+To send your request, choose one of these options:
+
+curlPowerShell
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login , or by using Cloud Shell, which automatically logs you into the gcloud CLI . You can check the currently active account by running gcloud auth list.
+Execute the following command:
+
+curl -X DELETE \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/sessions/SESSION_ID"
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login . You can check the currently active account by running gcloud auth list.
+Execute the following command:
+
+$cred = gcloud auth print-access-token
+$headers = @{ "Authorization" = "Bearer $cred" }
+
+Invoke-WebRequest `
+    -Method DELETE `
+    -Headers $headers `
+    -Uri "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/sessions/SESSION_ID" | Select-Object -Expand Content
+You should receive a successful status code (2xx) and an empty response.
+
+List events in a session
+List events in a session associated with your Vertex AI Agent Engine instance.
+
+REST API
+Use the events.list method.
+
+
+Before using any of the request data, make the following replacements:
+
+PROJECT_ID: Your project ID.
+LOCATION: The region where you created your Agent Engine instance.
+AGENT_ENGINE_ID: The resource ID of your Agent Engine instance.
+SESSION_ID: The resource ID of the session you want to retrieve.
+HTTP method and URL:
+
+GET https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID/events
+To send your request, choose one of these options:
+
+curlPowerShell
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login , or by using Cloud Shell, which automatically logs you into the gcloud CLI . You can check the currently active account by running gcloud auth list.
+Execute the following command:
+
+curl -X GET \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID/events"
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login . You can check the currently active account by running gcloud auth list.
+Execute the following command:
+
+$cred = gcloud auth print-access-token
+$headers = @{ "Authorization" = "Bearer $cred" }
+
+Invoke-WebRequest `
+    -Method GET `
+    -Headers $headers `
+    -Uri "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID/events" | Select-Object -Expand Content
+In the response, you should see a list of events associated with your session.
+
+Append an event to a session
+Append an event to a session associated with an Vertex AI Agent Engine instance.
+
+REST API
+Use the sessions.appendEvent method.
+
+
+Before using any of the request data, make the following replacements:
+
+PROJECT_ID: Your project ID.
+LOCATION: The region where you created your Agent Engine instance.
+AGENT_ENGINE_ID: The resource ID of your Agent Engine instance.
+SESSION_ID: The resource ID of the session you want to append events to.
+AUTHOR: The author of the event. This can be 'user', or an agent name.
+INVOCATION_ID: An identifier of an invocation.
+TIMESTAMP: The timestamp of the event.
+HTTP method and URL:
+
+POST https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID
+Request JSON body:
+
+{
+  "author": AUTHOR,
+  "invocationId": INVOCATION_ID,
+  "timestamp": TIMESTAMP,
+}
+
+To send your request, choose one of these options:
+
+curlPowerShell
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login , or by using Cloud Shell, which automatically logs you into the gcloud CLI . You can check the currently active account by running gcloud auth list.
+Save the request body in a file named request.json, and execute the following command:
+
+curl -X POST \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     -H "Content-Type: application/json; charset=utf-8" \
+     -d @request.json \
+     "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID"
+Note: The following command assumes that you have logged in to the gcloud CLI with your user account by running gcloud init or gcloud auth login . You can check the currently active account by running gcloud auth list.
+Save the request body in a file named request.json, and execute the following command:
+
+$cred = gcloud auth print-access-token
+$headers = @{ "Authorization" = "Bearer $cred" }
+
+Invoke-WebRequest `
+    -Method POST `
+    -Headers $headers `
+    -ContentType: "application/json; charset=utf-8" `
+    -InFile request.json `
+    -Uri "https://LOCATION-aiplatform.googleapis.com/v1beta1/projects/PROJECT_ID/locations/LOCATION/reasoningEngines/AGENT_ENGINE_ID/sessions/SESSION_ID" | Select-Object -Expand Content
+You should receive a successful status code (2xx) and an empty response.

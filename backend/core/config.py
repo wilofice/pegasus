@@ -74,6 +74,19 @@ class Settings(BaseSettings):
     google_generative_ai_model: str = "gemini-pro"
     gemini_api_key: Optional[str] = None  # Alternative env var name
     
+    # Vertex AI Configuration
+    vertex_ai_project_id: Optional[str] = None
+    vertex_ai_location: str = "us-central1"  # Default region
+    vertex_ai_agent_engine_id: Optional[str] = None
+    vertex_ai_model: str = "gemini-2.0-flash"
+    vertex_ai_timeout: float = 60.0
+    vertex_ai_temperature: float = 0.7
+    vertex_ai_max_tokens: int = 2048
+    vertex_ai_top_k: int = 40
+    vertex_ai_top_p: float = 0.95
+    # Google Cloud credentials file path (optional, falls back to default auth)
+    google_application_credentials: Optional[str] = None
+    
     # OpenAI Configuration (Legacy)
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-3.5-turbo"
@@ -136,7 +149,7 @@ Corrected transcript:"""
     @classmethod
     def validate_llm_provider(cls, v):
         """Validate LLM provider is supported."""
-        valid_providers = ['ollama', 'google_generative_ai', 'openai']
+        valid_providers = ['ollama', 'google_generative_ai', 'vertex_ai', 'openai']
         if v not in valid_providers:
             raise ValueError(f'LLM provider must be one of: {valid_providers}')
         return v

@@ -8,15 +8,62 @@ from enum import Enum
 from abc import ABC, abstractmethod
 
 import httpx
+import json
+import time
+from datetime import datetime
+from dataclasses import dataclass
 from services.ollama_service import OllamaService
 from core.config import settings
 LOGGER = logging.getLogger(__name__)
+
+
+@dataclass
+class VertexSession:
+    """Represents a Vertex AI session."""
+    id: str
+    user_id: str
+    created_at: datetime
+    state: Dict[str, Any]
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'VertexSession':
+        """Create a VertexSession from API response."""
+        return cls(
+            id=data.get("name", "").split("/")[-1],
+            user_id=data.get("userId", ""),
+            created_at=datetime.fromisoformat(data.get("createTime", "").replace("Z", "+00:00")),
+            state=data.get("state", {})
+        )
+
+
+@dataclass
+class VertexEvent:
+    """Represents a Vertex AI session event."""
+    author: str
+    invocation_id: str
+    timestamp: float
+    content: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to API format."""
+        event_data = {
+            "author": self.author,
+            "invocationId": self.invocation_id,
+            "timestamp": self.timestamp
+        }
+        if self.content:
+            event_data["content"] = self.content
+        if self.metadata:
+            event_data["metadata"] = self.metadata
+        return event_data
 
 
 class LLMProvider(str, Enum):
     """Supported LLM providers."""
     OLLAMA = "ollama"
     GOOGLE_GENERATIVE_AI = "google_generative_ai"
+    VERTEX_AI = "vertex_ai"
     OPENAI = "openai"  # Legacy support
 
 
@@ -37,6 +84,28 @@ class BaseLLMClient(ABC):
     async def health_check(self) -> Dict[str, Any]:
         """Check if the LLM service is healthy."""
         pass
+    
+    # Session management methods (optional, only implemented by clients that support it)
+    async def create_session(self, user_id: str, **kwargs) -> Optional[str]:
+        """Create a new session for the user. Returns session ID if supported."""
+        return None
+    
+    async def get_session(self, session_id: str, user_id: str) -> Optional[Any]:
+        """Get session details if supported."""
+        return None
+    
+    async def list_sessions(self, user_id: str) -> List[str]:
+        """List session IDs for a user if supported."""
+        return []
+    
+    async def delete_session(self, session_id: str, user_id: str) -> bool:
+        """Delete a session if supported."""
+        return False
+    
+    async def chat_with_session(self, messages: List[Dict[str, str]], session_id: str, user_id: str, **kwargs) -> str:
+        """Generate a chat response with session context if supported."""
+        # Fallback to regular chat for clients that don't support sessions
+        return await self.chat(messages, **kwargs)
 
 
 class OllamaClient(BaseLLMClient):
@@ -274,6 +343,317 @@ class GoogleGenerativeAIClient(BaseLLMClient):
             }
 
 
+class VertexAIClient(BaseLLMClient):
+    """Google Vertex AI Agent Engine client with session management."""
+    
+    def __init__(self):
+        self.project_id = settings.vertex_ai_project_id
+        self.location = settings.vertex_ai_location
+        self.agent_engine_id = settings.vertex_ai_agent_engine_id
+        self.model = settings.vertex_ai_model
+        self.timeout = settings.vertex_ai_timeout
+        
+        if not self.project_id:
+            raise RuntimeError("VERTEX_AI_PROJECT_ID not configured in settings")
+        if not self.agent_engine_id:
+            raise RuntimeError("VERTEX_AI_AGENT_ENGINE_ID not configured in settings")
+        
+        self.base_url = f"https://{self.location}-aiplatform.googleapis.com/v1beta1"
+        self.sessions_url = f"{self.base_url}/projects/{self.project_id}/locations/{self.location}/reasoningEngines/{self.agent_engine_id}/sessions"
+        
+        # Setup authentication
+        self._setup_auth()
+    
+    def _setup_auth(self):
+        """Setup Google Cloud authentication."""
+        import os
+        if settings.google_application_credentials:
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = settings.google_application_credentials
+    
+    async def _get_access_token(self) -> str:
+        """Get Google Cloud access token for authentication."""
+        try:
+            # Try to use gcloud auth if available
+            import subprocess
+            result = subprocess.run(
+                ["gcloud", "auth", "print-access-token"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode == 0:
+                return result.stdout.strip()
+            else:
+                LOGGER.warning(f"gcloud auth failed: {result.stderr}")
+        except Exception as e:
+            LOGGER.warning(f"Could not get gcloud access token: {e}")
+        
+        # Fallback to Google Auth library
+        try:
+            from google.auth import default
+            from google.auth.transport.requests import Request
+            credentials, _ = default()
+            credentials.refresh(Request())
+            return credentials.token
+        except Exception as e:
+            raise RuntimeError(f"Could not obtain Google Cloud access token: {e}")
+    
+    async def _make_request(self, method: str, url: str, data: Optional[Dict] = None) -> Dict[str, Any]:
+        """Make authenticated request to Vertex AI API."""
+        access_token = await self._get_access_token()
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                if method.upper() == "GET":
+                    response = await client.get(url, headers=headers, timeout=self.timeout)
+                elif method.upper() == "POST":
+                    response = await client.post(url, headers=headers, json=data, timeout=self.timeout)
+                elif method.upper() == "DELETE":
+                    response = await client.delete(url, headers=headers, timeout=self.timeout)
+                else:
+                    raise ValueError(f"Unsupported HTTP method: {method}")
+                
+                if response.status_code == 200 or response.status_code == 201:
+                    return response.json() if response.content else {}
+                else:
+                    error_msg = f"Vertex AI API error: {response.status_code} - {response.text}"
+                    LOGGER.error(error_msg)
+                    raise RuntimeError(error_msg)
+                    
+            except httpx.TimeoutException:
+                raise RuntimeError("Vertex AI request timed out")
+            except Exception as e:
+                if not isinstance(e, RuntimeError):
+                    LOGGER.error(f"Vertex AI error: {e}")
+                    raise RuntimeError(f"Vertex AI error: {str(e)}")
+                raise
+    
+    async def create_session(self, user_id: str, **kwargs) -> str:
+        """Create a new Vertex AI session."""
+        data = {"userId": user_id}
+        
+        # Add initial state if provided
+        if "initial_state" in kwargs:
+            data["state"] = kwargs["initial_state"]
+        
+        response = await self._make_request("POST", self.sessions_url, data)
+        
+        # Extract session ID from the operation response
+        if "name" in response:
+            session_id = response["name"].split("/")[-1]
+            LOGGER.info(f"Created Vertex AI session {session_id} for user {user_id}")
+            return session_id
+        else:
+            raise RuntimeError("Failed to create Vertex AI session - no session ID returned")
+    
+    async def get_session(self, session_id: str, user_id: str) -> VertexSession:
+        """Get a Vertex AI session."""
+        session_url = f"{self.sessions_url}/{session_id}"
+        response = await self._make_request("GET", session_url)
+        return VertexSession.from_dict(response)
+    
+    async def list_sessions(self, user_id: str) -> List[str]:
+        """List all sessions for a user."""
+        response = await self._make_request("GET", self.sessions_url)
+        sessions = response.get("sessions", [])
+        
+        # Filter sessions by user_id and extract session IDs
+        user_sessions = [
+            session["name"].split("/")[-1] 
+            for session in sessions 
+            if session.get("userId") == user_id
+        ]
+        
+        return user_sessions
+    
+    async def delete_session(self, session_id: str, user_id: str) -> bool:
+        """Delete a Vertex AI session."""
+        session_url = f"{self.sessions_url}/{session_id}"
+        try:
+            await self._make_request("DELETE", session_url)
+            LOGGER.info(f"Deleted Vertex AI session {session_id} for user {user_id}")
+            return True
+        except Exception as e:
+            LOGGER.error(f"Failed to delete session {session_id}: {e}")
+            return False
+    
+    async def append_event(self, session_id: str, event: VertexEvent) -> bool:
+        """Append an event to a session."""
+        event_url = f"{self.sessions_url}/{session_id}:appendEvent"
+        try:
+            await self._make_request("POST", event_url, event.to_dict())
+            return True
+        except Exception as e:
+            LOGGER.error(f"Failed to append event to session {session_id}: {e}")
+            return False
+    
+    async def list_events(self, session_id: str) -> List[Dict[str, Any]]:
+        """List events in a session."""
+        events_url = f"{self.sessions_url}/{session_id}/events"
+        response = await self._make_request("GET", events_url)
+        return response.get("events", [])
+    
+    async def generate(self, prompt: str, **kwargs) -> str:
+        """Generate a response using Vertex AI (stateless)."""
+        # For stateless generation, we'll use the Generative AI API
+        # since Agent Engine is designed for session-based interactions
+        access_token = await self._get_access_token()
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Use Vertex AI Generative AI API for stateless requests
+        model_url = f"https://{self.location}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{self.model}:generateContent"
+        
+        data = {
+            "contents": [
+                {
+                    "parts": [{"text": prompt}]
+                }
+            ],
+            "generationConfig": {
+                "temperature": kwargs.get("temperature", settings.vertex_ai_temperature),
+                "topK": kwargs.get("top_k", settings.vertex_ai_top_k),
+                "topP": kwargs.get("top_p", settings.vertex_ai_top_p),
+                "maxOutputTokens": kwargs.get("max_tokens", settings.vertex_ai_max_tokens),
+            }
+        }
+        
+        # Add system instruction if provided
+        system_prompt = kwargs.get("system_prompt")
+        if system_prompt:
+            data["systemInstruction"] = {
+                "parts": [{"text": system_prompt}]
+            }
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(
+                    model_url,
+                    headers=headers,
+                    json=data,
+                    timeout=self.timeout
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    candidates = result.get("candidates", [])
+                    if candidates and candidates[0].get("content"):
+                        parts = candidates[0]["content"].get("parts", [])
+                        if parts and parts[0].get("text"):
+                            return parts[0]["text"]
+                    
+                    raise RuntimeError("No text content in response")
+                else:
+                    error_msg = f"Vertex AI API error: {response.status_code} - {response.text}"
+                    LOGGER.error(error_msg)
+                    raise RuntimeError(error_msg)
+                    
+            except httpx.TimeoutException:
+                raise RuntimeError("Vertex AI request timed out")
+            except Exception as e:
+                if not isinstance(e, RuntimeError):
+                    LOGGER.error(f"Vertex AI error: {e}")
+                    raise RuntimeError(f"Vertex AI error: {str(e)}")
+                raise
+    
+    async def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+        """Generate a chat response using Vertex AI (stateless)."""
+        # Convert messages to a single prompt for stateless generation
+        system_prompt = None
+        prompt_parts = []
+        
+        for msg in messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            
+            if role == "system":
+                system_prompt = content
+            elif role == "user":
+                prompt_parts.append(f"User: {content}")
+            elif role == "assistant":
+                prompt_parts.append(f"Assistant: {content}")
+        
+        prompt = "\n\n".join(prompt_parts)
+        if prompt_parts:
+            prompt += "\n\nAssistant:"
+        
+        return await self.generate(prompt, system_prompt=system_prompt, **kwargs)
+    
+    async def chat_with_session(self, messages: List[Dict[str, str]], session_id: str, user_id: str, **kwargs) -> str:
+        """Generate a chat response with session context using Agent Engine."""
+        try:
+            # Get or create session
+            try:
+                session = await self.get_session(session_id, user_id)
+            except:
+                # Session doesn't exist, create it
+                actual_session_id = await self.create_session(user_id)
+                session_id = actual_session_id
+            
+            # Add user message as event
+            user_message = messages[-1] if messages else {"content": ""}
+            user_event = VertexEvent(
+                author="user",
+                invocation_id=f"inv_{int(time.time())}",
+                timestamp=time.time(),
+                content=user_message.get("content", ""),
+                metadata={"role": "user"}
+            )
+            
+            await self.append_event(session_id, user_event)
+            
+            # For now, fallback to stateless generation while maintaining session history
+            # TODO: Implement proper Agent Engine query when more documentation is available
+            response = await self.chat(messages, **kwargs)
+            
+            # Add assistant response as event
+            assistant_event = VertexEvent(
+                author="assistant",
+                invocation_id=f"inv_{int(time.time())}",
+                timestamp=time.time(),
+                content=response,
+                metadata={"role": "assistant"}
+            )
+            
+            await self.append_event(session_id, assistant_event)
+            
+            return response
+            
+        except Exception as e:
+            LOGGER.error(f"Session-based chat failed, falling back to stateless: {e}")
+            return await self.chat(messages, **kwargs)
+    
+    async def health_check(self) -> Dict[str, Any]:
+        """Check Vertex AI service health."""
+        try:
+            # Try to list sessions to verify connectivity and auth
+            response = await self._make_request("GET", self.sessions_url)
+            
+            return {
+                "healthy": True,
+                "provider": "vertex_ai",
+                "project_id": self.project_id,
+                "location": self.location,
+                "agent_engine_id": self.agent_engine_id,
+                "model": self.model,
+                "session_count": len(response.get("sessions", []))
+            }
+            
+        except Exception as e:
+            LOGGER.error(f"Vertex AI health check failed: {e}")
+            return {
+                "healthy": False,
+                "provider": "vertex_ai",
+                "error": str(e)
+            }
+
+
 class OpenAIClient(BaseLLMClient):
     """Legacy OpenAI client for backward compatibility."""
     
@@ -407,6 +787,8 @@ class LLMClientFactory:
             return OllamaClient()
         elif provider == LLMProvider.GOOGLE_GENERATIVE_AI or provider == "gemini":
             return GoogleGenerativeAIClient()
+        elif provider == LLMProvider.VERTEX_AI:
+            return VertexAIClient()
         elif provider == LLMProvider.OPENAI:
             return OpenAIClient()
         else:
