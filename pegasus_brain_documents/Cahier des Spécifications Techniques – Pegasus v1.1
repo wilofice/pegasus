@@ -1,0 +1,86 @@
+Cahier des Spécifications Techniques
+Projet : Pegasus
+Version : 1.1
+Date : 22 juin 2025
+
+1. Principes d'Architecture
+1.1. Vision Technique
+Pegasus est une application personnelle, non-commerciale, avec une architecture "mobile-first". Le système est conçu autour d'un serveur de données personnel et privé, qui sert de mémoire à long terme pour une Intelligence Artificielle conversationnelle. Pegasus fonctionne selon deux modes : un mode réactif où il répond aux requêtes de l'utilisateur, et un mode proactif où il peut initier la conversation pour partager des analyses ou des conseils pertinents. La sécurité, la confidentialité et la souveraineté des données sont les piliers de cette architecture.
+
+1.2. Schéma d'Architecture Générale
+Le système Pegasus se compose de cinq blocs principaux :
+
+Frontend (Applications Client) : L'interface de chat (texte/voix) sur mobile et web.
+
+Backend (Serveur Applicatif) : Le cerveau de Pegasus, qui orchestre la conversation et les analyses.
+
+Serveur de Données & Base Vectorielle : La mémoire personnelle et le contexte de l'utilisateur.
+
+Moteur d'Analyse Proactive : Un composant du backend qui tourne en tâche de fond pour analyser les nouvelles données.
+
+Service LLM Externe : Le modèle de langage qui génère les réponses.
+
+Légende : Le fonctionnement réactif reste le même. Pour le mode proactif : 1. Le Pipeline ETL signale la fin du traitement de nouvelles données. 2. Le Moteur d'Analyse Proactive s'active. 3. Il interroge la Base Vectorielle et génère une analyse via le LLM. 4. Si une information pertinente est trouvée, le Backend envoie une notification push au Frontend pour initier une conversation.
+
+2. Spécifications des Composants
+2.1. Frontend (Application Mobile & Web)
+Framework Mobile : React Native.
+
+Framework Web : React.js.
+
+Interface de Chat : Utilisation de bibliothèques comme react-native-gifted-chat.
+
+Fonctionnalités Voix : Speech-to-Text (STT) et Text-to-Speech (TTS) via les API natives.
+
+Communication Backend :
+
+Réactive : API REST sécurisée (HTTPS) ou WebSockets pour l'envoi des messages de l'utilisateur.
+
+Proactive : L'application doit pouvoir recevoir des notifications push (via Firebase Cloud Messaging ou Apple Push Notification Service) envoyées par le backend. Un clic sur la notification ouvrira directement l'application sur la nouvelle conversation initiée par Pegasus.
+
+2.2. Backend (Serveur Applicatif)
+Langage/Framework : Python avec FastAPI.
+
+Rôle d'Orchestrateur (Mode Réactif) : Le fonctionnement reste inchangé : recevoir la requête, chercher le contexte dans la base vectorielle, interroger le LLM et renvoyer la réponse.
+
+Nouveau - Moteur d'Analyse Proactive (Mode Proactif / Tâche de Fond) :
+
+Déclencheur : Ce moteur est activé par un signal du pipeline ETL après l'ingestion réussie de nouvelles données (ex: un nouveau fichier journal audio est traité).
+
+Processus d'Analyse :
+
+Le moteur identifie les "nouveaux" morceaux de texte (chunks) ajoutés à la base de données.
+
+Il effectue une analyse sur ces nouveaux chunks : il peut chercher des connexions avec des données plus anciennes, identifier des thèmes récurrents ou des émotions exprimées.
+
+Il utilise le LLM pour générer des "hypothèses d'analyse". Exemple de prompt interne : "Voici une nouvelle entrée de journal. Y a-t-il un lien avec des projets, des inquiétudes ou des objectifs mentionnés dans les extraits de mémoire suivants ? Si oui, formule une remarque bienveillante ou une question ouverte."
+
+Initiation de la Conversation : Si une analyse est jugée suffisamment pertinente, le backend formule un message d'introduction et l'envoie via une notification push au dispositif de l'utilisateur.
+
+Exemple : L'ETL traite un nouvel export de chat où vous parlez de l'organisation d'un voyage en Italie. Le moteur d'analyse le détecte, interroge la base et trouve une note de journal vieille de 6 mois où vous rêviez de visiter Florence. Il pourrait alors envoyer la notification : "Pegasus a une nouvelle pensée pour vous" qui, à l'ouverture, afficherait : "J'ai remarqué que vous parliez d'un voyage en Italie. Cela m'a rappelé que vous aviez mentionné vouloir absolument visiter Florence. Est-ce toujours dans vos projets pour ce voyage ?"
+
+2.3. Serveur de Données & Base de Données Vectorielle
+Stockage des Données Brutes : Inchangé (serveur personnel).
+
+Pipeline de Traitement des Données (ETL) : Inchangé, à un détail près :
+
+Nouveau : À la fin de chaque traitement réussi, le pipeline doit envoyer un signal/webhook au backend pour déclencher le "Moteur d'Analyse Proactive".
+
+Base de Données Vectorielle : ChromaDB.
+
+2.4. Service de Modèle de Langage (LLM)
+Modèle : GPT-4o d'OpenAI ou Claude 3 Opus d'Anthropic.
+
+3. Sécurité, Confidentialité et Déploiement
+Spécifications : Inchangées (Authentification JWT, chiffrement TLS 1.3, etc.).
+
+4. Prochaines Étapes Techniques
+Mise en place du serveur personnel : Installation du système d'exploitation et de Docker.
+
+Développement d'un POC (Proof of Concept) : Créer le script Python qui surveille un dossier, transcrit un fichier audio, le vectorise, l'insère dans ChromaDB et envoie un webhook à une URL de test.
+
+Développement de l'API Backend : Créer le endpoint /chat (mode réactif) et un endpoint /trigger-analysis (pour recevoir le webhook de l'ETL).
+
+Développement de l'interface de chat sur React Native, en incluant la configuration pour recevoir les notifications push.
+
+Nouveau - Développement du Moteur d'Analyse Proactive : Coder la logique d'analyse en tâche de fond et l'envoi de notifications.

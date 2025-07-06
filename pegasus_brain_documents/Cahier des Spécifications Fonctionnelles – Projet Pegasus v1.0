@@ -1,0 +1,136 @@
+Cahier des Spécifications Fonctionnelles
+Projet : Pegasus
+Version : 1.0
+Date : 22 juin 2025
+
+1. Introduction et Vision du Projet
+1.1. Vision
+Pegasus est une intelligence artificielle d'assistance familiale conçue pour simplifier la logistique du quotidien, alléger la charge mentale des membres de la famille et favoriser un environnement domestique organisé et serein. Agyissant comme un secrétaire personnel augmenté, Pegasus centralise l'information, automatise les tâches routinières et offre des aperçus proactifs pour améliorer le bien-être familial.
+
+1.2. Public Cible
+Les familles modernes, les couples et les foyers (avec ou sans enfants) cherchant à optimiser leur organisation, à mieux répartir les tâches et à consacrer plus de temps de qualité ensemble, libérés des contraintes logistiques.
+
+1.3. Principes Directeurs
+Pegasus sera développé en respectant quatre piliers fondamentaux :
+
+Non-Substitution : Pegasus est un outil de soutien, il ne remplace ni le jugement, ni l'attention, ni l'affect parental ou conjugal.
+
+Confidentialité Maximale : La sécurité et la confidentialité des données familiales sont la priorité absolue.
+
+Consentement Explicite : Chaque fonctionnalité, en particulier celles qui analysent des données sensibles, doit être activée volontairement par l'utilisateur.
+
+Neutralité Bienveillante : Pegasus ne prend pas parti dans les conflits. Il fournit des outils pour faciliter la communication et l'organisation.
+
+2. Spécifications Fonctionnelles
+Module 1 : Cœur Organisationnel (Fonctions de Secrétariat Personnel)
+1.1. Gestion des Agendas Familiaux
+
+Fonctionnalité : Synchronisation multi-comptes (Google Calendar, Outlook, etc.).
+
+Description : Agréger tous les agendas des membres de la famille dans une vue unifiée. Les événements sont identifiables par membre (codes couleur).
+
+Fonctionnalité : Détection de conflits et planification intelligente.
+
+Description : Alerter en cas de conflits d'horaires (ex: deux rendez-vous au même moment). Proposer des créneaux alternatifs en analysant les disponibilités de chacun.
+
+Fonctionnalité : Gestion des temps de trajet.
+
+Description : Intégrer automatiquement les temps de trajet entre les rendez-vous et alerter si un créneau devient irréaliste.
+
+1.2. Gestionnaire de Tâches Partagées
+
+Fonctionnalité : Listes de tâches personnelles et familiales.
+
+Description : Créer des listes de tâches (courses, ménage, démarches administratives) assignables à un ou plusieurs membres.
+
+Fonctionnalité : Tâches récurrentes et rappels intelligents.
+
+Description : Configurer des tâches récurrentes (sortir les poubelles, payer une facture) avec des rappels contextuels (ex: rappeler de sortir les poubelles la veille au soir).
+
+1.3. Hub Administratif et Documentaire
+
+Fonctionnalité : Coffre-fort numérique sécurisé.
+
+Description : Espace de stockage chiffré pour les documents importants (scans de passeports, livret de famille, bulletins, contrats).
+
+Fonctionnalité : Reconnaissance de caractères (OCR).
+
+Description : Extraire les informations clés des documents scannés (date d'expiration, numéro de police d'assurance) pour générer des rappels.
+
+Fonctionnalité : Rappels de renouvellement.
+
+Description : Alerter proactivement avant la date d'expiration d'un document (passeport, contrôle technique, assurance).
+
+1.4. Planificateur d'Événements
+
+Fonctionnalité : Module "Vacances".
+
+Description : Assister dans la planification des vacances : création de checklists, suivi du budget, centralisation des réservations (vols, hôtels).
+
+Fonctionnalité : Module "Anniversaires".
+
+Description : Gérer la liste des invités, les réponses (RSVP), les idées de cadeaux et le suivi du budget.
+
+Module 2 : Dynamiques Familiales & Bien-être (Fonctions Augmentées)
+2.1. Module de Connexion Familiale (Influence "Conseiller Familial")
+
+Fonctionnalité : Suggestion de "Temps de Qualité".
+
+Description : Analyser les agendas pour identifier des créneaux communs et suggérer des activités (soirée film, sortie au parc, dîner au restaurant), en fonction des préférences de la famille.
+
+Fonctionnalité : Journal des réussites familiales.
+
+Description : Un espace où les membres peuvent noter les moments positifs, les réussites ou les compliments. Pegasus peut proposer une synthèse hebdomadaire pour renforcer le positif.
+
+2.2. Tableau de Bord Enfants (Influence "Assistant Familial")
+
+Fonctionnalité : Hub centralisé par enfant.
+
+Description : Créer une fiche par enfant regroupant :
+
+Santé : Carnet de santé numérique (avec consentement), rappels de vaccins, historique des rendez-vous médicaux.
+
+Scolarité : Emploi du temps, dates des vacances et des examens, liste des fournitures.
+
+Activités : Horaires des activités extrascolaires, coordination du covoiturage.
+
+2.3. Indicateur de Charge Mentale (Influence "Psychologue" - Module non-diagnostique)
+
+Fonctionnalité : Analyse de la charge de travail.
+
+Description : Détecter (avec consentement) les signes de surcharge pour un utilisateur (accumulation de tâches, rendez-vous tardifs, peu de temps libre).
+
+Fonctionnalité : Suggestions de micro-pauses.
+
+Description : En cas de détection de surcharge, envoyer une notification privée suggérant une courte pause, un exercice de respiration, ou de déléguer une tâche si possible.
+
+Fonctionnalité : Passerelle vers des ressources professionnelles.
+
+Description : Si un utilisateur exprime un mal-être persistant (via des mots-clés dans un journal privé), Pegasus doit proposer, de manière neutre et confidentielle, une liste de professionnels de santé (psychologues, médecins) agréés dans sa région.
+
+Module 3 : Sécurité et Confidentialité
+Fonctionnalité : Chiffrement de bout-en-bout.
+
+Description : Toutes les données, qu'elles soient stockées ou en transit, doivent être chiffrées avec les standards les plus élevés.
+
+Fonctionnalité : Authentification à deux facteurs (2FA).
+
+Description : Proposer et encourager l'utilisation du 2FA pour sécuriser l'accès aux comptes.
+
+Fonctionnalité : Gestion granulaire des permissions.
+
+Description : Permettre aux administrateurs du compte familial de définir précisément qui a le droit de voir ou de modifier quelles informations.
+
+3. Phases de Développement Proposées
+V1.0 (Produit Minimum Viable) : Se concentrer sur le Module 1 (Cœur Organisationnel). Établir une base solide pour la gestion des agendas, des tâches et des documents.
+
+V2.0 (Enrichissement Familial) : Intégrer le Module 2.1 et 2.2. Déployer les fonctionnalités de connexion familiale et le tableau de bord des enfants.
+
+V3.0 (Intelligence Proactive) : Déployer avec précaution le Module 2.3 sur la charge mentale, après avoir recueilli les retours des utilisateurs et consolidé la confiance.
+
+4. Prochaines Étapes
+Validation : Validation de ce cahier des charges par les parties prenantes (vous !).
+
+Spécifications Techniques : Élaboration des choix technologiques (langages, bases de données, hébergement).
+
+Maquettage (UX/UI) : Création des premières maquettes de l'interface utilisateur.

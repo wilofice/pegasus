@@ -1,0 +1,88 @@
+Plan d'Organisation des Dossiers et Composants - Projet Pegasus
+Ce document définit la structure des répertoires et les conventions de nommage pour l'ensemble du projet Pegasus.
+
+1. Arborescence Globale du Projet
+Le projet sera organisé à la racine dans un dossier principal pegasus/ qui contiendra trois sous-dossiers majeurs, chacun représentant un macro-composant de notre architecture :
+
+pegasus/
+├── 📂 backend/         # Le cerveau de Pegasus (API, logique métier)
+├── 📂 data_pipeline/   # Le script qui nourrit la mémoire de Pegasus
+└── 📂 frontend/        # L'application mobile/web avec laquelle vous interagissez
+
+2. Détail du Dossier backend/
+Ce dossier contient le serveur applicatif écrit en Python avec FastAPI. Il gère la logique de conversation et le moteur proactif.
+
+backend/
+├── 📂 api/
+│   ├── __init__.py
+│   ├── chat_router.py          # Gère le endpoint /chat pour la conversation réactive
+│   └── analysis_router.py      # Gère le endpoint /webhook pour lancer l'analyse proactive
+│
+├── 📂 core/
+│   ├── __init__.py
+│   ├── orchestrator.py         # Le "chef d'orchestre" qui combine la requête, le contexte et appelle le LLM
+│   └── proactive_engine.py     # La logique du moteur d'analyse qui tourne en arrière-plan
+│
+├── 📂 services/
+│   ├── __init__.py
+│   ├── llm_client.py           # Interface pour communiquer avec le service LLM externe (OpenAI/Anthropic)
+│   └── vector_db_client.py     # Interface pour interroger la base de données vectorielle (ChromaDB)
+│
+├── 📄 main.py                   # Point d'entrée de l'application FastAPI, assemble les routeurs
+├── 📄 config.py                 # Fichier de configuration (clés d'API, URLs, etc.)
+├── 📄 Dockerfile                # Pour "emballer" le backend dans un conteneur
+└── 📄 requirements.txt          # Liste des dépendances Python
+
+3. Détail du Dossier data_pipeline/
+Ce dossier contient le script autonome qui traite les données brutes et alimente la base vectorielle.
+
+data_pipeline/
+├── 📂 source_data/              # Le dossier surveillé où vous déposez vos fichiers bruts
+│   └── .gitkeep                 # (Fichier vide pour que le dossier soit versionné)
+│
+├── 📂 database/                 # Destination pour la base de données ChromaDB
+│   └── .gitkeep
+│
+├── 📂 logs/
+│   └── pipeline.log             # Fichier de log pour tracer les opérations de traitement
+│
+├── 📄 pipeline.py               # Le script principal (surveillance, transcription, vectorisation)
+└── 📄 requirements.txt         # Liste des dépendances Python spécifiques à ce pipeline
+
+4. Détail du Dossier frontend/ (avec Flutter)
+Ce dossier contient l'application Flutter écrite en langage Dart. C'est l'interface visuelle et vocale de Pegasus.
+
+frontend/
+├── 📂 lib/                       # Le cœur du code source de l'application Flutter
+│   ├── 📂 api/
+│   │   └── pegasus_api_client.dart   # Fonctions pour appeler le backend de Pegasus (via http ou dio)
+│   │
+│   ├── 📂 models/
+│   │   └── message_model.dart      # Modèle de données pour un message de chat
+│   │
+│   ├── 📂 providers/               # Gestion de l'état (ex: avec Riverpod ou Provider)
+│   │   └── chat_provider.dart      # Gère l'état de la conversation
+│   │
+│   ├── 📂 screens/                 # Écrans principaux de l'application
+│   │   ├── chat_screen.dart        # L'écran principal de conversation
+│   │   └── settings_screen.dart    # Écran pour les futurs paramètres
+│   │
+│   ├── 📂 services/
+│   │   ├── notification_service.dart # Configuration et gestion des notifications push (Firebase)
+│   │   └── voice_service.dart      # Logique pour le Speech-to-Text et Text-to-Speech
+│   │
+│   ├── 📂 widgets/                 # Composants UI (widgets) réutilisables
+│   │   ├── message_bubble.dart     # Bulle d'affichage pour un message
+│   │   └── message_composer.dart   # Zone de saisie de texte et bouton micro
+│   │
+│   └── 📄 main.dart                 # Point d'entrée de l'application Flutter
+│
+├── 📂 assets/                      # Pour les ressources statiques (images, polices)
+│   └── └── images/
+│
+├── 📄 pubspec.yaml                 # Dépendances (packages) et configuration du projet Flutter
+└── 📄 README.md                   # Instructions pour lancer le projet frontend
+
+Cette vision est maintenant complète et cohérente. Chaque brique a sa place, et les technologies sont alignées avec l'objectif d'une application personnelle, sécurisée et performante.
+
+Nous avons donc tous les éléments nécessaires. Nous pouvons maintenant revenir en toute confiance à l'étape suivante qui est l'écriture du script pipeline.py dans le dossier data_pipeline/.

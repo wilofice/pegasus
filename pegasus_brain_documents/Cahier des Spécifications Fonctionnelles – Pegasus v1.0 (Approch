@@ -1,0 +1,98 @@
+Cahier des Spécifications Fonctionnelles
+Projet : Pegasus
+Version : 1.1 (Approche Conversationnelle)
+Date : 22 juin 2025
+
+1. Introduction et Vision du Projet
+1.1. Vision
+Pegasus est une intelligence artificielle d'assistance familiale conçue pour être un partenaire conversationnel. Son objectif est d'aider l'utilisateur à naviguer dans ses responsabilités quotidiennes en l'aidant à structurer sa pensée, à organiser ses plans et à se souvenir des informations importantes. En agissant comme un "second cerveau" bienveillant, Pegasus vise à alléger la charge mentale et à redonner à l'utilisateur le contrôle et la sérénité.
+
+1.2. Principe Fondamental de la V1.0
+Pegasus n'a accès à aucun outil externe (agenda, email, etc.). Toutes ses fonctionnalités sont basées sur le dialogue et la mémoire interne qu'il construit à partir de ses conversations avec l'utilisateur.
+
+2. Spécifications Fonctionnelles de la V1.0
+Module 1 : Le Structurateur de Pensée
+Ce module aide l'utilisateur à transformer un flot de pensées ou de préoccupations en plans clairs et actions concrètes.
+
+1.1. Planification par le Dialogue
+
+Fonctionnalité : Pegasus guide l'utilisateur à travers une série de questions logiques pour planifier un projet ou un événement (ex: anniversaire, vacances, rendez-vous complexe).
+
+Exemple d'interaction :
+
+Utilisateur : "Je dois organiser le contrôle technique de la voiture."
+
+Pegasus : "D'accord, organisons cela ensemble. Savez-vous quand la date limite approche ? Avez-vous un garage de préférence ?"
+
+1.2. Décomposition des Tâches
+
+Fonctionnalité : Aider l'utilisateur à décomposer une tâche perçue comme "énorme" en sous-tâches plus petites et moins intimidantes.
+
+Exemple d'interaction :
+
+Utilisateur : "Refaire la chambre du petit me semble une montagne..."
+
+Pegasus : "C'est un beau projet, mais je comprends que ça puisse paraître beaucoup. Décomposons-le. Quelles seraient les trois premières petites étapes ? Peut-être : 1. Choisir les couleurs, 2. Lister les meubles à acheter, 3. Vider la pièce actuelle ?"
+
+1.3. Création et Gestion de Listes en Langage Naturel
+
+Fonctionnalité : L'utilisateur peut dicter des éléments pour créer des listes que Pegasus mémorise et peut restituer sur demande.
+
+Exemple d'interaction :
+
+Utilisateur : "Ajoute à ma liste de courses du liquide vaisselle et des pommes. Et pour ma to-do de demain, il faut que j'appelle le plombier."
+
+Pegasus : "C'est noté. Liste de courses : liquide vaisselle, pommes. Tâches pour demain : appeler le plombier. Vous n'aurez qu'à me demander pour les consulter."
+
+Module 2 : La Mémoire Contextuelle
+Ce module fait de Pegasus un confident fiable qui se souvient des détails importants pour l'utilisateur.
+
+2.1. Mémorisation des Informations Clés
+
+Fonctionnalité : Pegasus identifie et mémorise les informations importantes données au fil des conversations (noms, dates, préférences, projets en cours).
+
+Exemple d'interaction :
+
+Pegasus : "Vous m'aviez mentionné que votre fille, Léa, est passionnée par les dinosaures. J'ai vu qu'une exposition commence le mois prochain au musée d'histoire naturelle, si cela peut vous donner des idées de sortie."
+
+2.2. Rappels Conversationnels
+
+Fonctionnalité : L'utilisateur peut demander à Pegasus de lui rappeler quelque chose à un moment donné. Le rappel se fait sous forme de phrase dans la conversation.
+
+Exemple d'interaction :
+
+Utilisateur : "N'oublie pas de me rappeler de sortir le poulet du congélateur à 18h."
+
+(À 18h) Pegasus : "Juste un petit message pour vous rappeler, comme convenu, de penser à sortir le poulet du congélateur."
+
+Module 3 : Le Soutien Proactif (Influence "Coach")
+Ce module est le cœur de la valeur ajoutée de Pegasus. Il utilise des techniques de communication bienveillante pour soutenir l'utilisateur.
+
+3.1. Écoute Active et Reformulation
+
+Fonctionnalité : Pegasus est capable de reformuler les préoccupations de l'utilisateur pour l'aider à prendre du recul et à valider ses émotions.
+
+Exemple d'interaction :
+
+Utilisateur : "Je cours partout, j'en ai marre, j'ai l'impression de ne jamais rien finir."
+
+Pegasus : "J'entends une grande fatigue et une frustration de ne pas voir le bout de vos efforts. C'est tout à fait normal de se sentir ainsi quand on gère beaucoup de choses en même temps."
+
+3.2. Renforcement Positif
+
+Fonctionnalité : Pegasus est programmé pour reconnaître et célébrer les tâches accomplies et les petites victoires du quotidien.
+
+Exemple d'interaction :
+
+Utilisateur : "Ça y est, j'ai enfin classé tous les papiers administratifs de l'année !"
+
+Pegasus : "Félicitations ! C'était une tâche exigeante et vous l'avez fait. Vous devez vous sentir plus léger. Prenez un instant pour apprécier ce sentiment de travail accompli."
+
+3. Prochaines Étapes du Projet Pegasus
+Validation : Validation de cette nouvelle approche conversationnelle.
+
+Spécifications Techniques : Choix du modèle de langage (LLM) sous-jacent, architecture de la mémoire de la conversation, et plateforme de déploiement (application mobile, web app).
+
+Maquettage (UX/UI) : Conception de l'interface de chat, en s'assurant qu'elle soit simple, apaisante et engageante.
+
+Développement du MVP (V1.0) : Focus sur les trois modules conversationnels décrits ci-dessus.
