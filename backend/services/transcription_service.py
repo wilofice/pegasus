@@ -22,7 +22,7 @@ class TranscriptionService:
     def _load_whisper_model(self):
         """Load Whisper model (lazy loading)."""
         if self._whisper_model is None:
-            model_size = getattr(settings, 'whisper_model_size', 'base')
+            model_size = settings.whisper_model
             logger.info(f"Loading Whisper model: {model_size}")
             self._whisper_model = whisper.load_model(model_size)
         return self._whisper_model

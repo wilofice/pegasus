@@ -13,9 +13,9 @@ class OllamaService:
     """Service for improving transcripts using Ollama local LLM."""
     
     def __init__(self):
-        self.base_url = getattr(settings, 'ollama_base_url', 'http://localhost:11434')
-        self.model = getattr(settings, 'ollama_model', 'llama2')
-        self.timeout = getattr(settings, 'ollama_timeout', 60.0)
+        self.base_url = settings.ollama_base_url
+        self.model = settings.ollama_model
+        self.timeout = settings.ollama_timeout
     
     async def check_model_availability(self) -> bool:
         """Check if the Ollama model is available.

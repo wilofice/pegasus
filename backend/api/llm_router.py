@@ -4,6 +4,7 @@ from typing import Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Query
 
 from services.llm_client import get_llm_client, LLMClientFactory, LLMProvider
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +45,7 @@ async def list_providers():
     Returns:
         Available providers and current selection
     """
-    import os
-    
-    current_provider = os.environ.get("LLM_PROVIDER", "ollama").lower()
+    current_provider = settings.llm_provider.lower()
     
     return {
         "available_providers": [p.value for p in LLMProvider],
