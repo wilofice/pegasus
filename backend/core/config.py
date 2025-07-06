@@ -111,8 +111,8 @@ Corrected transcript:"""
 
     # New settings for conversation history and prompt enhancement
     conversation_history_lookback_days: int = 1
-    conversation_processing_delay_minutes: int = 5
-    recent_transcript_window_hours: int = 12
+    conversation_processing_delay_minutes: int = 1
+    recent_transcript_window_hours: int = 25
     
     # Security
     max_upload_size_bytes: int = 104857600  # 100MB
