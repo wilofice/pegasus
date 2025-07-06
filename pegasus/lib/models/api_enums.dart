@@ -98,6 +98,8 @@ enum SearchStrategy {
 enum ProcessingStatus {
   uploaded('uploaded'),
   transcribing('transcribing'),
+  pendingReview('pending_review'),
+  pendingProcessing('pending_processing'),
   improving('improving'),
   completed('completed'),
   failed('failed');
@@ -119,6 +121,10 @@ enum ProcessingStatus {
         return 'Uploaded';
       case ProcessingStatus.transcribing:
         return 'Transcribing';
+      case ProcessingStatus.pendingReview:
+        return 'Pending Review';
+      case ProcessingStatus.pendingProcessing:
+        return 'Pending Processing';
       case ProcessingStatus.improving:
         return 'Improving';
       case ProcessingStatus.completed:
@@ -135,6 +141,10 @@ enum ProcessingStatus {
         return '#FFA726'; // Orange
       case ProcessingStatus.transcribing:
         return '#42A5F5'; // Blue
+      case ProcessingStatus.pendingReview:
+        return '#FF9800'; // Amber - waiting for user action
+      case ProcessingStatus.pendingProcessing:
+        return '#9C27B0'; // Purple - waiting for processing
       case ProcessingStatus.improving:
         return '#66BB6A'; // Green
       case ProcessingStatus.completed:
@@ -148,6 +158,8 @@ enum ProcessingStatus {
   bool get isInProgress {
     return this == ProcessingStatus.uploaded ||
            this == ProcessingStatus.transcribing ||
+           this == ProcessingStatus.pendingReview ||
+           this == ProcessingStatus.pendingProcessing ||
            this == ProcessingStatus.improving;
   }
 

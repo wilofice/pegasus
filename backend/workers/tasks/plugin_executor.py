@@ -119,7 +119,7 @@ def execute_plugins_for_transcript(
                     metadata={
                         "original_transcript": audio_file.original_transcript,
                         "language": audio_file.language,
-                        "tags": audio_file.tag,
+                        "tags": audio_file.tags,
                         "category": audio_file.category,
                         "upload_timestamp": audio_file.upload_timestamp.isoformat() if audio_file.upload_timestamp else None,
                         "file_name": audio_file.file_name,
@@ -278,7 +278,7 @@ def execute_single_plugin(
                     transcript=audio_file.improved_transcript,
                     metadata={
                         "language": audio_file.language,
-                        "tags": audio_file.tag,
+                        "tags": audio_file.tags,
                         "category": audio_file.category,
                         "file_name": audio_file.file_name
                     },

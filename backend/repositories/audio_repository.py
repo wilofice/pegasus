@@ -151,7 +151,7 @@ class AudioRepository:
             conditions.append(AudioFile.processing_status == status)
         
         if tag:
-            conditions.append(AudioFile.tag == tag)
+            conditions.append(AudioFile.tags.any(tag))
         
         if category:
             conditions.append(AudioFile.category == category)
@@ -223,7 +223,10 @@ class AudioRepository:
         Returns:
             List of unique tag strings
         """
-        query = select(AudioFile.tag).where(AudioFile.tag.isnot(None))
+        from sqlalchemy import func
+        
+        # Use unnest to flatten the tags array and get unique values
+        query = select(func.unnest(AudioFile.tags)).where(AudioFile.tags.isnot(None))
         
         if user_id:
             query = query.where(AudioFile.user_id == user_id)

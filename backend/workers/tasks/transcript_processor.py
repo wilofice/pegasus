@@ -75,7 +75,7 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                         "audio_id": str(audio_id), "user_id": str(audio_file.user_id) if audio_file.user_id else "",
                         "chunk_index": i, "chunk_total": len(chunks),
                         "timestamp": audio_file.upload_timestamp.isoformat() if audio_file.upload_timestamp else "",
-                        "language": audio_file.language or "en", "tags": str(audio_file.tag) if audio_file.tag else "",
+                        "language": audio_file.language or "en", "tags": ", ".join(audio_file.tags) if audio_file.tags else "",
                         "category": str(audio_file.category) if audio_file.category else "",
                         "entity_count": len(entities), "start_pos": int(chunk.start) if chunk.start is not None else 0,
                         "end_pos": int(chunk.end) if chunk.end is not None else 0,

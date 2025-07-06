@@ -337,6 +337,16 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
         statusText = 'Transcribing...';
         showProgress = true;
         break;
+      case 'pending_review':
+        statusColor = Colors.amber;
+        statusIcon = Icons.rate_review;
+        statusText = 'Pending Review';
+        break;
+      case 'pending_processing':
+        statusColor = Colors.purple;
+        statusIcon = Icons.hourglass_empty;
+        statusText = 'Pending Processing';
+        break;
       case 'improving':
         statusColor = Colors.purple;
         statusIcon = Icons.auto_fix_high;
@@ -531,8 +541,8 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
                     ),
                   ),
                   
-                  // Transcript button (only show when processing is complete)
-                  if (uploadedAudioId != null && processingStatus == 'completed')
+                  // Transcript button (show when transcript is ready for review or completed)
+                  if (uploadedAudioId != null && (processingStatus == 'completed' || processingStatus == 'pending_review'))
                     ElevatedButton.icon(
                       onPressed: _viewTranscript,
                       icon: const Icon(Icons.text_snippet),
