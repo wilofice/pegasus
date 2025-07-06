@@ -90,11 +90,14 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
     final selectedTags = ref.read(selectedTagsProvider);
     final customController = ref.read(customTagControllerProvider);
     
-    List<String> tagsToSave = [];
-    if (selectedTags.isNotEmpty) {
-      tagsToSave = selectedTags;
-    } else if (customController.text.isNotEmpty) {
-      tagsToSave = [customController.text.trim()];
+    List<String> tagsToSave = List.from(selectedTags);
+    
+    // Add custom tag if entered
+    if (customController.text.isNotEmpty) {
+      final customTag = customController.text.trim();
+      if (customTag.isNotEmpty && !tagsToSave.contains(customTag)) {
+        tagsToSave.add(customTag);
+      }
     }
     
     if (tagsToSave.isEmpty) {
@@ -480,6 +483,15 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () {
+                        final currentTags = ref.read(selectedTagsProvider);
+                        ref.read(selectedTagsProvider.notifier).state = 
+                          currentTags.where((t) => t != tag).toList();
+                      },
+                      child: const Icon(Icons.close, size: 16, color: Colors.green),
+                    ),
                 ],
               ),
             )).toList(),
@@ -505,11 +517,16 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
                   label: Text(tag),
                   selected: isSelected,
                   onSelected: (selected) {
+                    final currentTags = ref.read(selectedTagsProvider);
                     if (selected) {
-                      ref.read(selectedTagsProvider.notifier).state = [tag];
+                      // Add tag to current selection if not already present
+                      if (!currentTags.contains(tag)) {
+                        ref.read(selectedTagsProvider.notifier).state = [...currentTags, tag];
+                      }
                       customController.clear();
                     } else {
-                      ref.read(selectedTagsProvider.notifier).state = [];
+                      // Remove tag from current selection
+                      ref.read(selectedTagsProvider.notifier).state = currentTags.where((t) => t != tag).toList();
                     }
                   },
                   backgroundColor: isSelected ? Colors.blue.withValues(alpha: 0.1) : null,
@@ -568,7 +585,11 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
               return ActionChip(
                 label: Text(tag),
                 onPressed: () {
-                  ref.read(selectedTagsProvider.notifier).state = [tag];
+                  final currentTags = ref.read(selectedTagsProvider);
+                  // Add tag to current selection if not already present
+                  if (!currentTags.contains(tag)) {
+                    ref.read(selectedTagsProvider.notifier).state = [...currentTags, tag];
+                  }
                   customController.clear();
                 },
                 backgroundColor: Colors.grey.withValues(alpha: 0.1),

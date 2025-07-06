@@ -467,9 +467,16 @@ async def update_audio_tags(
         update_data["category"] = tag_update.category.strip() if tag_update.category.strip() else None
     
     if update_data:
+        # Check if this is the first time tags are being set or updated
+        has_previous_tags = audio_file.tags and len(audio_file.tags) > 0
+        
         updated_file = await audio_repo.update(audio_id, update_data)
         if updated_file:
             logger.info(f"Updated tags for audio file {audio_id}: {update_data}")
+            
+            # Trigger appropriate Celery task based on whether tags existed before
+            await _trigger_transcript_processing_after_tag_update(audio_id, has_previous_tags)
+            
             return AudioFileResponse.from_orm(updated_file)
     
     return AudioFileResponse.from_orm(audio_file)
@@ -570,6 +577,52 @@ async def start_processing(
         "processing_status": ProcessingStatus.PENDING_PROCESSING,
         "message": "Processing started successfully"
     }
+
+
+async def _trigger_transcript_processing_after_tag_update(audio_id: UUID, has_previous_tags: bool):
+    """Trigger appropriate transcript processing task after tag update."""
+    from workers.tasks.transcript_processor import process_transcript, reprocess_transcript
+    from models.job import JobType, ProcessingJob, JobStatus
+    from core.database import async_session
+    from models.audio_file import AudioFile
+    from sqlalchemy.future import select
+
+    task_name = "reprocess_transcript" if has_previous_tags else "process_transcript"
+    logger.info(f"Triggering {task_name} task for audio {audio_id} after tag update")
+
+    async with async_session() as db:
+        try:
+            result = await db.execute(select(AudioFile).filter(AudioFile.id == audio_id))
+            audio_file = result.scalar_one_or_none()
+
+            if not audio_file:
+                logger.error(f"Audio file {audio_id} not found, cannot start {task_name} job.")
+                return
+
+            job = ProcessingJob(
+                job_type=JobType.TRANSCRIPT_PROCESSING,
+                status=JobStatus.PENDING,
+                input_data={"audio_id": str(audio_id), "task_type": task_name},
+                user_id=audio_file.user_id,
+                audio_file_id=audio_id
+            )
+            db.add(job)
+            await db.commit()
+            await db.refresh(job)
+
+            # Trigger the appropriate task
+            if has_previous_tags:
+                task_result = reprocess_transcript.delay(audio_id=str(audio_id), job_id=str(job.id))
+            else:
+                task_result = process_transcript.delay(audio_id=str(audio_id), job_id=str(job.id))
+            
+            job.celery_task_id = task_result.id
+            await db.commit()
+
+            logger.info(f"Dispatched {task_name} task {task_result.id} for audio {audio_id}")
+
+        except Exception as e:
+            logger.error(f"Failed to dispatch {task_name} task for {audio_id}: {e}", exc_info=True)
 
 
 async def trigger_processing_task(audio_id: UUID):
