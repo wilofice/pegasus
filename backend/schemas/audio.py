@@ -26,7 +26,7 @@ class AudioFileResponse(BaseModel):
     upload_timestamp: Optional[datetime] = None
     processing_status: ProcessingStatus
     error_message: Optional[str] = None
-    tag: Optional[str] = None
+    tags: List[str] = Field(default_factory=list, description="User-defined tags")
     category: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -97,7 +97,14 @@ class AudioProcessingStatusResponse(BaseModel):
 
 class AudioTagUpdateRequest(BaseModel):
     """Request schema for updating audio file tags."""
-    tag: Optional[str] = Field(None, max_length=100, description="User-defined tag")
+    tags: List[str] = Field(default_factory=list, description="User-defined tags")
+    category: Optional[str] = Field(None, max_length=100, description="System category")
+
+
+class TranscriptUpdateRequest(BaseModel):
+    """Request schema for updating transcript and tags before processing."""
+    improved_transcript: str = Field(..., description="User-edited improved transcript")
+    tags: List[str] = Field(default_factory=list, description="User-defined tags")
     category: Optional[str] = Field(None, max_length=100, description="System category")
 
 

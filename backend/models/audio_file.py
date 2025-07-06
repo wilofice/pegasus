@@ -2,7 +2,7 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Float, BigInteger, Text, DateTime, Enum, Boolean
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import relationship
 import enum
 
@@ -13,6 +13,7 @@ class ProcessingStatus(str, enum.Enum):
     """Audio file processing status."""
     UPLOADED = "uploaded"
     TRANSCRIBING = "transcribing"
+    PENDING_REVIEW = "pending_review"  # New status for manual review
     PENDING_PROCESSING = "pending_processing"
     IMPROVING = "improving"
     COMPLETED = "completed"
@@ -56,7 +57,7 @@ class AudioFile(Base):
     error_message = Column(Text)
     
     # Tagging and categorization
-    tag = Column(String(100), index=True)  # User-defined tag (e.g., "Work", "Family", "Groceries")
+    tags = Column(ARRAY(String(100)), default=[], index=True)  # Multiple user-defined tags
     category = Column(String(100), index=True)  # System category (optional)
     
     # Brain indexing status
@@ -91,7 +92,7 @@ class AudioFile(Base):
             "upload_timestamp": self.upload_timestamp.isoformat() if self.upload_timestamp else None,
             "processing_status": self.processing_status.value if self.processing_status else None,
             "error_message": self.error_message,
-            "tag": self.tag,
+            "tags": self.tags or [],
             "category": self.category,
             "vector_indexed": self.vector_indexed,
             "vector_indexed_at": self.vector_indexed_at.isoformat() if self.vector_indexed_at else None,

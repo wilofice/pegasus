@@ -210,17 +210,51 @@ class PegasusApiClient {
     }
   }
 
-  /// Update audio file tags
-  Future<bool> updateAudioTags(String audioId, {String? tag, String? category}) async {
+  /// Update audio file tags (supports multiple tags)
+  Future<bool> updateAudioTags(String audioId, {List<String>? tags, String? category}) async {
     try {
       final data = <String, dynamic>{};
-      if (tag != null) data['tag'] = tag;
+      if (tags != null) data['tags'] = tags;
       if (category != null) data['category'] = category;
       
       final response = await _dio.put('${ApiConfig.updateTagsEndpoint}$audioId/tags', data: data);
       return response.statusCode == 200;
     } catch (e) {
       throw Exception('Failed to update audio tags: $e');
+    }
+  }
+
+  /// Update transcript and tags before processing
+  Future<Map<String, dynamic>?> updateTranscriptAndTags(
+    String audioId, 
+    String improvedTranscript, 
+    List<String> tags, 
+    {String? category}
+  ) async {
+    try {
+      final data = <String, dynamic>{
+        'improved_transcript': improvedTranscript,
+        'tags': tags,
+      };
+      if (category != null) data['category'] = category;
+      
+      final response = await _dio.put('${ApiConfig.updateTagsEndpoint}$audioId/transcript-and-tags', data: data);
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to update transcript and tags: $e');
+    }
+  }
+
+  /// Start processing after user review and approval
+  Future<bool> startProcessing(String audioId) async {
+    try {
+      final response = await _dio.post('${ApiConfig.updateTagsEndpoint}$audioId/start-processing');
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Failed to start processing: $e');
     }
   }
 

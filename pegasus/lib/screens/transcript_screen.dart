@@ -9,9 +9,14 @@ import 'review_reflection_screen.dart';
 final transcriptDataProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
 final bothTranscriptsProvider = StateProvider<Map<String, String?>>((ref) => {});
 final isLoadingProvider = StateProvider<bool>((ref) => true);
-final selectedTagProvider = StateProvider<String?>((ref) => null);
+final selectedTagsProvider = StateProvider<List<String>>((ref) => []);  // Changed to List<String>
 final availableTagsProvider = StateProvider<List<String>>((ref) => []);
 final customTagControllerProvider = StateProvider<TextEditingController>((ref) => TextEditingController());
+
+// New providers for editing
+final isEditingProvider = StateProvider<bool>((ref) => false);
+final editedTranscriptProvider = StateProvider<String?>((ref) => null);
+final transcriptControllerProvider = StateProvider<TextEditingController>((ref) => TextEditingController());
 
 class TranscriptScreen extends ConsumerStatefulWidget {
   final String audioId;
@@ -29,7 +34,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);  // Changed to 3 tabs
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
@@ -39,6 +44,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
   void dispose() {
     _tabController.dispose();
     ref.read(customTagControllerProvider).dispose();
+    ref.read(transcriptControllerProvider).dispose();
     super.dispose();
   }
   
@@ -56,10 +62,17 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
         ref.read(bothTranscriptsProvider.notifier).state = bothTranscripts;
       }
       
-      // Load audio file details to get current tag
+      // Load audio file details to get current tags
       final audioData = await _apiClient.getAudioFile(widget.audioId);
-      if (audioData != null && audioData['tag'] != null) {
-        ref.read(selectedTagProvider.notifier).state = audioData['tag'] as String;
+      if (audioData != null && audioData['tags'] != null) {
+        ref.read(selectedTagsProvider.notifier).state = List<String>.from(audioData['tags'] as List);
+      }
+      
+      // Initialize transcript editor if in PENDING_REVIEW status
+      if (transcriptData != null && transcriptData['status'] == 'pending_review') {
+        final improvedTranscript = transcriptData['transcript'] as String? ?? '';
+        ref.read(editedTranscriptProvider.notifier).state = improvedTranscript;
+        ref.read(transcriptControllerProvider.notifier).state.text = improvedTranscript;
       }
       
       // Load available tags

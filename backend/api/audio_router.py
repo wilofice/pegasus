@@ -18,6 +18,7 @@ from schemas.audio import (
     AudioFileListResponse,
     AudioUploadResponse,
     AudioTagUpdateRequest,
+    TranscriptUpdateRequest,
     AudioTagsResponse
 )
 
@@ -98,7 +99,7 @@ async def upload_audio(
             "processing_status": ProcessingStatus.UPLOADED
         })
         
-        # Add background task for processing
+        # Start only transcription (not full processing)
         background_tasks.add_task(
             trigger_transcription_task,
             audio_id=audio_record.id,
@@ -114,7 +115,7 @@ async def upload_audio(
             file_size_bytes=audio_record.file_size_bytes,
             upload_timestamp=audio_record.upload_timestamp,
             processing_status=audio_record.processing_status,
-            message="File uploaded successfully. Processing will begin shortly."
+            message="File uploaded successfully. Transcription will begin shortly."
         )
         
     except ValueError as e:
@@ -458,8 +459,10 @@ async def update_audio_tags(
     
     # Update tags/categories
     update_data = {}
-    if tag_update.tag is not None:
-        update_data["tag"] = tag_update.tag.strip() if tag_update.tag.strip() else None
+    if tag_update.tags is not None:
+        # Clean and filter tags
+        clean_tags = [tag.strip() for tag in tag_update.tags if tag.strip()]
+        update_data["tags"] = clean_tags
     if tag_update.category is not None:
         update_data["category"] = tag_update.category.strip() if tag_update.category.strip() else None
     
@@ -470,3 +473,140 @@ async def update_audio_tags(
             return AudioFileResponse.from_orm(updated_file)
     
     return AudioFileResponse.from_orm(audio_file)
+
+
+@router.put("/{audio_id}/transcript-and-tags", response_model=AudioFileResponse)
+async def update_transcript_and_tags(
+    audio_id: UUID,
+    transcript_update: TranscriptUpdateRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Update transcript and tags before processing.
+    
+    Args:
+        audio_id: UUID of the audio file
+        transcript_update: Transcript and tag updates
+        
+    Returns:
+        Updated audio file information
+    """
+    audio_repo = AudioRepository(db)
+    audio_file = await audio_repo.get_by_id(audio_id)
+    
+    if not audio_file:
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    # Verify file is in PENDING_REVIEW status
+    if audio_file.processing_status != ProcessingStatus.PENDING_REVIEW:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot update transcript. File status is {audio_file.processing_status}, expected PENDING_REVIEW"
+        )
+    
+    # Update transcript and tags
+    update_data = {
+        "improved_transcript": transcript_update.improved_transcript.strip(),
+        "tags": [tag.strip() for tag in transcript_update.tags if tag.strip()],
+    }
+    
+    if transcript_update.category:
+        update_data["category"] = transcript_update.category.strip()
+    
+    updated_file = await audio_repo.update(audio_id, update_data)
+    
+    if updated_file:
+        logger.info(f"Updated transcript and tags for audio file {audio_id}")
+        return AudioFileResponse.from_orm(updated_file)
+    
+    raise HTTPException(status_code=500, detail="Failed to update audio file")
+
+
+@router.post("/{audio_id}/start-processing")
+async def start_processing(
+    audio_id: UUID,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db)
+):
+    """Start full processing after user review and approval.
+    
+    Args:
+        audio_id: UUID of the audio file
+        
+    Returns:
+        Processing status information
+    """
+    audio_repo = AudioRepository(db)
+    audio_file = await audio_repo.get_by_id(audio_id)
+    
+    if not audio_file:
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    # Verify file is in PENDING_REVIEW status and has improved transcript
+    if audio_file.processing_status != ProcessingStatus.PENDING_REVIEW:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot start processing. File status is {audio_file.processing_status}, expected PENDING_REVIEW"
+        )
+    
+    if not audio_file.improved_transcript:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot start processing. No improved transcript available"
+        )
+    
+    # Update status to PENDING_PROCESSING
+    await audio_repo.update_status(audio_id, ProcessingStatus.PENDING_PROCESSING)
+    
+    # Trigger the processing chain
+    background_tasks.add_task(
+        trigger_processing_task,
+        audio_id=audio_id
+    )
+    
+    logger.info(f"Started manual processing for audio file {audio_id}")
+    
+    return {
+        "id": audio_id,
+        "processing_status": ProcessingStatus.PENDING_PROCESSING,
+        "message": "Processing started successfully"
+    }
+
+
+async def trigger_processing_task(audio_id: UUID):
+    """Trigger the transcript processing task."""
+    from workers.tasks.transcript_processor import process_transcript
+    from models.job import JobType, ProcessingJob, JobStatus
+    from core.database import async_session
+    from models.audio_file import AudioFile
+    from sqlalchemy.future import select
+
+    logger.info(f"Dispatching processing task for audio {audio_id}")
+
+    async with async_session() as db:
+        try:
+            result = await db.execute(select(AudioFile).filter(AudioFile.id == audio_id))
+            audio_file = result.scalar_one_or_none()
+
+            if not audio_file:
+                logger.error(f"Audio file {audio_id} not found, cannot start processing job.")
+                return
+
+            job = ProcessingJob(
+                job_type=JobType.PROCESSING,
+                status=JobStatus.PENDING,
+                input_data={"audio_id": str(audio_id)},
+                user_id=audio_file.user_id,
+                audio_file_id=audio_id
+            )
+            db.add(job)
+            await db.commit()
+            await db.refresh(job)
+
+            task_result = process_transcript.delay(audio_id=str(audio_id), job_id=str(job.id))
+            job.celery_task_id = task_result.id
+            await db.commit()
+
+            logger.info(f"Dispatched processing task {task_result.id} for audio {audio_id}")
+
+        except Exception as e:
+            logger.error(f"Failed to dispatch processing task for {audio_id}: {e}", exc_info=True)

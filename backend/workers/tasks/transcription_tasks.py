@@ -18,7 +18,6 @@ def transcribe_audio(self, audio_id: str, job_id: str = None):
         from core.database import async_session
         from repositories.audio_repository import AudioRepository
         from services.transcription_service import TranscriptionService
-        from .transcript_processor import process_transcript
 
         self._job_id = UUID(job_id) if job_id else None
         audio_uuid = UUID(audio_id)
@@ -49,13 +48,12 @@ def transcribe_audio(self, audio_id: str, job_id: str = None):
                     "duration_seconds": await transcription_service.get_audio_duration(audio_file.file_path)
                 })
                 
-                self.log_progress(2, 3, "Transcription complete, queueing processing")
-                await audio_repo.update_status(audio_uuid, ProcessingStatus.PENDING_PROCESSING)
+                self.log_progress(2, 3, "Transcription complete, awaiting user review")
+                await audio_repo.update_status(audio_uuid, ProcessingStatus.PENDING_REVIEW)
 
-                # Chain the next task
-                process_transcript.delay(audio_id=audio_id, job_id=job_id)
-
-                self.log_progress(3, 3, "Processing task queued")
+                # Do NOT chain to process_transcript - wait for user confirmation
+                
+                self.log_progress(3, 3, "Transcription complete - ready for user review")
 
                 return {"status": "success", "audio_id": audio_id}
 
