@@ -54,27 +54,39 @@ class _ChatScreenEnhancedState extends ConsumerState<ChatScreenEnhanced> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatV2Provider);
+    final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     
     return Scaffold(
       appBar: _buildAppBar(chatState),
-      resizeToAvoidBottomInset: true, // Ensure proper keyboard handling
-      body: Column(
-        children: [
-          if (_showSettings) _buildSettingsPanel(chatState),
-          if (_showContextSearch) 
-            Flexible(
-              flex: 2,
-              child: ContextSearchPanel(
-                showInline: true,
-                onResultSelected: _handleContextResult,
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              height: constraints.maxHeight,
+              child: Column(
+                children: [
+                  // Hide settings panel when keyboard is visible to save space
+                  if (_showSettings && !keyboardVisible) 
+                    _buildSettingsPanel(chatState),
+                  if (_showContextSearch && !keyboardVisible) 
+                    Flexible(
+                      flex: 2,
+                      child: ContextSearchPanel(
+                        showInline: true,
+                        onResultSelected: _handleContextResult,
+                      ),
+                    ),
+                  Flexible(
+                    flex: 1,
+                    child: _buildMessagesList(chatState),
+                  ),
+                  _buildInputArea(chatState),
+                ],
               ),
-            ),
-          Flexible(
-            flex: _showContextSearch ? 3 : 5,
-            child: _buildMessagesList(chatState),
-          ),
-          _buildInputArea(chatState),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -312,84 +324,94 @@ class _ChatScreenEnhancedState extends ConsumerState<ChatScreenEnhanced> {
   }
 
   Widget _buildInputArea(ChatV2State chatState) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.grey.shade200)),
+    final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 12,
+          right: 12,
+          top: keyboardVisible ? 4 : 8,
+          bottom: keyboardVisible ? 4 : 12,
         ),
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 8,
-            bottom: MediaQuery.of(context).viewInsets.bottom > 0
-                ? 8 // Reduced bottom padding when keyboard is shown
-                : 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // Important: use minimum space
-            children: [
-              if (!_showContextSearch && MediaQuery.of(context).viewInsets.bottom == 0)
-                QuickContextSearch(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Only show QuickContextSearch when keyboard is hidden and no other panels are open
+            if (!_showContextSearch && !keyboardVisible && !_showSettings)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: QuickContextSearch(
                   onQuerySelected: (query) => _sendMessage(query),
                 ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      constraints: const BoxConstraints(
-                        maxHeight: 120, // Limit max height for multi-line input
-                      ),
-                      child: TextField(
-                        controller: _messageController,
-                        focusNode: _messageFocusNode,
-                        decoration: InputDecoration(
-                          hintText: 'Ask me anything...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          suffixIcon: chatState.isLoading
-                              ? const Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  ),
-                                )
-                              : null,
+              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxHeight: keyboardVisible ? 80 : 120, // Smaller when keyboard is visible
+                    ),
+                    child: TextField(
+                      controller: _messageController,
+                      focusNode: _messageFocusNode,
+                      decoration: InputDecoration(
+                        hintText: 'Ask me anything...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
-                        maxLines: null,
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: chatState.isLoading ? null : _handleSubmit,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: keyboardVisible ? 8 : 12,
+                        ),
+                        suffixIcon: chatState.isLoading
+                            ? const Padding(
+                                padding: EdgeInsets.all(8),
+                                child: SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              )
+                            : null,
                       ),
+                      maxLines: keyboardVisible ? 2 : null, // Limit lines when keyboard is visible
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: chatState.isLoading ? null : _handleSubmit,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  FloatingActionButton(
-                    mini: true,
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 2),
+                  child: IconButton(
+                    icon: const Icon(Icons.send, size: 20),
                     onPressed: chatState.isLoading ? null : () => _handleSubmit(_messageController.text),
-                    child: const Icon(Icons.send),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.all(8),
+                      minimumSize: const Size(40, 40),
+                    ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
