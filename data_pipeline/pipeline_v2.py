@@ -105,6 +105,39 @@ class EnhancedPipeline:
                 self.callback(file_path)
         else:
             LOGGER.info("No existing audio files found")
+    
+    async def monitor_job_progress(self, audio_id: str, check_interval: int = 30):
+        """
+        Monitor job progress for an audio file.
+        
+        Args:
+            audio_id: Audio file UUID
+            check_interval: Seconds between progress checks
+        """
+        import asyncio
+        from backend_integration import BackendAudioProcessor
+        
+        processor = BackendAudioProcessor()
+        
+        while True:
+            try:
+                progress = await processor.get_job_progress(audio_id)
+                if not progress:
+                    LOGGER.warning(f"No progress info found for audio {audio_id}")
+                    break
+                
+                LOGGER.info(f"Progress for {audio_id}: {progress['completed_jobs']}/{progress['total_jobs']} jobs completed")
+                
+                # Check if all jobs are completed or failed
+                if progress['completed_jobs'] + progress['failed_jobs'] >= progress['total_jobs']:
+                    LOGGER.info(f"All jobs completed for audio {audio_id}")
+                    break
+                
+                await asyncio.sleep(check_interval)
+                
+            except Exception as e:
+                LOGGER.error(f"Error monitoring progress for {audio_id}: {e}")
+                break
 
 
 def main():

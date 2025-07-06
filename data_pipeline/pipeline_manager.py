@@ -103,6 +103,7 @@ class PipelineManager:
         if audio_id:
             print(f"✅ Successfully started processing: {audio_id}")
             print(f"You can check status with: python pipeline_manager.py check-status {audio_id}")
+            print(f"You can monitor jobs with: python pipeline_manager.py jobs {audio_id}")
         else:
             print("❌ Failed to process file")
     
@@ -121,6 +122,41 @@ class PipelineManager:
             print(json.dumps(status, indent=2))
         else:
             print("❌ Audio file not found or status unavailable")
+    
+    async def check_jobs(self, audio_id: str):
+        """
+        Check job progress for an audio file.
+        
+        Args:
+            audio_id: Audio file UUID
+        """
+        print(f"Checking job progress for audio ID: {audio_id}")
+        
+        progress = await self.processor.get_job_progress(audio_id)
+        
+        if progress:
+            print(f"\n=== Job Progress for {audio_id} ===")
+            print(f"Total Jobs: {progress['total_jobs']}")
+            print(f"Completed: {progress['completed_jobs']}")
+            print(f"Failed: {progress['failed_jobs']}")
+            print(f"Progress: {progress['completed_jobs']}/{progress['total_jobs']} ({100 * progress['completed_jobs'] / progress['total_jobs']:.1f}%)")
+            print("\n=== Job Details ===")
+            
+            for job in progress['jobs']:
+                status_icon = "✅" if job['status'] == 'COMPLETED' else "❌" if job['status'] == 'FAILED' else "⏳"
+                print(f"{status_icon} {job['type']} - {job['status']}")
+                print(f"   ID: {job['id']}")
+                if job['progress']:
+                    print(f"   Progress: {job['progress']}%")
+                if job['started_at']:
+                    print(f"   Started: {job['started_at']}")
+                if job['completed_at']:
+                    print(f"   Completed: {job['completed_at']}")
+                if job['error_message']:
+                    print(f"   Error: {job['error_message']}")
+                print()
+        else:
+            print("❌ No job information found")
     
     async def list_recent(self, limit: int = 10):
         """
@@ -218,6 +254,10 @@ async def main():
     check_parser = subparsers.add_parser("check-status", help="Check processing status")
     check_parser.add_argument("audio_id", help="Audio file UUID")
     
+    # Check jobs command
+    jobs_parser = subparsers.add_parser("jobs", help="Check job progress for audio file")
+    jobs_parser.add_argument("audio_id", help="Audio file UUID")
+    
     # List recent command
     list_parser = subparsers.add_parser("list-recent", help="List recent processed files")
     list_parser.add_argument("--limit", type=int, default=10, help="Number of files to show")
@@ -241,6 +281,8 @@ async def main():
             await manager.process_file(args.file_path, args.user_id, args.language)
         elif args.command == "check-status":
             await manager.check_status(args.audio_id)
+        elif args.command == "jobs":
+            await manager.check_jobs(args.audio_id)
         elif args.command == "list-recent":
             await manager.list_recent(args.limit)
         elif args.command == "clean-logs":
