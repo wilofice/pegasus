@@ -9,9 +9,8 @@ from fastapi import APIRouter, Depends, HTTPException, Header, status, Query
 from pydantic import BaseModel, Field
 
 from services.chat_orchestrator_factory import get_default_chat_orchestrator
-from services.chat_orchestrator_v2 import (
-    ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle, ChatResponse
-)
+from services.chat_orchestrator_v2 import ChatOrchestratorV2
+from services.chat_types import ChatConfig, ConversationMode, ResponseStyle, ChatResponse
 from services.context_aggregator_v2 import AggregationStrategy
 from services.context_ranker import RankingStrategy
 

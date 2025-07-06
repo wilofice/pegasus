@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum
 
 from services.context_aggregator_v2 import AggregatedContext
-from services.chat_orchestrator_v2 import ChatConfig, ConversationMode, ResponseStyle, ConversationContext
+from services.chat_types import ChatConfig, ConversationMode, ResponseStyle, ConversationContext
 
 logger = logging.getLogger(__name__)
 
