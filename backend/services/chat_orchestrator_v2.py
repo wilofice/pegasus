@@ -50,11 +50,14 @@ class ChatOrchestratorV2:
         config = config or self.default_config
         session_id = session_id or str(uuid.uuid4())
         
+        # Track timing for different operations
+        context_start = datetime.now()
+        plugin_start = None
+        llm_start = None
+        
         async with async_session() as db:
             try:
                 history_repo = ConversationHistoryRepository(db)
-                
-                metrics = ChatMetrics(total_processing_time_ms=0)
                 
                 conversation_history = await history_repo.get_recent_for_user(
                     user_id, settings.conversation_history_lookback_days
@@ -66,20 +69,46 @@ class ChatOrchestratorV2:
                     conversation_history=[h.to_dict() for h in conversation_history]
                 )
 
+                # Retrieve context
                 aggregated_context = await self._retrieve_context(message, config, user_id, context, **kwargs)
+                context_time = (datetime.now() - context_start).total_seconds() * 1000
                 
+                # Process plugins
+                plugin_start = datetime.now()
                 plugin_results = await self._process_plugins(message, aggregated_context, config, context)
+                plugin_time = (datetime.now() - plugin_start).total_seconds() * 1000
                 
+                # Generate response
+                llm_start = datetime.now()
                 response_text = await self._generate_response(
                     message, aggregated_context, plugin_results, config, context, db
                 )
+                llm_time = (datetime.now() - llm_start).total_seconds() * 1000
                 
+                # Save conversation
                 await self._save_and_process_conversation(
                     history_repo, session_id, user_id, message, response_text, aggregated_context
                 )
 
+                # Calculate total time
                 total_time = (datetime.now() - start_time).total_seconds() * 1000
-                metrics.total_processing_time_ms = total_time
+                
+                # Extract metrics from aggregated context
+                context_results_count = len(aggregated_context.results) if aggregated_context and aggregated_context.results else 0
+                top_context_score = aggregated_context.results[0].unified_score if aggregated_context and aggregated_context.results else 0.0
+                plugins_executed = plugin_results.get("executed_plugins", []) if plugin_results else []
+                
+                # Create metrics with all required arguments
+                metrics = ChatMetrics(
+                    context_retrieval_time_ms=context_time,
+                    llm_generation_time_ms=llm_time,
+                    plugin_processing_time_ms=plugin_time,
+                    total_processing_time_ms=total_time,
+                    context_results_count=context_results_count,
+                    top_context_score=top_context_score,
+                    plugins_executed=plugins_executed,
+                    confidence_score=self._calculate_confidence(aggregated_context, plugin_results)
+                )
 
                 return ChatResponse(
                     response=response_text,
@@ -93,7 +122,23 @@ class ChatOrchestratorV2:
 
             except Exception as e:
                 logger.error(f"Chat processing failed: {e}", exc_info=True)
-                return ChatResponse(response="An error occurred.", session_id=session_id, config=config)
+                # Create minimal metrics for error case
+                error_metrics = ChatMetrics(
+                    context_retrieval_time_ms=0.0,
+                    llm_generation_time_ms=0.0,
+                    plugin_processing_time_ms=0.0,
+                    total_processing_time_ms=(datetime.now() - start_time).total_seconds() * 1000,
+                    context_results_count=0,
+                    top_context_score=0.0,
+                    plugins_executed=[],
+                    confidence_score=0.0
+                )
+                return ChatResponse(
+                    response="I apologize, but I encountered an error while processing your request. Please try again.",
+                    session_id=session_id,
+                    config=config,
+                    metrics=error_metrics
+                )
 
     async def _retrieve_context(self, message: str, config: ChatConfig, user_id: Optional[str], context: ConversationContext, **kwargs) -> AggregatedContext:
         aggregation_config = AggregationConfig(
@@ -166,3 +211,20 @@ class ChatOrchestratorV2:
 
     def _generate_suggestions(self, message: str, aggregated_context: AggregatedContext, config: ChatConfig) -> List[str]:
         return ["Tell me more about that."]
+    
+    def _calculate_confidence(self, aggregated_context: AggregatedContext, plugin_results: Dict[str, Any]) -> float:
+        """Calculate confidence score based on context quality and plugin results."""
+        confidence = 0.5  # Base confidence
+        
+        # Boost confidence based on context quality
+        if aggregated_context and aggregated_context.results:
+            top_scores = [r.unified_score for r in aggregated_context.results[:3]]
+            if top_scores:
+                avg_top_score = sum(top_scores) / len(top_scores)
+                confidence = 0.3 + (avg_top_score * 0.5)  # 30-80% based on context
+        
+        # Boost confidence if plugins provided additional data
+        if plugin_results and plugin_results.get("results"):
+            confidence = min(confidence + 0.1, 0.95)  # Add 10% for plugin data, cap at 95%
+        
+        return round(confidence, 2)
