@@ -1,0 +1,41 @@
+└──╼ $./setup_vertex_ai_ubuntu.sh 
+gcloud CLI is already installed.
+Authenticating gcloud CLI. A browser window will open for login.
+Your browser has been opened to visit:
+
+    https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=32555940559.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8085%2F&scope=openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fappengine.admin+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fsqlservice.login+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcompute+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Faccounts.reauth&state=Uan8kO3HXj53Q7eQ9EeAjZnd8qQh1g&access_type=offline&code_challenge=s3NRJ4Q3-PIcX-b-2t3WW8_tAfSsH2vdoOx-4QBL-2g&code_challenge_method=S256
+
+
+You are now logged in as [genereux.alahassa@gmail.com].
+Your current project is [None].  You can change this setting by running:
+  $ gcloud config set project PROJECT_ID
+Enter your Google Cloud Project ID: gen-lang-client-0319023828
+Enabling required Google Cloud APIs...
+ERROR: (gcloud.services.enable) PERMISSION_DENIED: Not found or permission denied for service(s): vertexai.googleapis.com.
+Help Token: AeNz4PjLqedA-syooCHXldEJKLzqQr9oSZk3oconD-xksMQqjMASduJ1nb7g_ghN4fgU7uYZ3Y8BZ8--r_9Hsmi-BlW83xebF2-eG_1Z2KAL2xyM. This command is authenticated as genereux.alahassa@gmail.com which is the active account specified by the [core/account] property
+- '@type': type.googleapis.com/google.rpc.PreconditionFailure
+  violations:
+  - subject: ?error_code=220002&services=vertexai.googleapis.com
+    type: googleapis.com
+- '@type': type.googleapis.com/google.rpc.ErrorInfo
+  domain: serviceusage.googleapis.com
+  metadata:
+    services: vertexai.googleapis.com
+  reason: SERVICE_CONFIG_NOT_FOUND_OR_PERMISSION_DENIED
+Creating Vertex AI Agent Engine instance...
+Failed to extract Agent Engine ID. Please check the output above for errors.
+Agent Engine creation output: ERROR: (gcloud.alpha) Invalid choice: 'vertex-ai'.
+Maybe you meant:
+  gcloud alpha container ai profiles manifests create
+  gcloud alpha container ai recommender manifests create
+  gcloud ai custom-jobs create
+  gcloud ai endpoints create
+  gcloud ai hp-tuning-jobs create
+  gcloud ai index-endpoints create
+  gcloud ai indexes create
+  gcloud ai model-monitoring-jobs create
+  gcloud ai persistent-resources create
+  gcloud ai tensorboards create
+
+To search the help text of gcloud commands, run:
+  gcloud help -- SEARCH_TERMS
