@@ -420,20 +420,23 @@ async def process_audio_file(audio_id: UUID, file_path: str):
             if audio_file and audio_file.improved_transcript:
                 try:
                     from workers.tasks.transcript_processor import process_transcript
-                    from models.job import JobType
-                    from repositories.job_repository import JobRepository
+                    from models.job import JobType, ProcessingJob, JobStatus
                     
-                    # Create a job record for tracking
-                    job_repo = JobRepository(db)
-                    job = await job_repo.create({
-                        "name": f"Process transcript for audio {audio_id}",
-                        "job_type": JobType.TRANSCRIPT_PROCESSING,
-                        "parameters": {
+                    # Create a job record for tracking using direct model creation
+                    job = ProcessingJob(
+                        job_type=JobType.TRANSCRIPT_PROCESSING,
+                        status=JobStatus.PENDING,
+                        input_data={
                             "audio_id": str(audio_id),
                             "user_id": audio_file.user_id
                         },
-                        "user_id": audio_file.user_id
-                    })
+                        user_id=audio_file.user_id,
+                        audio_file_id=audio_id
+                    )
+                    
+                    db.add(job)
+                    await db.commit()
+                    await db.refresh(job)
                     
                     # Dispatch Celery task
                     result = process_transcript.delay(
@@ -442,7 +445,8 @@ async def process_audio_file(audio_id: UUID, file_path: str):
                     )
                     
                     # Update job with task ID
-                    await job_repo.update(job.id, {"task_id": result.id})
+                    job.celery_task_id = result.id
+                    await db.commit()
                     
                     logger.info(f"Dispatched transcript processing task {result.id} for audio {audio_id}")
                     
@@ -481,14 +485,20 @@ async def get_indexing_status(
         raise HTTPException(status_code=404, detail="Audio file not found")
     
     # Check if there's an active job for this audio file
-    from repositories.job_repository import JobRepository
-    from models.job import JobType, JobStatus
+    from models.job import JobType, JobStatus, ProcessingJob
+    from sqlalchemy import select, and_
     
-    job_repo = JobRepository(db)
-    active_job = await job_repo.get_active_job_for_resource(
-        resource_id=audio_id,
-        job_type=JobType.TRANSCRIPT_PROCESSING
+    # Query for active job directly using async session
+    result = await db.execute(
+        select(ProcessingJob).where(
+            and_(
+                ProcessingJob.audio_file_id == audio_id,
+                ProcessingJob.job_type == JobType.TRANSCRIPT_PROCESSING,
+                ProcessingJob.status.in_([JobStatus.PENDING, JobStatus.PROCESSING])
+            )
+        ).order_by(ProcessingJob.created_at.desc())
     )
+    active_job = result.scalar_one_or_none()
     
     return {
         "audio_id": str(audio_id),
