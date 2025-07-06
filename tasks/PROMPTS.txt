@@ -1,0 +1,11 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+a) We have a problem; The ultimate purpose of Pegasus is to be a life Coach. I've implemented an intelligent system prompt for the LLM at the heart in                                      │
+│    'backend/services/intelligent_prompt_builder.py' . But sometimes, it seems that sometimes the LLM allucinates; It says things that are not related to anything I've said. We need to make │
+│     sure that in the prompt, the LLM has the instructions that indicates him to avoid hallucinating. Secondly, currently, it seems on that 'backend/api/chat_router_v2.py' we are not saving │
+│     each conversation chat (request/response) in the database. That is not good, it is very important for the LLM to know all previous conversations messages. At least the last K days      │
+│    messages (basically 1 day but set this a config in Settings (.env file)). We need also to add the conversation history into the processing pipeline (chromadb, ner, neo4j) in other to    │
+│    use them later for similarity or semantic search; They need to be a celery task that is schedule after each user request. It must be delayed of of 5 minutes; If you have any better idea │
+│     or option to suggest, please do so and act on it; That time schedule config for the celery task  need to be added to Settings (.env file). One last thing is that we need also to add to │
+│     LLM prompt, last 12h audio improved transcripts . This 12h config must be in Settings as well. One last thing but not least, is the Ollama Service LLM tends to add extra content to the │
+│     improved transcript he produces. That is not good. Enforce the prompt to make sure the llm avoids adding extra text that doesn't matter to us;
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

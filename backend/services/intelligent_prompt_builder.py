@@ -38,71 +38,51 @@ class IntelligentPromptBuilder:
                                 aggregated_context: AggregatedContext,
                                 plugin_results: Dict[str, Any],
                                 config: ChatConfig,
-                                conversation_context: ConversationContext) -> str:
+                                conversation_context: ConversationContext,
+                                recent_transcripts: List[str]) -> str:
         """
         Build an intelligent, comprehensive prompt that maximizes context utilization.
-        
-        Args:
-            user_message: The user's question/request
-            aggregated_context: Retrieved and ranked context from various sources
-            plugin_results: Results from executed plugins
-            config: Chat configuration
-            conversation_context: Conversation history and metadata
-            
-        Returns:
-            A sophisticated prompt optimized for the LLM
         """
         try:
-            # Determine optimal prompt strategy
-            prompt_strategy = self._determine_prompt_strategy(
-                user_message, aggregated_context, config
-            )
+            prompt_strategy = self._determine_prompt_strategy(user_message, aggregated_context, config)
             
-            # Build structured prompt components
             prompt_components = []
             
-            # 1. Core System Instructions
             system_prompt = self._build_system_instructions(config, prompt_strategy)
             prompt_components.append(system_prompt)
+
+            if recent_transcripts:
+                transcript_section = self._build_transcript_section(recent_transcripts)
+                prompt_components.append(transcript_section)
             
-            # 2. Context Analysis and Integration
             if aggregated_context.results:
                 context_section = self._build_context_section(aggregated_context, config)
                 prompt_components.append(context_section)
             
-            # 3. Plugin Intelligence Integration
             if plugin_results and plugin_results.get("results"):
                 plugin_section = self._build_plugin_section(plugin_results)
                 prompt_components.append(plugin_section)
             
-            # 4. Conversation Continuity
             if conversation_context.conversation_history:
                 history_section = self._build_conversation_section(conversation_context)
                 prompt_components.append(history_section)
             
-            # 5. Task-Specific Instructions
-            task_instructions = self._build_task_instructions(
-                user_message, aggregated_context, config
-            )
+            task_instructions = self._build_task_instructions(user_message, aggregated_context, config)
             prompt_components.append(task_instructions)
             
-            # 6. Response Framework
             response_framework = self._build_response_framework(config, aggregated_context)
             prompt_components.append(response_framework)
             
-            # 7. Quality Assurance Instructions
             quality_instructions = self._build_quality_instructions(config)
             prompt_components.append(quality_instructions)
             
-            # Combine all components
-            full_prompt = "\\n\\n".join(prompt_components)
+            full_prompt = "\n\n".join(prompt_components)
             
             logger.info(f"Built intelligent prompt with {len(prompt_components)} sections")
             return full_prompt
             
         except Exception as e:
             logger.error(f"Intelligent prompt building failed: {e}")
-            # Fallback to basic prompt
             return self._build_fallback_prompt(user_message, aggregated_context, config)
     
     def _determine_prompt_strategy(self,
@@ -255,7 +235,7 @@ Focus on:
         history_header = "=== CONVERSATION CONTEXT ==="
         
         # Include recent exchanges with context
-        recent_history = conversation_context.conversation_history[-3:]
+        recent_history = conversation_context.conversation_history
         history_parts = []
         
         for i, exchange in enumerate(recent_history, 1):
@@ -334,6 +314,8 @@ Focus on:
         
         quality_requirements = [
             "Ensure your response:",
+            "✓ Strictly adheres to the provided context. Do not add or infer information not present.",
+            "✓ Avoids hallucinations and making up facts. If the context is insufficient, state it clearly.",
             "✓ Directly addresses the user's question",
             "✓ Makes effective use of provided context",
             "✓ Maintains factual accuracy",
@@ -343,7 +325,16 @@ Focus on:
             "✓ Acknowledges uncertainty when appropriate"
         ]
         
-        return quality_header + "\\n" + "\\n".join(quality_requirements)
+        return quality_header + "\n" + "\n".join(quality_requirements)
+    
+    def _build_transcript_section(self, recent_transcripts: List[str]) -> str:
+        """Build the recent transcripts section."""
+        header = "=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ==="
+        if not recent_transcripts:
+            return ""
+        
+        transcripts_summary = "\n".join([f"- {t[:200]}..." for t in recent_transcripts])
+        return f"{header}\n{transcripts_summary}"
     
     def _get_confidence_indicator(self, score: float) -> str:
         """Get confidence indicator based on score."""

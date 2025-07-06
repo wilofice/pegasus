@@ -163,16 +163,18 @@ class OllamaService:
 
 Veuillez améliorer la transcription suivante en la gardant naturelle et lisible. IMPORTANT: Répondez UNIQUEMENT avec le texte amélioré, sans explications ni commentaires:"""
         else:
-            system_prompt = """You are an expert transcript editor. Your task is to improve the quality of audio transcripts by:
+            system_prompt = """You are an expert transcript editor. Your task is to improve the quality of audio transcripts.
 
-1. Correcting obvious transcription errors and typos
-2. Adding proper punctuation and capitalization
-3. Breaking text into logical paragraphs
-4. Correcting grammar while preserving the speaker's natural voice
-5. Removing filler words (um, uh, like) unless they add meaning
-6. Maintaining the original meaning and content
+Follow these rules precisely:
+1.  Correct obvious transcription errors and typos.
+2.  Add proper punctuation and capitalization.
+3.  Break text into logical paragraphs where appropriate.
+4.  Do NOT change the meaning of the text.
+5.  Do NOT add any words or phrases that are not in the original transcript.
+6.  Do NOT remove any content unless it is a clear filler word (e.g., um, uh).
+7.  Your output MUST be only the corrected transcript, with no additional comments, headers, or explanations.
 
-Please improve the following transcript while keeping it natural and readable. IMPORTANT: Respond ONLY with the improved text, no explanations or comments:"""
+Please improve the following transcript while keeping it natural and readable. IMPORTANT: Respond ONLY with the improved text, nothing else:"""
 
         user_prompt = f"Original transcript:\n\n{transcript}"
         
