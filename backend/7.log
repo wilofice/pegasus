@@ -1,0 +1,33 @@
+TTP/1.1 200 OK"
+INFO:services.chromadb_manager:Found 0 results for query in audio_transcripts
+INFO:services.retrieval.chromadb_retriever:ChromaDB search returned 0 results for query: 'What are my latest notes ?...'
+INFO:services.retrieval.neo4j_retriever:Neo4j search returned 0 results for query: 'What are my latest notes ?...'
+INFO:services.context_aggregator_v2:Context aggregation completed: 0 results in 4988.0ms
+INFO:services.plugin_manager:No enabled plugins found for type: PluginType.ANALYSIS
+INFO:services.plugin_manager:Processed message through 0 plugins
+ERROR:services.chat_orchestrator_v2:Chat processing failed: AudioRepository.list_with_filters() got an unexpected keyword argument 'created_after'
+Traceback (most recent call last):
+  File "/home/mica/Desktop/pegasus/backend/services/chat_orchestrator_v2.py", line 83, in chat
+    response_text = await self._generate_response(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        message, aggregated_context, plugin_results, config, context, db
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/mica/Desktop/pegasus/backend/services/chat_orchestrator_v2.py", line 158, in _generate_response
+    prompt = await self._build_prompt(message, aggregated_context, plugin_results, config, context, db)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/Desktop/pegasus/backend/services/chat_orchestrator_v2.py", line 169, in _build_prompt
+    recent_transcripts = await self._get_recent_transcripts(context.user_id, db)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/Desktop/pegasus/backend/services/chat_orchestrator_v2.py", line 183, in _get_recent_transcripts
+    recent_audio_files = await audio_repo.list_with_filters(
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        user_id=user_id,
+        ^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        created_after=since
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+TypeError: AudioRepository.list_with_filters() got an unexpected keyword argument 'created_after'
