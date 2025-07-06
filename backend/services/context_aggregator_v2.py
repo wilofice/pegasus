@@ -21,6 +21,7 @@ class AggregationStrategy(Enum):
     HYBRID = "hybrid"
     ENSEMBLE = "ensemble"
     ADAPTIVE = "adaptive"
+    GRAPH_TRAVERSAL = "graph_traversal"
 
 
 @dataclass
@@ -43,6 +44,9 @@ class AggregationConfig:
     # Performance settings
     timeout_seconds: float = 30.0
     parallel_retrieval: bool = True
+
+    # Graph Traversal settings
+    traversal_depth: int = 2
 
 
 @dataclass
@@ -105,19 +109,15 @@ class ContextAggregatorV2:
                  neo4j_retriever: Neo4jRetriever,
                  context_ranker: ContextRanker,
                  default_config: Optional[AggregationConfig] = None):
-        """Initialize context aggregator.
-        
-        Args:
-            chromadb_retriever: ChromaDB retrieval service
-            neo4j_retriever: Neo4j graph retrieval service
-            context_ranker: Context ranking service
-            default_config: Default aggregation configuration
-        """
+        """Initialize context aggregator."""
         self.chromadb_retriever = chromadb_retriever
         self.neo4j_retriever = neo4j_retriever
         self.context_ranker = context_ranker
         self.default_config = default_config or AggregationConfig()
         
+        from services.ner_service import NERService
+        self.ner_service = NERService()
+
         logger.info("Context Aggregator V2 initialized with modern retrieval services")
     
     async def aggregate_context(self,
@@ -170,6 +170,8 @@ class ContextAggregatorV2:
                 all_results = await self._ensemble_retrieval(query, config, user_id, filters, **kwargs)
             elif config.strategy == AggregationStrategy.ADAPTIVE:
                 all_results = await self._adaptive_retrieval(query, config, user_id, filters, **kwargs)
+            elif config.strategy == AggregationStrategy.GRAPH_TRAVERSAL:
+                all_results = await self._graph_traversal_retrieval(query, config, user_id, filters, **kwargs)
             else:
                 raise ValueError(f"Unknown aggregation strategy: {config.strategy}")
             
@@ -471,46 +473,73 @@ class ContextAggregatorV2:
             return await self._hybrid_retrieval(query, config, user_id, filters, **kwargs)
     
     def _analyze_query(self, query: str) -> Dict[str, Any]:
-        """Analyze query characteristics for adaptive strategy selection."""
+        """Analyze query characteristics for adaptive strategy selection using NER."""
         try:
+            entities = self.ner_service.extract_entities(query)
+            entity_count = len(entities)
+            entity_types = {e['type'] for e in entities}
+            
             query_lower = query.lower()
-            words = query_lower.split()
             
-            # Simple entity detection (could be enhanced with NER)
-            entity_indicators = ['who', 'what', 'where', 'when', 'which']
-            has_entities = any(word in entity_indicators for word in words)
-            
-            # Estimate entity count (simple heuristic)
-            capitalized_words = [w for w in query.split() if w[0].isupper() and len(w) > 1]
-            entity_count = len(capitalized_words)
-            
-            # Semantic query detection
-            semantic_indicators = ['like', 'similar', 'about', 'regarding', 'concerning']
-            is_semantic_query = any(indicator in query_lower for indicator in semantic_indicators)
-            
-            # Temporal query detection
-            temporal_indicators = ['recent', 'latest', 'new', 'old', 'yesterday', 'today', 'last']
-            is_temporal_query = any(indicator in query_lower for indicator in temporal_indicators)
-            
+            # More robust query classification
+            is_semantic_query = any(k in query_lower for k in ['like', 'similar', 'about', 'concept'])
+            is_complex_graph_query = entity_count > 1 and any(k in query_lower for k in ['relationship', 'connection', 'link', 'interaction'])
+
             return {
-                "has_entities": has_entities,
+                "entities": entities,
                 "entity_count": entity_count,
-                "is_semantic_query": is_semantic_query,
-                "is_temporal_query": is_temporal_query,
-                "word_count": len(words),
+                "entity_types": entity_types,
+                "is_semantic_query": is_semantic_query and entity_count == 0,
+                "is_complex_graph_query": is_complex_graph_query,
                 "query_length": len(query)
             }
             
         except Exception as e:
             logger.warning(f"Query analysis failed: {e}")
             return {
-                "has_entities": False,
-                "entity_count": 0,
-                "is_semantic_query": True,  # Default to semantic
-                "is_temporal_query": False,
-                "word_count": 0,
+                "entities": [], "entity_count": 0, "entity_types": set(),
+                "is_semantic_query": True, "is_complex_graph_query": False,
                 "query_length": len(query)
             }
+    
+    async def _graph_traversal_retrieval(self,
+                                      query: str,
+                                      config: AggregationConfig,
+                                      user_id: Optional[str],
+                                      filters: Optional[List[RetrievalFilter]],
+                                      **kwargs) -> List[RetrievalResult]:
+        """Perform targeted graph traversal based on extracted entities."""
+        try:
+            query_analysis = self._analyze_query(query)
+            entities = query_analysis['entities']
+
+            if not entities:
+                logger.warning("Graph traversal called without entities, falling back to hybrid.")
+                return await self._hybrid_retrieval(query, config, user_id, filters, **kwargs)
+
+            # Example: Find paths between two entities
+            if len(entities) >= 2:
+                entity1 = entities[0]['text']
+                entity2 = entities[1]['text']
+                logger.info(f"Performing graph traversal between '{entity1}' and '{entity2}'")
+                
+                return await self.neo4j_retriever.find_paths_between_entities(
+                    entity1_name=entity1,
+                    entity2_name=entity2,
+                    max_depth=config.traversal_depth,
+                    user_id=user_id
+                )
+            
+            # Fallback for single entity
+            return await self.neo4j_retriever.find_entity_mentions(
+                entity_name=entities[0]['text'],
+                user_id=user_id,
+                limit=config.max_results
+            )
+
+        except Exception as e:
+            logger.error(f"Graph traversal retrieval failed: {e}", exc_info=True)
+            return []
     
     def _deduplicate_results(self, results: List[RetrievalResult]) -> List[RetrievalResult]:
         """Remove duplicate results based on content similarity."""

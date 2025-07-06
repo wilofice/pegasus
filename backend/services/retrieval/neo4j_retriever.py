@@ -381,6 +381,68 @@ class Neo4jRetriever(BaseRetriever):
             logger.error(f"Failed to find connections for {entity_name}: {e}")
             return []
     
+    async def find_paths_between_entities(self, 
+                                         entity1_name: str,
+                                         entity2_name: str,
+                                         max_depth: int = 3,
+                                         user_id: str = None) -> List[RetrievalResult]:
+        """Find shortest paths and related chunks between two entities."""
+        if not self._initialized:
+            await self.initialize()
+
+        try:
+            user_filter = "AND c.user_id = $user_id" if user_id else ""
+
+            query = f"""
+            MATCH (e1), (e2)
+            WHERE (e1.name =~ $entity1_pattern OR e1.normalized_name =~ $entity1_pattern)
+            AND (e2.name =~ $entity2_pattern OR e2.normalized_name =~ $entity2_pattern)
+            MATCH path = allShortestPaths((e1)-[*..{max_depth}]-(e2))
+            UNWIND nodes(path) as node
+            MATCH (c:AudioChunk)-[:MENTIONS]->(node)
+            {user_filter}
+            RETURN DISTINCT c, path
+            LIMIT 20
+            """
+
+            params = {
+                "entity1_pattern": f"(?i){entity1_name}",
+                "entity2_pattern": f"(?i){entity2_name}",
+                "max_depth": max_depth,
+            }
+            if user_id:
+                params["user_id"] = user_id
+
+            results = await self.neo4j_client.execute_read_query(query, params)
+            
+            retrieval_results = []
+            for result in results:
+                chunk_data = dict(result['c'])
+                path = result['path']
+                
+                score = 1.0 / (len(path) + 1)
+
+                retrieval_result = RetrievalResult(
+                    id=chunk_data.get('id', str(uuid.uuid4())),
+                    type=ResultType.CHUNK,
+                    content=chunk_data.get('text', ''),
+                    metadata={
+                        **self._clean_node_properties(chunk_data),
+                        'path_length': len(path),
+                        'path': str(path)
+                    },
+                    score=score,
+                    source=f"neo4j.paths",
+                    timestamp=self._parse_timestamp(chunk_data.get('created_at'))
+                )
+                retrieval_results.append(retrieval_result)
+
+            return retrieval_results
+
+        except Exception as e:
+            logger.error(f"Failed to find paths between entities: {e}")
+            return []
+
     async def _search_by_entity_name(self, 
                                     query: str, 
                                     depth: int,

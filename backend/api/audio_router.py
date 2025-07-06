@@ -339,130 +339,63 @@ async def get_transcript(
 
 
 async def process_audio_file(audio_id: UUID, file_path: str):
-    """Background task to process audio file.
+    """Background task to trigger the full audio processing pipeline.
     
     Args:
         audio_id: UUID of the audio file
         file_path: Path to the audio file
     """
     from core.database import async_session
-    from services.transcription_service import TranscriptionService
-    from services.ollama_service import OllamaService
+    from models.job import JobType, ProcessingJob, JobStatus
     
-    logger.info(f"Starting audio processing for {audio_id}")
+    logger.info(f"Triggering full audio processing for {audio_id}")
     
-    # Create new database session for background task
     async with async_session() as db:
-        audio_repo = AudioRepository(db)
-        transcription_service = TranscriptionService()
-        ollama_service = OllamaService()
-        
         try:
-            # Step 1: Update status to TRANSCRIBING
-            await audio_repo.update_status(audio_id, ProcessingStatus.TRANSCRIBING)
-            logger.info(f"Updated status to TRANSCRIBING for {audio_id}")
-            
-            # Step 2: Get audio duration if possible
-            duration = await transcription_service.get_audio_duration(file_path)
-            if duration:
-                await audio_repo.update(audio_id, {"duration_seconds": duration})
-            
-            # Step 3: Get audio file for language info
-            audio_file = await audio_repo.get_by_id(audio_id)
-            language = audio_file.language if audio_file else 'en'
-            
-            # Step 3: Transcribe audio with language hint
-            transcription_result = await transcription_service.transcribe_audio(
-                file_path, 
-                settings.transcription_engine,
-                language=language
-            )
-            
-            if not transcription_result["success"]:
-                error_msg = f"Transcription failed: {transcription_result.get('error', 'Unknown error')}"
-                await audio_repo.update_status(audio_id, ProcessingStatus.FAILED, error_msg)
-                logger.error(f"Transcription failed for {audio_id}: {error_msg}")
+            from workers.tasks.transcript_processor import process_transcript
+            from models.audio_file import AudioFile
+            from sqlalchemy.future import select
+
+            # Get user_id from audio_file
+            result = await db.execute(select(AudioFile).filter(AudioFile.id == audio_id))
+            audio_file = result.scalar_one_or_none()
+
+            if not audio_file:
+                logger.error(f"Audio file {audio_id} not found, cannot trigger processing.")
                 return
-            
-            # Update with transcription results
-            await audio_repo.update(audio_id, {
-                "original_transcript": transcription_result["transcript"],
-                "transcription_engine": transcription_result["engine"]
-            })
-            
-            # Step 4: Update status to IMPROVING
-            await audio_repo.update_status(audio_id, ProcessingStatus.IMPROVING)
-            logger.info(f"Updated status to IMPROVING for {audio_id}")
-            
-            # Step 5: Improve transcript with Ollama using language context
-            improvement_result = await ollama_service.improve_transcript(
-                transcription_result["transcript"],
-                language=language
+
+            # Create a job record for tracking
+            job = ProcessingJob(
+                job_type=JobType.TRANSCRIPT_PROCESSING,
+                status=JobStatus.PENDING,
+                input_data={
+                    "audio_id": str(audio_id),
+                    "user_id": audio_file.user_id,
+                    "file_path": file_path
+                },
+                user_id=audio_file.user_id,
+                audio_file_id=audio_id
             )
             
-            if improvement_result["success"]:
-                # Update with improved transcript
-                await audio_repo.update(audio_id, {
-                    "improved_transcript": improvement_result["improved_transcript"]
-                })
-                logger.info(f"Transcript improved for {audio_id}")
-            else:
-                logger.warning(f"Transcript improvement failed for {audio_id}: {improvement_result.get('error')}")
-                # Continue with original transcript
+            db.add(job)
+            await db.commit()
+            await db.refresh(job)
             
-            # Step 6: Update status to COMPLETED
-            await audio_repo.update_status(audio_id, ProcessingStatus.COMPLETED)
-            logger.info(f"Audio processing completed for {audio_id}")
+            # Dispatch Celery task
+            result = process_transcript.delay(
+                audio_id=str(audio_id),
+                job_id=str(job.id)
+            )
             
-            # Step 7: Trigger Celery task for brain indexing
-            # Only trigger if we have an improved transcript
-            audio_file = await audio_repo.get_by_id(audio_id)
-            if audio_file and audio_file.improved_transcript:
-                try:
-                    from workers.tasks.transcript_processor import process_transcript
-                    from models.job import JobType, ProcessingJob, JobStatus
-                    
-                    # Create a job record for tracking using direct model creation
-                    job = ProcessingJob(
-                        job_type=JobType.TRANSCRIPT_PROCESSING,
-                        status=JobStatus.PENDING,
-                        input_data={
-                            "audio_id": str(audio_id),
-                            "user_id": audio_file.user_id
-                        },
-                        user_id=audio_file.user_id,
-                        audio_file_id=audio_id
-                    )
-                    
-                    db.add(job)
-                    await db.commit()
-                    await db.refresh(job)
-                    
-                    # Dispatch Celery task
-                    result = process_transcript.delay(
-                        audio_id=str(audio_id),
-                        job_id=str(job.id)
-                    )
-                    
-                    # Update job with task ID
-                    job.celery_task_id = result.id
-                    await db.commit()
-                    
-                    logger.info(f"Dispatched transcript processing task {result.id} for audio {audio_id}")
-                    
-                except Exception as e:
-                    # Log error but don't fail the audio processing
-                    logger.error(f"Failed to dispatch transcript processing task for {audio_id}: {e}")
-                    # Optionally update audio file with a note about indexing failure
-                    await audio_repo.update(audio_id, {
-                        "error_message": f"Transcript indexing dispatch failed: {str(e)}"
-                    })
+            # Update job with task ID
+            job.celery_task_id = result.id
+            await db.commit()
             
+            logger.info(f"Dispatched transcript processing task {result.id} for audio {audio_id}")
+
         except Exception as e:
-            # Handle any unexpected errors
-            error_msg = f"Processing error: {str(e)}"
-            await audio_repo.update_status(audio_id, ProcessingStatus.FAILED, error_msg)
-            logger.error(f"Audio processing failed for {audio_id}: {error_msg}", exc_info=True)
+            logger.error(f"Failed to dispatch transcript processing task for {audio_id}: {e}")
+            # The worker task should handle failure reporting.
 
 
 @router.get("/{audio_id}/indexing-status")
