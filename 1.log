@@ -1,0 +1,37 @@
+└──╼ $./setup_vertex_ai_ubuntu.sh 
+gcloud CLI is already installed.
+Enter your Google Cloud Project ID: gen-lang-client-0319023828
+Enabling required Google Cloud APIs...
+ERROR: (gcloud.services.enable) The required property [project] is not currently set.
+It can be set on a per-command basis by re-running your command with the [--project] flag.
+
+You may set it for your current workspace by running:
+
+  $ gcloud config set project VALUE
+
+or it can be set temporarily by the environment variable [CLOUDSDK_CORE_PROJECT]
+ERROR: (gcloud.services.enable) The required property [project] is not currently set.
+It can be set on a per-command basis by re-running your command with the [--project] flag.
+
+You may set it for your current workspace by running:
+
+  $ gcloud config set project VALUE
+
+or it can be set temporarily by the environment variable [CLOUDSDK_CORE_PROJECT]
+Creating Vertex AI Agent Engine instance...
+Failed to extract Agent Engine ID. Please check the output above for errors.
+Agent Engine creation output: ERROR: (gcloud.alpha) Invalid choice: 'vertex-ai'.
+Maybe you meant:
+  gcloud alpha container ai profiles manifests create
+  gcloud alpha container ai recommender manifests create
+  gcloud ai custom-jobs create
+  gcloud ai endpoints create
+  gcloud ai hp-tuning-jobs create
+  gcloud ai index-endpoints create
+  gcloud ai indexes create
+  gcloud ai model-monitoring-jobs create
+  gcloud ai persistent-resources create
+  gcloud ai tensorboards create
+
+To search the help text of gcloud commands, run:
+  gcloud help -- SEARCH_TERMS
