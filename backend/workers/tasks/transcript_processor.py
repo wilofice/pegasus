@@ -90,17 +90,17 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                     chunk_texts.append(chunk.text)
                     
                     metadata = {
-                        "audio_id": audio_id,
-                        "user_id": str(audio_file.user_id),
+                        "audio_id": str(audio_id),
+                        "user_id": str(audio_file.user_id) if audio_file.user_id else "",
                         "chunk_index": i,
                         "chunk_total": len(chunks),
-                        "timestamp": audio_file.upload_timestamp.isoformat() if audio_file.upload_timestamp else None,
-                        "language": audio_file.language,
-                        "tags": audio_file.tag,
-                        "category": audio_file.category,
+                        "timestamp": audio_file.upload_timestamp.isoformat() if audio_file.upload_timestamp else "",
+                        "language": audio_file.language or "en",
+                        "tags": str(audio_file.tag) if audio_file.tag else "",
+                        "category": str(audio_file.category) if audio_file.category else "",
                         "entity_count": len([e for e in all_entities if chunk.start <= e.get('start', 0) < chunk.end]),
-                        "start_pos": chunk.start,
-                        "end_pos": chunk.end
+                        "start_pos": int(chunk.start) if chunk.start is not None else 0,
+                        "end_pos": int(chunk.end) if chunk.end is not None else 0
                     }
                     chunk_metadatas.append(metadata)
                 
