@@ -1,0 +1,57 @@
+└──╼ $python start_worker.py 
+2025-07-06 21:00:46,047 - __main__ - INFO - Starting Pegasus Brain Celery worker...
+ 
+ -------------- celery@mica v5.5.3 (immunity)
+--- ***** ----- 
+-- ******* ---- Linux-6.8.0-60-generic-x86_64-with-glibc2.35 2025-07-06 21:00:46
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         pegasus_brain:0x79f9dff06ba0
+- ** ---------- .> transport:   redis://localhost:6379/0
+- ** ---------- .> results:     postgresql://pegasus_user:**@localhost:5432/pegasus_db_1
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: ON
+--- ***** ----- 
+ -------------- [queues]
+                .> default          exchange=default(direct) key=default
+                .> entity_extraction exchange=nlp(direct) key=nlp.entities
+                .> graph_building   exchange=indexing(direct) key=indexing.graph
+                .> plugin_execution exchange=plugins(direct) key=plugin.execute
+                .> transcript_processing exchange=transcript(direct) key=transcript.processing
+                .> vector_indexing  exchange=indexing(direct) key=indexing.vector
+
+[tasks]
+  . workers.celery_app.health_check
+  . workers.tasks.plugin_executor.execute_plugins_for_transcript
+  . workers.tasks.plugin_executor.execute_single_plugin
+  . workers.tasks.plugin_executor.get_plugin_status
+  . workers.tasks.plugin_executor.reload_plugin
+  . workers.tasks.transcript_processor.process_transcript
+  . workers.tasks.transcript_processor.reprocess_transcript
+
+2025-07-06 21:00:46,805 - celery.worker.consumer.connection - INFO - Connected to redis://localhost:6379/0
+2025-07-06 21:00:46,814 - workers.celery_app - INFO - Celery worker celery@mica is ready
+2025-07-06 21:00:46,814 - celery.apps.worker - INFO - celery@mica ready.
+2025-07-06 21:02:35,381 - celery.worker.consumer.consumer - ERROR - Received unregistered task of type 'workers.tasks.transcription_tasks.transcribe_audio'.
+The message has been ignored and discarded.
+
+Did you remember to import the module containing this task?
+Or maybe you're using relative imports?
+
+Please see
+https://docs.celeryq.dev/en/latest/internals/protocol.html
+for more information.
+
+The full contents of the message body was:
+b'[[], {"audio_id": "2c1f4137-dbc2-468a-8e92-8628cdaf3ce1", "job_id": "806c4b85-99d7-42b3-81db-b6e54eca9c1c"}, {"callbacks": null, "errbacks": null, "chain": null, "chord": null}]' (177b)
+
+The full contents of the message headers:
+{'lang': 'py', 'task': 'workers.tasks.transcription_tasks.transcribe_audio', 'id': 'e95518f1-b430-432c-917a-828b299e1650', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': 'e95518f1-b430-432c-917a-828b299e1650', 'parent_id': None, 'argsrepr': '()', 'kwargsrepr': "{'audio_id': '2c1f4137-dbc2-468a-8e92-8628cdaf3ce1', 'job_id': '806c4b85-99d7-42b3-81db-b6e54eca9c1c'}", 'origin': 'gen321623@mica', 'ignore_result': False, 'replaced_task_nesting': 0, 'stamped_headers': None, 'stamps': {}}
+
+The delivery info for this task is:
+{'exchange': '', 'routing_key': 'default'}
+Traceback (most recent call last):
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/celery/worker/consumer/consumer.py", line 662, in on_task_received
+    strategy = strategies[type_]
+               ~~~~~~~~~~^^^^^^^
+KeyError: 'workers.tasks.transcription_tasks.transcribe_audio'
