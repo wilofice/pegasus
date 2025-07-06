@@ -188,3 +188,112 @@ def reprocess_transcript(self, audio_id: str, job_id: str = None):
         asyncio.set_event_loop(loop)
     
     return loop.run_until_complete(_reprocess_transcript_async())
+
+
+@app.task(base=BaseTask, bind=True)
+def process_knowledge_base(self, audio_id: str, job_id: str = None):
+    """Process transcript for knowledge base (skip transcript improvement)."""
+    
+    async def _process_knowledge_base_async():
+        from core.database import async_session
+        from repositories.audio_repository import AudioRepository
+
+        self._job_id = UUID(job_id) if job_id else None
+        audio_uuid = UUID(audio_id)
+
+        async with async_session() as db:
+            audio_repo = AudioRepository(db)
+            try:
+                self.log_progress(1, 5, "Loading improved transcript")
+                
+                audio_file = await audio_repo.get_by_id(audio_uuid)
+                if not audio_file or not audio_file.improved_transcript:
+                    raise ValueError(f"Audio file {audio_id} or its improved transcript not found")
+
+                # Skip transcript improvement - use existing improved transcript
+                logger.info(f"Using existing improved transcript for knowledge base processing: {audio_id}")
+                
+                self.log_progress(2, 5, "Chunking transcript")
+                from services.chunking_service import ChunkingService
+                chunker = ChunkingService()
+                chunks = chunker.chunk_text(audio_file.improved_transcript)
+                
+                self.log_progress(3, 5, "Analyzing sentiment and extracting entities")
+                from services.sentiment_service import SentimentService
+                from services.ner_service import NERService
+                sentiment_service = SentimentService()
+                ner_service = NERService()
+
+                all_entities = []
+                chunk_metadatas = []
+                for i, chunk in enumerate(chunks):
+                    entities = ner_service.extract_entities(chunk.text, language=audio_file.language or 'en')
+                    all_entities.extend(entities)
+                    sentiment = sentiment_service.analyze_sentiment(chunk.text)
+                    
+                    metadata = {
+                        "audio_id": str(audio_id), "user_id": str(audio_file.user_id) if audio_file.user_id else "",
+                        "chunk_index": i, "chunk_total": len(chunks),
+                        "timestamp": audio_file.upload_timestamp.isoformat() if audio_file.upload_timestamp else "",
+                        "language": audio_file.language or "en", "tags": ", ".join(audio_file.tags) if audio_file.tags else "",
+                        "category": str(audio_file.category) if audio_file.category else "",
+                        "entity_count": len(entities), "start_pos": int(chunk.start) if chunk.start is not None else 0,
+                        "end_pos": int(chunk.end) if chunk.end is not None else 0,
+                        "sentiment_score": sentiment["score"], "sentiment_classification": sentiment["classification"]
+                    }
+                    chunk_metadatas.append(metadata)
+
+                # Clear existing data first (since tags may have changed)
+                self.log_progress(4, 5, "Updating knowledge base")
+                await self.chromadb_client.delete_documents(where={"audio_id": audio_id})
+                await self.neo4j_client.execute_write_query(
+                    "MATCH (c:AudioChunk {audio_id: $audio_id}) DETACH DELETE c",
+                    {"audio_id": audio_id}
+                )
+
+                # Store new chunks in ChromaDB
+                await self.chromadb_client.add_documents(
+                    documents=[c.text for c in chunks],
+                    metadatas=chunk_metadatas,
+                    ids=[f"{audio_id}_chunk_{i}" for i in range(len(chunks))]
+                )
+                
+                # Create graph nodes in Neo4j
+                from services.graph_builder import GraphBuilder
+                graph_builder = GraphBuilder(self.neo4j_client)
+                
+                for i, chunk in enumerate(chunks):
+                    chunk_id = f"{audio_id}_chunk_{i}"
+                    chunk_entities = [e for e in all_entities if chunk.start <= e.get('start', 0) < chunk.end]
+                    await graph_builder.create_chunk_node(
+                        chunk_id=chunk_id, audio_id=audio_id, text=chunk.text,
+                        metadata=chunk_metadatas[i], entities=chunk_entities
+                    )
+                
+                self.log_progress(5, 5, "Knowledge base processing completed")
+                await audio_repo.update(audio_uuid, {
+                    "vector_indexed": True, "vector_indexed_at": datetime.utcnow(),
+                    "graph_indexed": True, "graph_indexed_at": datetime.utcnow(),
+                    "entities_extracted": True, "entities_extracted_at": datetime.utcnow()
+                })
+                
+                result = {
+                    "audio_id": audio_id, "chunks_created": len(chunks), "entities_extracted": len(all_entities),
+                    "vector_indexed": True, "graph_indexed": True, "knowledge_base_updated_at": datetime.utcnow().isoformat(),
+                    "transcript_improvement_skipped": True
+                }
+                logger.info(f"Successfully updated knowledge base for audio {audio_id} (no transcript improvement)")
+                return result
+
+            except Exception as e:
+                logger.error(f"Failed to process knowledge base for audio {audio_id}: {e}", exc_info=True)
+                await audio_repo.update_status(audio_uuid, ProcessingStatus.FAILED, str(e))
+                raise
+
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    
+    return loop.run_until_complete(_process_knowledge_base_async())

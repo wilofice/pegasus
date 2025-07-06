@@ -580,15 +580,14 @@ async def start_processing(
 
 
 async def _trigger_transcript_processing_after_tag_update(audio_id: UUID, has_previous_tags: bool):
-    """Trigger appropriate transcript processing task after tag update."""
-    from workers.tasks.transcript_processor import process_transcript, reprocess_transcript
+    """Trigger knowledge base processing after tag update (without transcript improvement)."""
+    from workers.tasks.transcript_processor import process_knowledge_base
     from models.job import JobType, ProcessingJob, JobStatus
     from core.database import async_session
     from models.audio_file import AudioFile
     from sqlalchemy.future import select
 
-    task_name = "reprocess_transcript" if has_previous_tags else "process_transcript"
-    logger.info(f"Triggering {task_name} task for audio {audio_id} after tag update")
+    logger.info(f"Triggering knowledge base processing for audio {audio_id} after tag update")
 
     async with async_session() as db:
         try:
@@ -596,13 +595,18 @@ async def _trigger_transcript_processing_after_tag_update(audio_id: UUID, has_pr
             audio_file = result.scalar_one_or_none()
 
             if not audio_file:
-                logger.error(f"Audio file {audio_id} not found, cannot start {task_name} job.")
+                logger.error(f"Audio file {audio_id} not found, cannot start knowledge base processing job.")
+                return
+
+            # Check if transcript is already improved
+            if not audio_file.improved_transcript:
+                logger.warning(f"Audio file {audio_id} doesn't have improved transcript yet. Skipping knowledge base processing.")
                 return
 
             job = ProcessingJob(
                 job_type=JobType.TRANSCRIPT_PROCESSING,
                 status=JobStatus.PENDING,
-                input_data={"audio_id": str(audio_id), "task_type": task_name},
+                input_data={"audio_id": str(audio_id), "task_type": "knowledge_base_only"},
                 user_id=audio_file.user_id,
                 audio_file_id=audio_id
             )
@@ -610,19 +614,16 @@ async def _trigger_transcript_processing_after_tag_update(audio_id: UUID, has_pr
             await db.commit()
             await db.refresh(job)
 
-            # Trigger the appropriate task
-            if has_previous_tags:
-                task_result = reprocess_transcript.delay(audio_id=str(audio_id), job_id=str(job.id))
-            else:
-                task_result = process_transcript.delay(audio_id=str(audio_id), job_id=str(job.id))
+            # Trigger knowledge base processing only (no transcript improvement)
+            task_result = process_knowledge_base.delay(audio_id=str(audio_id), job_id=str(job.id))
             
             job.celery_task_id = task_result.id
             await db.commit()
 
-            logger.info(f"Dispatched {task_name} task {task_result.id} for audio {audio_id}")
+            logger.info(f"Dispatched knowledge base processing task {task_result.id} for audio {audio_id}")
 
         except Exception as e:
-            logger.error(f"Failed to dispatch {task_name} task for {audio_id}: {e}", exc_info=True)
+            logger.error(f"Failed to dispatch knowledge base processing task for {audio_id}: {e}", exc_info=True)
 
 
 async def trigger_processing_task(audio_id: UUID):
