@@ -1,0 +1,66 @@
+(pegasus) ┌─[mica@mica]─[~/Desktop/pegasus]
+└──╼ $./setup_vertex_ai_ubuntu.sh 
+gcloud CLI is already installed.
+Updating gcloud components...
+To help improve the quality of this product, we collect anonymized usage data and anonymized stacktraces when crashes are encountered; additional information is 
+available at <https://cloud.google.com/sdk/usage-statistics>. This data is handled in accordance with our privacy policy 
+<https://cloud.google.com/terms/cloud-privacy-notice>. You may choose to opt in this collection now (by choosing 'Y' at the below prompt), or at any time in the 
+future by running the following command:
+
+    gcloud config set disable_usage_reporting false
+
+Do you want to opt-in (y/N)?  y
+
+Beginning update. This process may take several minutes.
+ERROR: (gcloud.components.update) 
+You cannot perform this action because the Google Cloud CLI component manager 
+is disabled for this installation. You can run the following command 
+to achieve the same result for this installation: 
+
+sudo apt-get update && sudo apt-get --only-upgrade install google-cloud-cli-nomos google-cloud-cli-spanner-migration-tool google-cloud-cli-local-extract google-cloud-cli-terraform-tools google-cloud-cli-firestore-emulator google-cloud-cli-app-engine-python-extras google-cloud-cli-minikube google-cloud-cli google-cloud-cli-cloud-build-local google-cloud-cli-package-go-module google-cloud-cli-istioctl google-cloud-cli-app-engine-grpc google-cloud-cli-spanner-emulator google-cloud-cli-managed-flink-client google-cloud-cli-gke-gcloud-auth-plugin google-cloud-cli-run-compose google-cloud-cli-skaffold google-cloud-cli-pubsub-emulator google-cloud-cli-spanner-cli google-cloud-cli-kpt kubectl google-cloud-cli-anthoscli google-cloud-cli-log-streaming google-cloud-cli-kubectl-oidc google-cloud-cli-enterprise-certificate-proxy google-cloud-cli-anthos-auth google-cloud-cli-app-engine-go google-cloud-cli-bigtable-emulator google-cloud-cli-docker-credential-gcr google-cloud-cli-cbt google-cloud-cli-datastore-emulator google-cloud-cli-config-connector google-cloud-cli-app-engine-python google-cloud-cli-app-engine-java google-cloud-cli-cloud-run-proxy
+
+
+Enter your Google Cloud Project ID: gen-lang-client-0319023828
+Enabling required Google Cloud APIs...
+ERROR: (gcloud.services.enable) You do not currently have an active account selected.
+Please run:
+
+  $ gcloud auth login
+
+to obtain new credentials.
+
+If you have already logged in with a different account, run:
+
+  $ gcloud config set account ACCOUNT
+
+to select an already authenticated account to use.
+ERROR: (gcloud.services.enable) You do not currently have an active account selected.
+Please run:
+
+  $ gcloud auth login
+
+to obtain new credentials.
+
+If you have already logged in with a different account, run:
+
+  $ gcloud config set account ACCOUNT
+
+to select an already authenticated account to use.
+Creating Vertex AI Agent Engine instance...
+Failed to extract Agent Engine ID. Please check the output above for errors.
+Agent Engine creation output: ERROR: (gcloud.alpha) Invalid choice: 'vertex-ai'.
+Maybe you meant:
+  gcloud alpha container ai profiles manifests create
+  gcloud alpha container ai recommender manifests create
+  gcloud ai custom-jobs create
+  gcloud ai endpoints create
+  gcloud ai hp-tuning-jobs create
+  gcloud ai index-endpoints create
+  gcloud ai indexes create
+  gcloud ai model-monitoring-jobs create
+  gcloud ai persistent-resources create
+  gcloud ai tensorboards create
+
+To search the help text of gcloud commands, run:
+  gcloud help -- SEARCH_TERMS
+(pegasus) ┌─[✗]─[mica@mica]─[~/Desktop/pe
