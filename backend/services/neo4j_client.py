@@ -224,7 +224,8 @@ class Neo4jClient:
             
             # Chunk constraints
             "CREATE CONSTRAINT chunk_id IF NOT EXISTS FOR (c:AudioChunk) REQUIRE c.id IS UNIQUE",
-            "CREATE CONSTRAINT chunk_audio_id IF NOT EXISTS FOR (c:AudioChunk) REQUIRE c.audio_id IS NOT NULL",
+            # Note: Property existence constraints require Neo4j Enterprise Edition
+            # "CREATE CONSTRAINT chunk_audio_id IF NOT EXISTS FOR (c:AudioChunk) REQUIRE c.audio_id IS NOT NULL",
             
             # User constraints
             "CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE"
