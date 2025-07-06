@@ -12,10 +12,10 @@ class ApiConfig {
   static const String? defaultToken = 'empty';
   
   /// API timeout duration in seconds
-  static const int timeoutSeconds = 30;
+  static const int timeoutSeconds = 120;
   
   /// Connection timeout duration in seconds
-  static const int connectionTimeoutSeconds = 10;
+  static const int connectionTimeoutSeconds = 30;
   
   /// Endpoints
   static const String chatEndpoint = '/chat';
