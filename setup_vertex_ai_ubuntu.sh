@@ -19,14 +19,16 @@ then
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
     sudo apt-get update
     sudo apt-get install google-cloud-sdk -y
+    # Install alpha components for Vertex AI commands
+    sudo apt-get install google-cloud-cli-alpha -y
     echo "gcloud CLI installed."
 else
     echo "gcloud CLI is already installed."
 fi
 
-# Update gcloud components to ensure alpha commands are available
-echo "Updating gcloud components..."
-gcloud components update
+# Authenticate gcloud CLI (this command is interactive)
+echo "Authenticating gcloud CLI. A browser window will open for login."
+gcloud auth login
 
 # Get Google Cloud Project ID from user
 PROJECT_ID=$(prompt_for_input "Enter your Google Cloud Project ID")

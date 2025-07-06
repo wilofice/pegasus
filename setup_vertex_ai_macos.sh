@@ -26,9 +26,9 @@ else
     echo "gcloud CLI is already installed."
 fi
 
-# Update gcloud components to ensure alpha commands are available
-echo "Updating gcloud components..."
-gcloud components update
+# Authenticate gcloud CLI (this command is interactive)
+echo "Authenticating gcloud CLI. A browser window will open for login."
+gcloud auth login
 
 # Get Google Cloud Project ID from user
 PROJECT_ID=$(prompt_for_input "Enter your Google Cloud Project ID")
@@ -64,6 +64,7 @@ echo "Updating or creating $ENV_FILE..."
 if [ ! -f "$ENV_FILE" ]; then
     echo "backend/.env not found. Creating from backend/.env.example"
     cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
+
 fi
 
 # Update or add Vertex AI configuration
