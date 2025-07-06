@@ -11,7 +11,8 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from models.base import Base
-from models.audio_file import AudioFile
+# Import all models to register them with Base.metadata
+from models import AudioFile, ProcessingJob, JobStatusHistory, ConversationHistory
 from core.config import settings
 
 # this is the Alembic Config object, which provides

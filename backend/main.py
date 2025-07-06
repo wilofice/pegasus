@@ -1,16 +1,35 @@
 """FastAPI application entry point."""
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
 from routers import context, plugins
 from core.config import settings
+from core.database import create_tables
 from middleware import SelectiveLoggingMiddleware, RequestLoggingConfig
+# Import all models to ensure they're registered
+from models import AudioFile, ProcessingJob, JobStatusHistory, ConversationHistory
 import logging
 logger = logging.getLogger(__name__)
 
 logger.info("Starting Pegasus Brain with settings...\n" + str(settings))
 
-app = FastAPI(title="Pegasus Backend")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Handle application startup and shutdown."""
+    # Startup
+    logger.info("Creating database tables...")
+    await create_tables()
+    logger.info("Database tables created successfully!")
+    
+    yield
+    
+    # Shutdown (if needed)
+    pass
+
+
+app = FastAPI(title="Pegasus Backend", lifespan=lifespan)
 
 # Add request/response logging middleware
 if settings.enable_request_logging:
