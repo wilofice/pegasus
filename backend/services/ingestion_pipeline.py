@@ -13,7 +13,7 @@ from sqlalchemy import and_
 from services.chromadb_manager import get_chromadb_manager
 from services.neo4j_schema import get_schema_manager
 from services.graph_builder import GraphBuilder, Entity
-from services.neo4j_client import get_neo4j_client
+from services.neo4j_client import get_neo4j_client_async
 from services.ner_service import NERService
 from models.audio_file import AudioFile, ProcessingStatus
 from models.job import ProcessingJob, JobStatus
@@ -94,7 +94,7 @@ class IngestionPipeline:
             logger.info("ChromaDB manager initialized")
             
             # Initialize Neo4j client and services
-            self.neo4j_client = await get_neo4j_client()
+            self.neo4j_client = await get_neo4j_client_async()
             self.graph_builder = GraphBuilder(self.neo4j_client)
             self.schema_manager = get_schema_manager()
             logger.info("Neo4j services initialized")

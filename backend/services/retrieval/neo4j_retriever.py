@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 
 from services.retrieval.base import BaseRetriever, RetrievalResult, RetrievalFilter, ResultType, FilterOperator
-from services.neo4j_client import get_neo4j_client
+from services.neo4j_client import get_neo4j_client_async
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class Neo4jRetriever(BaseRetriever):
         """Initialize Neo4j connection."""
         try:
             # Get Neo4j client instance
-            self.neo4j_client = await get_neo4j_client()
+            self.neo4j_client = await get_neo4j_client_async()
             logger.info("Neo4j retriever initialized successfully")
             
             self._initialized = True

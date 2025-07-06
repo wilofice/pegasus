@@ -9,7 +9,7 @@ from pathlib import Path
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from services.neo4j_client import get_neo4j_client, close_neo4j_client
+from services.neo4j_client import get_neo4j_client_async, close_neo4j_client
 from services.vector_db_client import get_chromadb_client, close_chromadb_client
 
 logging.basicConfig(level=logging.INFO)
@@ -21,7 +21,7 @@ async def test_neo4j():
     logger.info("Testing Neo4j connection...")
     
     try:
-        client = await get_neo4j_client()
+        client = await get_neo4j_client_async()
         health = await client.health_check()
         
         if health["status"] == "healthy":

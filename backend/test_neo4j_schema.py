@@ -154,9 +154,9 @@ async def test_health_check():
 async def test_constraint_creation():
     """Test individual constraint creation and validation."""
     try:
-        from services.neo4j_client import get_neo4j_client
+        from services.neo4j_client import get_neo4j_client_async
         
-        client = await get_neo4j_client()
+        client = await get_neo4j_client_async()
         
         # Test creating a sample node that should trigger constraints
         logger.info("🧪 Testing constraint validation...")

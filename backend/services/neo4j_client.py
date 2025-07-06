@@ -269,19 +269,50 @@ class Neo4jClient:
 # Global Neo4j client instance
 _neo4j_client: Optional[Neo4jClient] = None
 
-async def get_neo4j_client() -> Neo4jClient:
-    """Get or create the global Neo4j client instance."""
+def get_neo4j_client() -> Neo4jClient:
+    """Get or create the global Neo4j client instance (synchronous version for Celery tasks)."""
     global _neo4j_client
     
     if _neo4j_client is None:
         _neo4j_client = Neo4jClient()
-        await _neo4j_client.connect()
         
-        # Initialize schema
-        await _neo4j_client.create_constraints()
-        await _neo4j_client.create_indexes()
+        # Use asyncio to run async initialization in sync context
+        import asyncio
+        try:
+            # Try to get existing event loop
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is already running (e.g., in async context), create a new thread
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(asyncio.run, _initialize_neo4j_client(_neo4j_client))
+                    future.result()
+            else:
+                # Run in the current loop
+                loop.run_until_complete(_initialize_neo4j_client(_neo4j_client))
+        except RuntimeError:
+            # No event loop exists, create one
+            asyncio.run(_initialize_neo4j_client(_neo4j_client))
     
     return _neo4j_client
+
+async def get_neo4j_client_async() -> Neo4jClient:
+    """Get or create the global Neo4j client instance (async version)."""
+    global _neo4j_client
+    
+    if _neo4j_client is None:
+        _neo4j_client = Neo4jClient()
+        await _initialize_neo4j_client(_neo4j_client)
+    
+    return _neo4j_client
+
+async def _initialize_neo4j_client(client: Neo4jClient) -> None:
+    """Initialize Neo4j client with connection and schema setup."""
+    await client.connect()
+    
+    # Initialize schema
+    await client.create_constraints()
+    await client.create_indexes()
 
 async def close_neo4j_client() -> None:
     """Close the global Neo4j client."""

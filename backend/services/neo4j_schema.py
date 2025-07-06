@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-from services.neo4j_client import Neo4jClient, get_neo4j_client
+from services.neo4j_client import Neo4jClient, get_neo4j_client_async
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class Neo4jSchemaManager:
             Dictionary containing initialization results
         """
         if not self.client:
-            self.client = await get_neo4j_client()
+            self.client = await get_neo4j_client_async()
         
         results = {
             "constraints": {"created": 0, "failed": 0, "errors": []},
@@ -321,7 +321,7 @@ class Neo4jSchemaManager:
         try:
             # Check if client is connected
             if not self.client:
-                self.client = await get_neo4j_client()
+                self.client = await get_neo4j_client_async()
             
             client_health = await self.client.health_check()
             health["client_status"] = client_health["status"]
