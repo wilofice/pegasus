@@ -150,7 +150,7 @@ class ChatOrchestratorV2:
             "user_id": user_id,
             "user_message": user_message,
             "assistant_response": assistant_response,
-            "metadata": {"context_summary": context.get_summary_stats()}
+            "extra_data": {"context_summary": context.get_summary_stats()}
         })
 
         from workers.tasks.conversation_processing_tasks import process_conversation_history

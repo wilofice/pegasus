@@ -21,8 +21,8 @@ class ConversationHistory(Base):
     
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
     
-    # Metadata
-    metadata = Column(JSONB)
+    # Extra data (renamed from metadata to avoid SQLAlchemy reserved word)
+    extra_data = Column(JSONB)
     
     def to_dict(self):
         """Convert the conversation history instance to a dictionary."""
@@ -33,5 +33,5 @@ class ConversationHistory(Base):
             "user_message": self.user_message,
             "assistant_response": self.assistant_response,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None,
-            "metadata": self.metadata
+            "extra_data": self.extra_data
         }

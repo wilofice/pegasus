@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column('user_message', sa.Text(), nullable=False),
         sa.Column('assistant_response', sa.Text(), nullable=False),
         sa.Column('timestamp', sa.DateTime(), nullable=True, index=True),
-        sa.Column('metadata', postgresql.JSONB(), nullable=True),
+        sa.Column('extra_data', postgresql.JSONB(), nullable=True),
     )
 
     # 2. Add PENDING_REVIEW to processing_status enum
