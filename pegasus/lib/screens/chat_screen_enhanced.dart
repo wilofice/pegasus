@@ -57,19 +57,20 @@ class _ChatScreenEnhancedState extends ConsumerState<ChatScreenEnhanced> {
     
     return Scaffold(
       appBar: _buildAppBar(chatState),
+      resizeToAvoidBottomInset: true, // Ensure proper keyboard handling
       body: Column(
         children: [
           if (_showSettings) _buildSettingsPanel(chatState),
           if (_showContextSearch) 
-            Expanded(
+            Flexible(
               flex: 2,
               child: ContextSearchPanel(
                 showInline: true,
                 onResultSelected: _handleContextResult,
               ),
             ),
-          Expanded(
-            flex: _showContextSearch ? 3 : 1,
+          Flexible(
+            flex: _showContextSearch ? 3 : 5,
             child: _buildMessagesList(chatState),
           ),
           _buildInputArea(chatState),
@@ -311,72 +312,85 @@ class _ChatScreenEnhancedState extends ConsumerState<ChatScreenEnhanced> {
   }
 
   Widget _buildInputArea(ChatV2State chatState) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 8,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey.shade200)),
-      ),
-      child: Column(
-        children: [
-          if (!_showContextSearch)
-            QuickContextSearch(
-              onQuerySelected: (query) => _sendMessage(query),
-            ),
-          Row(
+    return SafeArea(
+      top: false,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Colors.grey.shade200)),
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 8,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                ? 8 // Reduced bottom padding when keyboard is shown
+                : 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Important: use minimum space
             children: [
-              Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  focusNode: _messageFocusNode,
-                  decoration: InputDecoration(
-                    hintText: 'Ask me anything...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    suffixIcon: chatState.isLoading
-                        ? const Padding(
-                            padding: EdgeInsets.all(12),
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          )
-                        : null,
-                  ),
-                  maxLines: null,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: chatState.isLoading ? null : _handleSubmit,
+              if (!_showContextSearch && MediaQuery.of(context).viewInsets.bottom == 0)
+                QuickContextSearch(
+                  onQuerySelected: (query) => _sendMessage(query),
                 ),
-              ),
-              const SizedBox(width: 8),
-              FloatingActionButton(
-                mini: true,
-                onPressed: chatState.isLoading ? null : () => _handleSubmit(_messageController.text),
-                child: const Icon(Icons.send),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        maxHeight: 120, // Limit max height for multi-line input
+                      ),
+                      child: TextField(
+                        controller: _messageController,
+                        focusNode: _messageFocusNode,
+                        decoration: InputDecoration(
+                          hintText: 'Ask me anything...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          suffixIcon: chatState.isLoading
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                )
+                              : null,
+                        ),
+                        maxLines: null,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: chatState.isLoading ? null : _handleSubmit,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FloatingActionButton(
+                    mini: true,
+                    onPressed: chatState.isLoading ? null : () => _handleSubmit(_messageController.text),
+                    child: const Icon(Icons.send),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

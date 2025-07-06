@@ -546,7 +546,7 @@ class QuickContextSearch extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       height: 40,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.only(bottom: 8), // Reduced margin
       child: Row(
         children: [
           Expanded(
@@ -584,6 +584,8 @@ class QuickContextSearch extends ConsumerWidget {
             icon: const Icon(Icons.auto_awesome, size: 20),
             onPressed: () => _showSmartSuggestions(context),
             tooltip: 'Smart suggestions',
+            padding: EdgeInsets.zero, // Remove extra padding
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
           ),
         ],
       ),
