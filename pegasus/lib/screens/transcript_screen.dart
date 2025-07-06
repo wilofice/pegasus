@@ -34,7 +34,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);  // Changed to 3 tabs
+    _tabController = TabController(length: 2, vsync: this);  // 2 tabs: Transcript and Tags
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
@@ -228,7 +228,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
     final originalTranscript = bothTranscripts['original'];
     final isImproved = transcriptData['is_improved'] as bool? ?? false;
     
-    if (status != 'completed') {
+    if (status != 'completed' && status != 'pending_review') {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
