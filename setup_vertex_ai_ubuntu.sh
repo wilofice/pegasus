@@ -24,13 +24,17 @@ else
     echo "gcloud CLI is already installed."
 fi
 
+# Update gcloud components to ensure alpha commands are available
+echo "Updating gcloud components..."
+gcloud components update
+
 # Get Google Cloud Project ID from user
 PROJECT_ID=$(prompt_for_input "Enter your Google Cloud Project ID")
 LOCATION="us-central1" # Default location as per documentation
 
 echo "Enabling required Google Cloud APIs..."
-gcloud services enable aiplatform.googleapis.com
-gcloud services enable vertexai.googleapis.com
+gcloud services enable aiplatform.googleapis.com --project=$PROJECT_ID
+gcloud services enable vertexai.googleapis.com --project=$PROJECT_ID
 
 echo "Creating Vertex AI Agent Engine instance..."
 # Create the agent engine and capture the output
