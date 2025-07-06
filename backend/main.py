@@ -1,5 +1,6 @@
 """FastAPI application entry point."""
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 
 from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
@@ -15,13 +16,55 @@ logger = logging.getLogger(__name__)
 logger.info("Starting Pegasus Brain with settings...\n" + str(settings))
 
 
+async def run_migrations():
+    """Run database migrations on startup."""
+    try:
+        import subprocess
+        import os
+        
+        # Change to backend directory
+        backend_dir = Path(__file__).parent
+        original_cwd = os.getcwd()
+        os.chdir(backend_dir)
+        
+        # Run alembic upgrade
+        result = subprocess.run(
+            ["alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        
+        if result.returncode == 0:
+            logger.info("Database migrations completed successfully")
+        else:
+            logger.error(f"Migration failed: {result.stderr}")
+            # Fallback to direct table creation
+            logger.info("Falling back to direct table creation...")
+            await create_tables()
+        
+    except Exception as e:
+        logger.warning(f"Could not run migrations: {e}")
+        logger.info("Falling back to direct table creation...")
+        await create_tables()
+    finally:
+        os.chdir(original_cwd)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Handle application startup and shutdown."""
     # Startup
-    logger.info("Creating database tables...")
-    await create_tables()
-    logger.info("Database tables created successfully!")
+    logger.info("Initializing database...")
+    
+    if settings.auto_migrate_on_startup:
+        logger.info("Auto-migration enabled - running migrations...")
+        await run_migrations()
+    else:
+        logger.info("Auto-migration disabled - creating tables only...")
+        await create_tables()
+    
+    logger.info("Database initialization completed!")
     
     yield
     

@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     
     # Database
     database_url: str = "postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db"
+    auto_migrate_on_startup: bool = True  # Run migrations automatically on app startup
     
     # Neo4j Configuration
     neo4j_uri: str = "bolt://localhost:7687"
