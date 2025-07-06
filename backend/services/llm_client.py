@@ -119,13 +119,12 @@ class GoogleGenerativeAIClient(BaseLLMClient):
             }
         }
         
-        # Add system prompt if provided
+        # Add system instruction if provided using dedicated parameter
         system_prompt = kwargs.get("system_prompt")
         if system_prompt:
-            data["contents"].insert(0, {
-                "role": "user",
-                "parts": [{"text": f"System: {system_prompt}"}]
-            })
+            data["systemInstruction"] = {
+                "parts": [{"text": system_prompt}]
+            }
         
         try:
             async with httpx.AsyncClient() as client:
@@ -166,17 +165,18 @@ class GoogleGenerativeAIClient(BaseLLMClient):
         
         # Convert messages to Google format
         contents = []
+        system_instruction = None
+        
         for msg in messages:
             role = msg.get("role", "user")
             content = msg.get("content", "")
             
             # Google uses "user" and "model" roles
             if role == "system":
-                # Add system message as first user message
-                contents.insert(0, {
-                    "role": "user",
-                    "parts": [{"text": f"System: {content}"}]
-                })
+                # Use dedicated systemInstruction parameter
+                system_instruction = {
+                    "parts": [{"text": content}]
+                }
             elif role == "assistant":
                 contents.append({
                     "role": "model",
@@ -197,6 +197,10 @@ class GoogleGenerativeAIClient(BaseLLMClient):
                 "maxOutputTokens": kwargs.get("max_tokens", 2048),
             }
         }
+        
+        # Add system instruction if provided
+        if system_instruction:
+            data["systemInstruction"] = system_instruction
         
         try:
             async with httpx.AsyncClient() as client:
