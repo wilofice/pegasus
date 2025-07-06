@@ -32,19 +32,72 @@ gcloud auth login
 
 # Get Google Cloud Project ID from user
 PROJECT_ID=$(prompt_for_input "Enter your Google Cloud Project ID")
+
+# Set the project for gcloud CLI
+echo "Setting gcloud project to $PROJECT_ID..."
+gcloud config set project $PROJECT_ID
+
 LOCATION="us-central1" # Default location as per documentation
 
 echo "Enabling required Google Cloud APIs..."
 gcloud services enable aiplatform.googleapis.com --project=$PROJECT_ID
 gcloud services enable vertexai.googleapis.com --project=$PROJECT_ID
 
-echo "Creating Vertex AI Agent Engine instance..."
-# Create the agent engine and capture the output
-AGENT_ENGINE_OUTPUT=$(gcloud alpha vertex-ai reasoning-engines create --region=$LOCATION --project=$PROJECT_ID 2>&1)
+# Install google-cloud-aiplatform Python package
+echo "Installing google-cloud-aiplatform Python package..."
+pip install google-cloud-aiplatform
 
-# Extract Agent Engine ID from the output
-# The ID is usually in the format: projects/PROJECT_NUMBER/locations/LOCATION/reasoningEngines/ENGINE_ID
-AGENT_ENGINE_ID=$(echo "$AGENT_ENGINE_OUTPUT" | grep -oP 'reasoningEngines/\K[^ ]+')
+
+# Create a temporary Python script to create the agent engine
+PYTHON_SCRIPT=$(cat << EOT
+import vertexai
+from vertexai.preview import reasoning_engines
+
+PROJECT_ID = "$PROJECT_ID"
+LOCATION = "$LOCATION"
+
+vertexai.init(project=PROJECT_ID, location=LOCATION)
+
+try:
+    # Attempt to create a simple ReasoningEngine. The actual content of the engine
+    # is not critical for just getting an ID, but a minimal valid object is needed.
+    # Using a placeholder class as the actual application logic is not relevant here.
+    class PlaceholderApp:
+        def __init__(self):
+            pass
+        def predict(self, input_data):
+            return "Hello from PlaceholderApp"
+
+    # Check if an engine with a similar display name already exists
+    # This is a basic check and might need more robust handling for production
+    existing_engines = reasoning_engines.ReasoningEngine.list()
+    agent_engine_id = None
+    for engine in existing_engines:
+        if engine.display_name == "pegasus-agent-engine-$PROJECT_ID":
+            agent_engine_id = engine.name.split('/')[-1]
+            print(f"Found existing Agent Engine ID: {agent_engine_id}")
+            break
+
+    if agent_engine_id is None:
+        agent_engine = reasoning_engines.ReasoningEngine.create(
+            PlaceholderApp(),
+            display_name=f"pegasus-agent-engine-$PROJECT_ID",
+            description="Agent Engine for Pegasus backend",
+            requirements=["cloudpickle==3.0.0"], # Minimal requirement
+        )
+        agent_engine_id = agent_engine.name.split('/')[-1]
+        print(f"Created new Agent Engine ID: {agent_engine_id}")
+
+    print(f"AGENT_ENGINE_ID_OUTPUT:{agent_engine_id}")
+
+except Exception as e:
+    print(f"Error creating Agent Engine: {e}")
+    exit(1)
+EOT
+)
+
+AGENT_ENGINE_OUTPUT=$(python -c "$PYTHON_SCRIPT" 2>&1)
+AGENT_ENGINE_ID=$(echo "$AGENT_ENGINE_OUTPUT" | grep -oP 'AGENT_ENGINE_ID_OUTPUT:\K[^ ]+')
 
 if [ -z "$AGENT_ENGINE_ID" ]; then
     echo "Failed to extract Agent Engine ID. Please check the output above for errors."
