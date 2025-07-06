@@ -38,11 +38,23 @@ async def init_db(drop_first=False, mark_migrations=False):
         expected_tables = ['audio_files', 'processing_jobs', 'job_status_history', 'conversation_history']
         
         for table_name in expected_tables:
-            result = await conn.execute(
-                text("SELECT to_regclass('public.{}'::regclass)".format(table_name))
-            )
-            if result.scalar() is not None:
-                tables_created.append(table_name)
+            try:
+                # Try using to_regclass (PostgreSQL 9.4+)
+                result = await conn.execute(
+                    text("SELECT to_regclass('public.{}')".format(table_name))
+                )
+                if result.scalar() is not None:
+                    tables_created.append(table_name)
+            except Exception:
+                # Fallback for older PostgreSQL versions
+                result = await conn.execute(
+                    text("""
+                        SELECT table_name FROM information_schema.tables 
+                        WHERE table_schema = 'public' AND table_name = '{}'
+                    """.format(table_name))
+                )
+                if result.scalar() is not None:
+                    tables_created.append(table_name)
         
         print(f"✅ Created {len(tables_created)} tables: {', '.join(tables_created)}")
         

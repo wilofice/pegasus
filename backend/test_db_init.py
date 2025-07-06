@@ -32,10 +32,21 @@ async def test_db_init():
             ]
             
             for table_name in tables_to_check:
-                result = await conn.execute(
-                    text("SELECT to_regclass('public.{}')".format(table_name))
-                )
-                table_exists = result.scalar() is not None
+                try:
+                    # Try using to_regclass (PostgreSQL 9.4+)
+                    result = await conn.execute(
+                        text("SELECT to_regclass('public.{}')".format(table_name))
+                    )
+                    table_exists = result.scalar() is not None
+                except Exception:
+                    # Fallback for older PostgreSQL versions
+                    result = await conn.execute(
+                        text("""
+                            SELECT table_name FROM information_schema.tables 
+                            WHERE table_schema = 'public' AND table_name = '{}'
+                        """.format(table_name))
+                    )
+                    table_exists = result.scalar() is not None
                 
                 if table_exists:
                     print(f"✅ Table '{table_name}' exists")
