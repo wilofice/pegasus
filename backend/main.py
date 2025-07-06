@@ -1,7 +1,7 @@
 """FastAPI application entry point."""
 from fastapi import FastAPI
 
-from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2
+from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
 from routers import context, plugins
 from core.config import settings
 from middleware import SelectiveLoggingMiddleware, RequestLoggingConfig
@@ -26,6 +26,7 @@ app.include_router(game_router.router)
 app.include_router(context.router)
 app.include_router(plugins.router)
 app.include_router(chat_router_v2.router)
+app.include_router(llm_router.router)
 
 
 @app.get("/health")

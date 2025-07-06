@@ -33,6 +33,9 @@ openai-whisper>=20231117
 httpx>=0.26.0
 ollama>=0.1.7
 
+# LLM providers
+google-generativeai>=0.3.0
+
 # File handling
 aiofiles>=23.2.1
 python-magic>=0.4.27

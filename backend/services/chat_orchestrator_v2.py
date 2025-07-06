@@ -9,7 +9,7 @@ import uuid
 
 from services.context_aggregator_v2 import ContextAggregatorV2, AggregatedContext, AggregationConfig, AggregationStrategy
 from services.context_ranker import RankingStrategy
-from services.llm_client import generate as llm_generate
+from services.llm_client import get_llm_client
 from services.ollama_service import OllamaService
 from services.plugin_manager import PluginManager
 
@@ -431,7 +431,8 @@ class ChatOrchestratorV2:
         """Generate response using external LLM service."""
         try:
             # Use external LLM client
-            response = llm_generate(prompt)
+            llm_client = get_llm_client()
+            response = await llm_client.generate(prompt)
             return response.strip()
             
         except Exception as e:
