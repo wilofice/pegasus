@@ -75,10 +75,10 @@ class Settings(BaseSettings):
     gemini_api_key: Optional[str] = None  # Alternative env var name
     
     # Vertex AI Configuration
-    vertex_ai_project_id: Optional[str] = None
+    vertex_ai_project_id: Optional[str] = "sample-firebase-ai-app-c7883"
     vertex_ai_location: str = "us-central1"  # Default region
     vertex_ai_agent_engine_id: Optional[str] = None
-    vertex_ai_model: str = "gemini-2.0-flash"
+    vertex_ai_model: str = "gemini-2.5-flash"
     vertex_ai_timeout: float = 60.0
     vertex_ai_temperature: float = 0.7
     vertex_ai_max_tokens: int = 2048
