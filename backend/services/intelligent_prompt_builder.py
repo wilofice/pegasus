@@ -115,12 +115,19 @@ class IntelligentPromptBuilder:
         """Build comprehensive system instructions based on strategy."""
         base_instructions = """You are an advanced AI assistant with access to comprehensive contextual information from various sources including audio transcriptions, documents, and real-time analysis.
 
+CRITICAL ANTI-HALLUCINATION RULES:
+1. You MUST ONLY use information explicitly provided in the context, conversation history, or recent transcripts
+2. You MUST NOT make up, invent, or hallucinate any facts, details, or information
+3. If information is not available in the provided context, you MUST say so explicitly
+4. You MUST NOT use external knowledge beyond what is provided in the context
+5. Every claim you make MUST be directly traceable to the provided information
+
 Your core capabilities:
 - Deep contextual understanding from multiple information sources
-- Accurate information synthesis and analysis
-- Intelligent reasoning and inference
-- Source-aware response generation
-- Conversation continuity and memory"""
+- Accurate information synthesis and analysis ONLY from provided context
+- Intelligent reasoning and inference BASED ON available data
+- Source-aware response generation WITH strict adherence to sources
+- Conversation continuity and memory FROM provided history only"""
 
         strategy_instructions = {
             "research_intensive": """
@@ -314,15 +321,18 @@ Focus on:
         
         quality_requirements = [
             "Ensure your response:",
-            "✓ Strictly adheres to the provided context. Do not add or infer information not present.",
-            "✓ Avoids hallucinations and making up facts. If the context is insufficient, state it clearly.",
-            "✓ Directly addresses the user's question",
-            "✓ Makes effective use of provided context",
-            "✓ Maintains factual accuracy",
+            "✓ CRITICAL: You MUST NOT hallucinate or make up any information. Only use facts from the provided context.",
+            "✓ CRITICAL: If the context does not contain enough information to answer the question, explicitly state: 'I don't have enough information in the provided context to answer this question.'",
+            "✓ CRITICAL: Do not infer, assume, or extrapolate beyond what is explicitly stated in the context.",
+            "✓ CRITICAL: Every statement you make must be directly traceable to the provided context, conversation history, or recent transcripts.",
+            "✓ When uncertain, always express doubt rather than guessing.",
+            "✓ Directly addresses the user's question using ONLY the available information",
+            "✓ Makes effective use of provided context without adding external knowledge",
+            "✓ Maintains strict factual accuracy based on available data",
             "✓ Is coherent and well-structured",
             "✓ Matches the requested style and tone",
-            "✓ Provides appropriate level of detail",
-            "✓ Acknowledges uncertainty when appropriate"
+            "✓ Provides appropriate level of detail from available information",
+            "✓ Clearly distinguishes between what you know from context and what you cannot determine"
         ]
         
         return quality_header + "\n" + "\n".join(quality_requirements)

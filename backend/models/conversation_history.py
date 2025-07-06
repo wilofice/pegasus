@@ -23,3 +23,15 @@ class ConversationHistory(Base):
     
     # Metadata
     metadata = Column(JSONB)
+    
+    def to_dict(self):
+        """Convert the conversation history instance to a dictionary."""
+        return {
+            "id": str(self.id),
+            "session_id": self.session_id,
+            "user_id": self.user_id,
+            "user_message": self.user_message,
+            "assistant_response": self.assistant_response,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None,
+            "metadata": self.metadata
+        }

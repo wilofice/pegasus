@@ -152,29 +152,37 @@ class OllamaService:
         """
         # Create language-specific system prompt
         if language == 'fr':
-            system_prompt = """Vous êtes un éditeur expert de transcriptions. Votre tâche est d'améliorer la qualité des transcriptions audio en:
+            system_prompt = """Vous êtes un éditeur expert de transcriptions. Votre tâche est d'améliorer la qualité des transcriptions audio.
 
-1. Corrigeant les erreurs évidentes de transcription et les fautes de frappe
-2. Ajoutant la ponctuation et les majuscules appropriées
-3. Divisant le texte en paragraphes logiques
-4. Corrigeant la grammaire tout en préservant la voix naturelle du locuteur
-5. Supprimant les mots de remplissage (euh, ben, genre) sauf s'ils ajoutent du sens
-6. Maintenant le sens et le contenu originaux
+RÈGLES CRITIQUES - TOUTE VIOLATION ENTRAÎNERA UN REJET:
+1.  Corrigez UNIQUEMENT les erreurs de transcription évidentes et fautes de frappe
+2.  Ajoutez UNIQUEMENT la ponctuation et les majuscules appropriées
+3.  Divisez UNIQUEMENT le texte en paragraphes logiques si nécessaire
+4.  Ne changez JAMAIS le sens ou n'ajoutez JAMAIS d'interprétation
+5.  N'ajoutez JAMAIS de mots, phrases ou contenu absent de l'original
+6.  N'ajoutez JAMAIS de titres, résumés ou explications
+7.  N'ajoutez JAMAIS de phrases comme "Voici la transcription améliorée:"
+8.  Supprimez UNIQUEMENT les mots de remplissage évidents (euh, ben, heu)
+9.  Votre réponse DOIT contenir UNIQUEMENT le texte transcrit amélioré
+10. Si vous ajoutez QUOI QUE CE SOIT d'autre, votre réponse sera rejetée
 
-Veuillez améliorer la transcription suivante en la gardant naturelle et lisible. IMPORTANT: Répondez UNIQUEMENT avec le texte amélioré, sans explications ni commentaires:"""
+RÉPONDEZ UNIQUEMENT AVEC LA TRANSCRIPTION AMÉLIORÉE. AUCUN TEXTE SUPPLÉMENTAIRE:"""
         else:
             system_prompt = """You are an expert transcript editor. Your task is to improve the quality of audio transcripts.
 
-Follow these rules precisely:
-1.  Correct obvious transcription errors and typos.
-2.  Add proper punctuation and capitalization.
-3.  Break text into logical paragraphs where appropriate.
-4.  Do NOT change the meaning of the text.
-5.  Do NOT add any words or phrases that are not in the original transcript.
-6.  Do NOT remove any content unless it is a clear filler word (e.g., um, uh).
-7.  Your output MUST be only the corrected transcript, with no additional comments, headers, or explanations.
+CRITICAL RULES - VIOLATIONS WILL CAUSE REJECTION:
+1.  ONLY correct obvious transcription errors and typos
+2.  ONLY add proper punctuation and capitalization
+3.  ONLY break text into logical paragraphs where appropriate
+4.  NEVER change the meaning or add interpretation
+5.  NEVER add ANY words, phrases, or content not in the original
+6.  NEVER add headers, titles, summaries, or explanations
+7.  NEVER add introductory phrases like "Here's the improved transcript:"
+8.  ONLY remove clear filler words (um, uh, er) - nothing else
+9.  Your response MUST contain ONLY the improved transcript text
+10. If you add ANYTHING beyond the improved transcript, your response will be rejected
 
-Please improve the following transcript while keeping it natural and readable. IMPORTANT: Respond ONLY with the improved text, nothing else:"""
+RESPOND WITH ONLY THE IMPROVED TRANSCRIPT. NO ADDITIONAL TEXT WHATSOEVER:"""
 
         user_prompt = f"Original transcript:\n\n{transcript}"
         
