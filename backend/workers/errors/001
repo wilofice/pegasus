@@ -1,0 +1,137 @@
+(pegasus) ┌─[mica@mica]─[~/Desktop/pegasus/backend]
+└──╼ $python start_worker.py 
+2025-07-06 05:37:09,854 - __main__ - INFO - Starting Pegasus Brain Celery worker...
+ 
+ -------------- celery@mica v5.5.3 (immunity)
+--- ***** ----- 
+-- ******* ---- Linux-6.8.0-60-generic-x86_64-with-glibc2.35 2025-07-06 05:37:10
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         pegasus_brain:0x792f953eeba0
+- ** ---------- .> transport:   redis://localhost:6379/0
+- ** ---------- .> results:     postgresql://pegasus_user:**@localhost:5432/pegasus_db
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: ON
+--- ***** ----- 
+ -------------- [queues]
+                .> default          exchange=default(direct) key=default
+                .> entity_extraction exchange=nlp(direct) key=nlp.entities
+                .> graph_building   exchange=indexing(direct) key=indexing.graph
+                .> plugin_execution exchange=plugins(direct) key=plugin.execute
+                .> transcript_processing exchange=transcript(direct) key=transcript.processing
+                .> vector_indexing  exchange=indexing(direct) key=indexing.vector
+
+[tasks]
+  . workers.celery_app.health_check
+  . workers.tasks.plugin_executor.execute_plugins_for_transcript
+  . workers.tasks.plugin_executor.execute_single_plugin
+  . workers.tasks.plugin_executor.get_plugin_status
+  . workers.tasks.plugin_executor.reload_plugin
+  . workers.tasks.transcript_processor.process_transcript
+  . workers.tasks.transcript_processor.reprocess_transcript
+
+2025-07-06 05:37:10,618 - celery.worker.consumer.connection - INFO - Connected to redis://localhost:6379/0
+2025-07-06 05:37:10,627 - workers.celery_app - INFO - Celery worker celery@mica is ready
+2025-07-06 05:37:10,627 - celery.apps.worker - INFO - celery@mica ready.
+2025-07-06 05:39:28,704 - celery.worker.strategy - INFO - Task workers.tasks.transcript_processor.process_transcript[77ae0c69-6b04-44ac-9fae-9420f0f2da22] received
+2025-07-06 05:39:28,708 - workers.celery_app - INFO - Starting task workers.tasks.transcript_processor.process_transcript [77ae0c69-6b04-44ac-9fae-9420f0f2da22]
+2025-07-06 05:39:30,822 - httpx - INFO - HTTP Request: GET http://localhost:8001/api/v2/auth/identity "HTTP/1.1 200 OK"
+2025-07-06 05:39:31,009 - httpx - INFO - HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
+2025-07-06 05:39:31,027 - httpx - INFO - HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
+2025-07-06 05:39:31,319 - httpx - INFO - HTTP Request: GET http://localhost:8001/api/v2/heartbeat "HTTP/1.1 200 OK"
+2025-07-06 05:39:31,320 - services.vector_db_client - INFO - Connected to ChromaDB at localhost:8001
+2025-07-06 05:39:42,319 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-07-06 05:39:46,070 - httpx - INFO - HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
+2025-07-06 05:39:46,071 - services.vector_db_client - INFO - Initialized collection: pegasus_transcripts
+2025-07-06 05:39:46,298 - repositories.job_repository - INFO - Updated job 45fc2e5a-e6ce-4be3-9927-9621be8e6eaa status: JobStatus.PENDING -> JobStatus.PROCESSING
+2025-07-06 05:39:46,299 - workers.base_task - INFO - Task 77ae0c69-6b04-44ac-9fae-9420f0f2da22 initialized successfully
+2025-07-06 05:39:46,299 - workers.tasks.transcript_processor - INFO - Starting transcript processing for audio 61fab344-9238-47c7-8084-6ff1bc08c6c9
+2025-07-06 05:39:46,299 - workers.base_task - INFO - Progress: 1/6 (16.7%) - Loading transcript from database
+2025-07-06 05:39:46,463 - workers.base_task - INFO - Progress: 2/6 (33.3%) - Chunking transcript
+2025-07-06 05:39:46,661 - workers.tasks.transcript_processor - INFO - Created 1 chunks from transcript
+2025-07-06 05:39:46,661 - workers.base_task - INFO - Progress: 3/6 (50.0%) - Extracting entities
+2025-07-06 05:39:49,303 - services.ner_service - WARNING - Could not load spaCy model for en, using blank model
+2025-07-06 05:39:49,431 - services.ner_service - WARNING - Could not load spaCy model for fr, using blank model
+2025-07-06 05:39:49,487 - services.ner_service - WARNING - Could not load spaCy model for es, using blank model
+2025-07-06 05:39:49,529 - services.ner_service - WARNING - Could not load spaCy model for de, using blank model
+2025-07-06 05:39:49,596 - workers.tasks.transcript_processor - INFO - Extracted 0 entities
+2025-07-06 05:39:49,596 - workers.base_task - INFO - Progress: 4/6 (66.7%) - Generating embeddings and storing in ChromaDB
+2025-07-06 05:39:49,604 - httpx - INFO - HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/pegasus_transcripts "HTTP/1.1 200 OK"
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]WARNING - 
+Batches: 100%|##########| 1/1 [00:01<00:00,  1.58s/it]- 
+Batches: 100%|##########| 1/1 [00:01<00:00,  1.58s/it]- 
+2025-07-06 05:39:51,186 - httpx - INFO - HTTP Request: GET http://localhost:8001/api/v2/pre-flight-checks "HTTP/1.1 200 OK"
+2025-07-06 05:39:51,199 - httpx - INFO - HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/816743e7-17bd-4258-a95e-eec70ae26b1f/add "HTTP/1.1 422 Unprocessable Entity"
+2025-07-06 05:39:51,199 - services.vector_db_client - ERROR - Failed to add documents: Failed to deserialize the JSON body into the target type: metadatas[0].tags: data did not match any variant of untagged enum MetadataValue at line 1 column 2311
+2025-07-06 05:39:51,200 - workers.tasks.transcript_processor - ERROR - Failed to process transcript for audio 61fab344-9238-47c7-8084-6ff1bc08c6c9: Failed to deserialize the JSON body into the target type: metadatas[0].tags: data did not match any variant of untagged enum MetadataValue at line 1 column 2311
+2025-07-06 05:39:51,231 - workers.base_task - ERROR - Task 77ae0c69-6b04-44ac-9fae-9420f0f2da22 failed: Failed to deserialize the JSON body into the target type: metadatas[0].tags: data did not match any variant of untagged enum MetadataValue at line 1 column 2311
+2025-07-06 05:39:51,244 - repositories.job_repository - INFO - Updated job 45fc2e5a-e6ce-4be3-9927-9621be8e6eaa status: JobStatus.PROCESSING -> JobStatus.FAILED
+2025-07-06 05:39:51,244 - celery.app.trace - ERROR - Task workers.tasks.transcript_processor.process_transcript[77ae0c69-6b04-44ac-9fae-9420f0f2da22] raised unexpected: ChromaError('Failed to deserialize the JSON body into the target type: metadatas[0].tags: data did not match any variant of untagged enum MetadataValue at line 1 column 2311')
+Traceback (most recent call last):
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/celery/app/trace.py", line 453, in trace_task
+    R = retval = fun(*args, **kwargs)
+                 ~~~^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/celery/app/trace.py", line 736, in __protected_call__
+    return self.run(*args, **kwargs)
+           ~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/mica/Desktop/pegasus/backend/workers/tasks/transcript_processor.py", line 175, in process_transcript
+    return loop.run_until_complete(_process_transcript_async())
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/mica/Desktop/pegasus/backend/workers/tasks/transcript_processor.py", line 108, in _process_transcript_async
+    await self.chromadb_client.add_documents(
+    ...<3 lines>...
+    )
+  File "/home/mica/Desktop/pegasus/backend/services/vector_db_client.py", line 148, in add_documents
+    await asyncio.get_event_loop().run_in_executor(
+    ...<6 lines>...
+    )
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/home/mica/Desktop/pegasus/backend/services/vector_db_client.py", line 150, in <lambda>
+    lambda: collection.add(
+            ~~~~~~~~~~~~~~^
+        documents=documents,
+        ^^^^^^^^^^^^^^^^^^^^
+        metadatas=metadatas,
+        ^^^^^^^^^^^^^^^^^^^^
+        ids=ids
+        ^^^^^^^
+    )
+    ^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/chromadb/api/models/Collection.py", line 89, in add
+    self._client._add(
+    ~~~~~~~~~~~~~~~~~^
+        collection_id=self.id,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        database=self.database,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/chromadb/telemetry/opentelemetry/__init__.py", line 150, in wrapper
+    return f(*args, **kwargs)
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/chromadb/api/fastapi.py", line 517, in _add
+    self._submit_batch(
+    ~~~~~~~~~~~~~~~~~~^
+        batch,
+        ^^^^^^
+        f"/tenants/{tenant}/databases/{database}/collections/{str(collection_id)}/add",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/chromadb/telemetry/opentelemetry/__init__.py", line 150, in wrapper
+    return f(*args, **kwargs)
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/chromadb/api/fastapi.py", line 490, in _submit_batch
+    self._make_request("post", url, json=data)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/chromadb/api/fastapi.py", line 108, in _make_request
+    BaseHTTPClient._raise_chroma_error(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/chromadb/api/base_http_client.py", line 97, in _raise_chroma_error
+    raise chroma_error
+chromadb.errors.ChromaError: Failed to deserialize the JSON body into the target type: metadatas[0].tags: data did not match any variant of untagged enum MetadataValue at line 1 column 2311
+2025-07-06 05:39:51,249 - workers.base_task - INFO - Task 77ae0c69-6b04-44ac-9fae-9420f0f2da22 cleanup completed
+2025-07-06 05:39:51,250 - workers.celery_app - INFO - Finished task workers.tasks.transcript_processor.process_transcript [77ae0c69-6b04-44ac-9fae-9420f0f2da22] with state: FAILURE
