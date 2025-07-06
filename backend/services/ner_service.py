@@ -33,12 +33,13 @@ class NERService:
                 # Try to load the full model
                 self.models[lang_code] = spacy.load(model_name)
                 logger.info(f"Loaded spaCy model for {lang_code}: {model_name}")
-            except OSError:
+            except OSError as e:
                 try:
                     # Try fallback model
+                    logger.warning(f"Could not load spaCy model for {lang_code}, using blank model", e)
                     self.models[lang_code] = spacy.load(fallback)
                     logger.info(f"Loaded fallback spaCy model for {lang_code}: {fallback}")
-                except OSError:
+                except OSError as e:
                     # Use blank model as last resort
                     logger.warning(f"Could not load spaCy model for {lang_code}, using blank model")
                     self.models[lang_code] = self._create_blank_model(lang_code)
