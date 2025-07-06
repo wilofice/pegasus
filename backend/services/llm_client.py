@@ -87,13 +87,14 @@ class GoogleGenerativeAIClient(BaseLLMClient):
     """Google Generative AI (Gemini) client."""
     
     def __init__(self):
-        self.api_key = os.environ.get("GOOGLE_GENERATIVE_AI_API_KEY", os.environ.get("GEMINI_API_KEY"))
+        # Use primary API key or fallback to alternative env var name
+        self.api_key = settings.google_generative_ai_api_key or settings.gemini_api_key
         if not self.api_key:
-            raise RuntimeError("GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY not configured")
+            raise RuntimeError("GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY not configured in settings")
         
         self.base_url = "https://generativelanguage.googleapis.com/v1beta"
-        self.model = os.environ.get("GOOGLE_GENERATIVE_AI_MODEL", "gemini-pro")
-        self.timeout = float(os.environ.get("LLM_TIMEOUT", "30.0"))
+        self.model = settings.google_generative_ai_model
+        self.timeout = settings.llm_timeout
     
     async def generate(self, prompt: str, **kwargs) -> str:
         """Generate a response using Google Generative AI."""
@@ -273,13 +274,13 @@ class OpenAIClient(BaseLLMClient):
     """Legacy OpenAI client for backward compatibility."""
     
     def __init__(self):
-        self.api_key = os.environ.get("OPENAI_API_KEY", os.environ.get("LLM_API_KEY"))
+        self.api_key = settings.openai_api_key or settings.llm_api_key
         if not self.api_key:
-            raise RuntimeError("OPENAI_API_KEY or LLM_API_KEY not configured")
+            raise RuntimeError("OPENAI_API_KEY or LLM_API_KEY not configured in settings")
         
-        self.base_url = os.environ.get("OPENAI_API_URL", "https://api.openai.com/v1")
-        self.model = os.environ.get("OPENAI_MODEL", "gpt-3.5-turbo")
-        self.timeout = float(os.environ.get("LLM_TIMEOUT", "30.0"))
+        self.base_url = settings.openai_api_url
+        self.model = settings.openai_model
+        self.timeout = settings.llm_timeout
     
     async def generate(self, prompt: str, **kwargs) -> str:
         """Generate using OpenAI completion API (legacy)."""
@@ -391,9 +392,9 @@ class LLMClientFactory:
         Raises:
             RuntimeError: If the provider is not supported or required configuration is missing.
         """
-        # Determine provider from environment or parameter
+        # Determine provider from settings or parameter
         if provider is None:
-            provider = os.environ.get("LLM_PROVIDER", LLMProvider.OLLAMA).lower()
+            provider = settings.llm_provider.lower()
         else:
             provider = provider.lower()
         
