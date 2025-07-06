@@ -44,45 +44,99 @@ class IntelligentPromptBuilder:
         Build an intelligent, comprehensive prompt that maximizes context utilization.
         """
         try:
-            prompt_strategy = self._determine_prompt_strategy(user_message, aggregated_context, config)
+            logger.debug(f"Starting intelligent prompt building for message: {user_message[:50]}...")
+            
+            # Determine prompt strategy with error handling
+            try:
+                prompt_strategy = self._determine_prompt_strategy(user_message, aggregated_context, config)
+                logger.debug(f"Determined prompt strategy: {prompt_strategy}")
+            except Exception as e:
+                logger.error(f"Error determining prompt strategy: {e}", exc_info=True)
+                prompt_strategy = "conversational_balanced"  # Safe fallback
             
             prompt_components = []
             
-            system_prompt = self._build_system_instructions(config, prompt_strategy)
-            prompt_components.append(system_prompt)
+            # Build system instructions with error handling
+            try:
+                system_prompt = self._build_system_instructions(config, prompt_strategy)
+                prompt_components.append(system_prompt)
+                logger.debug("Added system instructions")
+            except Exception as e:
+                logger.error(f"Error building system instructions: {e}", exc_info=True)
+                prompt_components.append("You are a helpful AI assistant.")
 
+            # Build transcript section with error handling
             if recent_transcripts:
-                transcript_section = self._build_transcript_section(recent_transcripts)
-                prompt_components.append(transcript_section)
+                try:
+                    transcript_section = self._build_transcript_section(recent_transcripts)
+                    prompt_components.append(transcript_section)
+                    logger.debug(f"Added transcript section with {len(recent_transcripts)} transcripts")
+                except Exception as e:
+                    logger.error(f"Error building transcript section: {e}", exc_info=True)
             
-            if aggregated_context.results:
-                context_section = self._build_context_section(aggregated_context, config)
-                prompt_components.append(context_section)
+            # Build context section with error handling
+            if aggregated_context and hasattr(aggregated_context, 'results') and aggregated_context.results:
+                try:
+                    context_section = self._build_context_section(aggregated_context, config)
+                    prompt_components.append(context_section)
+                    logger.debug(f"Added context section with {len(aggregated_context.results)} results")
+                except Exception as e:
+                    logger.error(f"Error building context section: {e}", exc_info=True)
             
+            # Build plugin section with error handling
             if plugin_results and plugin_results.get("results"):
-                plugin_section = self._build_plugin_section(plugin_results)
-                prompt_components.append(plugin_section)
+                try:
+                    plugin_section = self._build_plugin_section(plugin_results)
+                    if plugin_section.strip():  # Only add if not empty
+                        prompt_components.append(plugin_section)
+                        logger.debug("Added plugin section")
+                except Exception as e:
+                    logger.error(f"Error building plugin section: {e}", exc_info=True)
             
-            if conversation_context.conversation_history:
-                history_section = self._build_conversation_section(conversation_context)
-                prompt_components.append(history_section)
+            # Build conversation section with error handling
+            if conversation_context and hasattr(conversation_context, 'conversation_history') and conversation_context.conversation_history:
+                try:
+                    history_section = self._build_conversation_section(conversation_context)
+                    if history_section.strip():  # Only add if not empty
+                        prompt_components.append(history_section)
+                        logger.debug(f"Added conversation section with {len(conversation_context.conversation_history)} exchanges")
+                except Exception as e:
+                    logger.error(f"Error building conversation section: {e}", exc_info=True)
             
-            task_instructions = self._build_task_instructions(user_message, aggregated_context, config)
-            prompt_components.append(task_instructions)
+            # Build task instructions with error handling
+            try:
+                task_instructions = self._build_task_instructions(user_message, aggregated_context, config)
+                prompt_components.append(task_instructions)
+                logger.debug("Added task instructions")
+            except Exception as e:
+                logger.error(f"Error building task instructions: {e}", exc_info=True)
+                prompt_components.append(f"=== CURRENT TASK ===\nUser Question: {user_message}")
             
-            response_framework = self._build_response_framework(config, aggregated_context)
-            prompt_components.append(response_framework)
+            # Build response framework with error handling
+            try:
+                response_framework = self._build_response_framework(config, aggregated_context)
+                prompt_components.append(response_framework)
+                logger.debug("Added response framework")
+            except Exception as e:
+                logger.error(f"Error building response framework: {e}", exc_info=True)
             
-            quality_instructions = self._build_quality_instructions(config)
-            prompt_components.append(quality_instructions)
+            # Build quality instructions with error handling
+            try:
+                quality_instructions = self._build_quality_instructions(config)
+                prompt_components.append(quality_instructions)
+                logger.debug("Added quality instructions")
+            except Exception as e:
+                logger.error(f"Error building quality instructions: {e}", exc_info=True)
             
-            full_prompt = "\n\n".join(prompt_components)
+            # Join all components, filtering out empty ones
+            valid_components = [comp for comp in prompt_components if comp and comp.strip()]
+            full_prompt = "\n\n".join(valid_components)
             
-            logger.info(f"Built intelligent prompt with {len(prompt_components)} sections")
+            logger.info(f"Built intelligent prompt with {len(valid_components)} sections, total length: {len(full_prompt)}")
             return full_prompt
             
         except Exception as e:
-            logger.error(f"Intelligent prompt building failed: {e}")
+            logger.error(f"Critical error in intelligent prompt building: {e}", exc_info=True)
             return self._build_fallback_prompt(user_message, aggregated_context, config)
     
     def _determine_prompt_strategy(self,
@@ -257,27 +311,89 @@ Focus on:
         return plugin_header + "\\n" + "\\n".join(plugin_parts) if plugin_parts else ""
     
     def _build_conversation_section(self, conversation_context: ConversationContext) -> str:
-        """Build conversation history section."""
-        history_header = "=== CONVERSATION CONTEXT ==="
-        
-        # Include recent exchanges with context
-        recent_history = conversation_context.conversation_history
-        history_parts = []
-        
-        for i, exchange in enumerate(recent_history, 1):
-            history_parts.append(f"Turn {len(conversation_context.conversation_history) - len(recent_history) + i}:")
-            history_parts.append(f"  User: {exchange['user']}")
-            history_parts.append(f"  Assistant: {exchange['assistant'][:200]}{'...' if len(exchange['assistant']) > 200 else ''}")
-        
-        conversation_meta = []
-        if hasattr(conversation_context, 'user_preferences'):
-            conversation_meta.append(f"User preferences: {conversation_context.user_preferences}")
-        
-        conversation_meta.append(f"Total conversation turns: {len(conversation_context.conversation_history)}")
-        
-        return (history_header + "\\n" + 
-                "\\n".join(history_parts) + 
-                "\\n\\nConversation Metadata:\\n" + "\\n".join(conversation_meta))
+        """Build conversation history section with comprehensive error handling."""
+        try:
+            history_header = "=== CONVERSATION CONTEXT ==="
+            
+            # Validate conversation context
+            if not conversation_context:
+                logger.warning("Conversation context is None")
+                return ""
+            
+            if not hasattr(conversation_context, 'conversation_history'):
+                logger.warning("Conversation context missing conversation_history attribute")
+                return ""
+            
+            recent_history = conversation_context.conversation_history
+            if not recent_history:
+                logger.debug("No conversation history found")
+                return ""
+            
+            history_parts = []
+            valid_exchanges = 0
+            
+            for i, exchange in enumerate(recent_history, 1):
+                try:
+                    # Validate exchange data
+                    if not isinstance(exchange, dict):
+                        logger.warning(f"Exchange {i} is not a dictionary: {type(exchange)}")
+                        continue
+                    
+                    # Handle different possible key formats for conversation history
+                    user_message = exchange.get('user_message') or exchange.get('user', '')
+                    assistant_message = exchange.get('assistant_response') or exchange.get('assistant', '')
+                    
+                    # Debug logging for key structure
+                    if not user_message and not assistant_message:
+                        available_keys = list(exchange.keys())
+                        logger.warning(f"Exchange {i} missing expected keys. Available: {available_keys}")
+                        continue
+                    
+                    turn_number = len(recent_history) - len(recent_history) + i
+                    history_parts.append(f"Turn {turn_number}:")
+                    
+                    if user_message:
+                        # Sanitize user message
+                        clean_user_message = str(user_message).strip()
+                        history_parts.append(f"  User: {clean_user_message}")
+                    
+                    if assistant_message:
+                        # Sanitize and truncate assistant message
+                        clean_assistant_message = str(assistant_message).strip()
+                        truncated_response = clean_assistant_message[:200] + ('...' if len(clean_assistant_message) > 200 else '')
+                        history_parts.append(f"  Assistant: {truncated_response}")
+                    
+                    valid_exchanges += 1
+                    
+                except Exception as e:
+                    logger.error(f"Error processing conversation exchange {i}: {e}", exc_info=True)
+                    continue
+            
+            if valid_exchanges == 0:
+                logger.warning("No valid conversation exchanges found")
+                return ""
+            
+            # Build conversation metadata safely
+            conversation_meta = []
+            try:
+                if hasattr(conversation_context, 'user_preferences') and conversation_context.user_preferences:
+                    conversation_meta.append(f"User preferences: {conversation_context.user_preferences}")
+            except Exception as e:
+                logger.error(f"Error accessing user preferences: {e}")
+            
+            conversation_meta.append(f"Total conversation turns: {len(recent_history)}")
+            conversation_meta.append(f"Valid exchanges processed: {valid_exchanges}")
+            
+            result = (history_header + "\\n" + 
+                     "\\n".join(history_parts) + 
+                     "\\n\\nConversation Metadata:\\n" + "\\n".join(conversation_meta))
+            
+            logger.debug(f"Built conversation section with {valid_exchanges} valid exchanges")
+            return result
+                    
+        except Exception as e:
+            logger.error(f"Critical error building conversation section: {e}", exc_info=True)
+            return ""  # Return empty string on critical error
     
     def _build_task_instructions(self,
                                user_message: str,
@@ -392,22 +508,45 @@ Focus on:
                               aggregated_context: AggregatedContext,
                               config: ChatConfig) -> str:
         """Build fallback prompt when intelligent building fails."""
-        fallback_parts = [
-            "You are a helpful AI assistant. Please respond to the user's question using any available context.",
-            "",
-            f"User Question: {user_message}"
-        ]
-        
-        if aggregated_context.results:
-            fallback_parts.extend([
+        try:
+            logger.info("Building fallback prompt due to error in main prompt building")
+            
+            fallback_parts = [
+                "You are a helpful AI assistant. Please respond to the user's question using any available context.",
                 "",
-                "Available Context:",
-                "\\n".join([f"- {result.content}" for result in aggregated_context.results[:3]])
-            ])
-        
-        fallback_parts.append("\\nPlease provide a helpful, accurate response.")
-        
-        return "\\n".join(fallback_parts)
+                f"User Question: {user_message}"
+            ]
+            
+            # Safely add context if available
+            try:
+                if aggregated_context and hasattr(aggregated_context, 'results') and aggregated_context.results:
+                    context_items = []
+                    for result in aggregated_context.results[:3]:
+                        try:
+                            if hasattr(result, 'content') and result.content:
+                                content_preview = str(result.content)[:100]
+                                context_items.append(f"- {content_preview}...")
+                        except Exception as e:
+                            logger.error(f"Error processing context result: {e}")
+                            continue
+                    
+                    if context_items:
+                        fallback_parts.extend([
+                            "",
+                            "Available Context:",
+                            "\\n".join(context_items)
+                        ])
+            except Exception as e:
+                logger.error(f"Error adding context to fallback prompt: {e}")
+            
+            fallback_parts.append("\\nPlease provide a helpful, accurate response.")
+            
+            return "\\n".join(fallback_parts)
+            
+        except Exception as e:
+            logger.error(f"Error even in fallback prompt building: {e}", exc_info=True)
+            # Ultra-minimal fallback
+            return f"Please respond to: {user_message}"
     
     def _load_prompt_templates(self) -> Dict[str, str]:
         """Load pre-defined prompt templates."""
