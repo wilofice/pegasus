@@ -16,15 +16,7 @@ logger = logging.getLogger(__name__)
 
 @app.task(base=BaseTask, bind=True)
 def process_transcript(self, audio_id: str, job_id: str = None):
-    """Process audio transcript through the full brain pipeline.
-    
-    Args:
-        audio_id: UUID of the audio file to process
-        job_id: UUID of the associated job
-        
-    Returns:
-        Dict with processing results
-    """
+    """Process audio transcript through the full brain pipeline."""
     
     async def _process_transcript_async():
         from core.database import async_session
@@ -36,41 +28,18 @@ def process_transcript(self, audio_id: str, job_id: str = None):
         async with async_session() as db:
             audio_repo = AudioRepository(db)
             try:
-                # Step 1: Transcription
-                self.log_progress(1, 8, "Starting transcription")
-                await audio_repo.update_status(audio_uuid, ProcessingStatus.TRANSCRIBING)
-                
-                audio_file = await audio_repo.get_by_id(audio_uuid)
-                if not audio_file:
-                    raise ValueError(f"Audio file {audio_id} not found")
-
-                from services.transcription_service import TranscriptionService
-                transcription_service = TranscriptionService()
-                
-                transcription_result = await transcription_service.transcribe_audio(
-                    audio_file.file_path,
-                    settings.transcription_engine,
-                    language=audio_file.language or 'en'
-                )
-
-                if not transcription_result["success"]:
-                    raise RuntimeError(f"Transcription failed: {transcription_result.get('error')}")
-
-                await audio_repo.update(audio_uuid, {
-                    "original_transcript": transcription_result["transcript"],
-                    "transcription_engine": transcription_result["engine"],
-                    "duration_seconds": await transcription_service.get_audio_duration(audio_file.file_path)
-                })
-                
-                # Step 2: Transcript Improvement
-                self.log_progress(2, 8, "Improving transcript")
+                self.log_progress(1, 7, "Improving transcript")
                 await audio_repo.update_status(audio_uuid, ProcessingStatus.IMPROVING)
                 
+                audio_file = await audio_repo.get_by_id(audio_uuid)
+                if not audio_file or not audio_file.original_transcript:
+                    raise ValueError(f"Audio file {audio_id} or its transcript not found")
+
                 from services.ollama_service import OllamaService
                 ollama_service = OllamaService()
                 
                 improvement_result = await ollama_service.improve_transcript(
-                    transcription_result["transcript"],
+                    audio_file.original_transcript,
                     language=audio_file.language or 'en'
                 )
                 
@@ -78,24 +47,20 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                     await audio_repo.update(audio_uuid, {"improved_transcript": improvement_result["improved_transcript"]})
                 else:
                     logger.warning(f"Transcript improvement failed for {audio_id}, using original.")
-                    await audio_repo.update(audio_uuid, {"improved_transcript": transcription_result["transcript"]})
+                    await audio_repo.update(audio_uuid, {"improved_transcript": audio_file.original_transcript})
 
-                # Refresh audio_file object
                 audio_file = await audio_repo.get_by_id(audio_uuid)
                 
-                # Step 3: Chunking
-                self.log_progress(3, 8, "Chunking transcript")
+                self.log_progress(2, 7, "Chunking transcript")
                 from services.chunking_service import ChunkingService
                 chunker = ChunkingService()
                 chunks = chunker.chunk_text(audio_file.improved_transcript)
                 
-                # Step 4: Sentiment Analysis
-                self.log_progress(4, 8, "Analyzing sentiment")
+                self.log_progress(3, 7, "Analyzing sentiment")
                 from services.sentiment_service import SentimentService
                 sentiment_service = SentimentService()
                 
-                # Step 5: Entity Extraction
-                self.log_progress(5, 8, "Extracting entities")
+                self.log_progress(4, 7, "Extracting entities")
                 from services.ner_service import NERService
                 ner_service = NERService()
 
@@ -104,36 +69,28 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                 for i, chunk in enumerate(chunks):
                     entities = ner_service.extract_entities(chunk.text, language=audio_file.language or 'en')
                     all_entities.extend(entities)
-                    
                     sentiment = sentiment_service.analyze_sentiment(chunk.text)
                     
                     metadata = {
-                        "audio_id": str(audio_id),
-                        "user_id": str(audio_file.user_id) if audio_file.user_id else "",
-                        "chunk_index": i,
-                        "chunk_total": len(chunks),
+                        "audio_id": str(audio_id), "user_id": str(audio_file.user_id) if audio_file.user_id else "",
+                        "chunk_index": i, "chunk_total": len(chunks),
                         "timestamp": audio_file.upload_timestamp.isoformat() if audio_file.upload_timestamp else "",
-                        "language": audio_file.language or "en",
-                        "tags": str(audio_file.tag) if audio_file.tag else "",
+                        "language": audio_file.language or "en", "tags": str(audio_file.tag) if audio_file.tag else "",
                         "category": str(audio_file.category) if audio_file.category else "",
-                        "entity_count": len(entities),
-                        "start_pos": int(chunk.start) if chunk.start is not None else 0,
+                        "entity_count": len(entities), "start_pos": int(chunk.start) if chunk.start is not None else 0,
                         "end_pos": int(chunk.end) if chunk.end is not None else 0,
-                        "sentiment_score": sentiment["score"],
-                        "sentiment_classification": sentiment["classification"]
+                        "sentiment_score": sentiment["score"], "sentiment_classification": sentiment["classification"]
                     }
                     chunk_metadatas.append(metadata)
 
-                # Step 6: ChromaDB Ingestion
-                self.log_progress(6, 8, "Storing chunks in ChromaDB")
+                self.log_progress(5, 7, "Storing chunks in ChromaDB")
                 await self.chromadb_client.add_documents(
                     documents=[c.text for c in chunks],
                     metadatas=chunk_metadatas,
                     ids=[f"{audio_id}_chunk_{i}" for i in range(len(chunks))]
                 )
                 
-                # Step 7: Neo4j Ingestion
-                self.log_progress(7, 8, "Creating graph nodes in Neo4j")
+                self.log_progress(6, 7, "Creating graph nodes in Neo4j")
                 from services.graph_builder import GraphBuilder
                 graph_builder = GraphBuilder(self.neo4j_client)
                 
@@ -141,15 +98,11 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                     chunk_id = f"{audio_id}_chunk_{i}"
                     chunk_entities = [e for e in all_entities if chunk.start <= e.get('start', 0) < chunk.end]
                     await graph_builder.create_chunk_node(
-                        chunk_id=chunk_id,
-                        audio_id=audio_id,
-                        text=chunk.text,
-                        metadata=chunk_metadatas[i],
-                        entities=chunk_entities
+                        chunk_id=chunk_id, audio_id=audio_id, text=chunk.text,
+                        metadata=chunk_metadatas[i], entities=chunk_entities
                     )
                 
-                # Step 8: Finalize Status
-                self.log_progress(8, 8, "Finalizing processing")
+                self.log_progress(7, 7, "Finalizing processing")
                 await audio_repo.update(audio_uuid, {
                     "vector_indexed": True, "vector_indexed_at": datetime.utcnow(),
                     "graph_indexed": True, "graph_indexed_at": datetime.utcnow(),
@@ -158,12 +111,8 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                 })
                 
                 result = {
-                    "audio_id": audio_id,
-                    "chunks_created": len(chunks),
-                    "entities_extracted": len(all_entities),
-                    "vector_indexed": True,
-                    "graph_indexed": True,
-                    "processing_completed_at": datetime.utcnow().isoformat()
+                    "audio_id": audio_id, "chunks_created": len(chunks), "entities_extracted": len(all_entities),
+                    "vector_indexed": True, "graph_indexed": True, "processing_completed_at": datetime.utcnow().isoformat()
                 }
                 logger.info(f"Successfully processed transcript for audio {audio_id}")
                 return result
@@ -173,7 +122,6 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                 await audio_repo.update_status(audio_uuid, ProcessingStatus.FAILED, str(e))
                 raise
 
-    # Run the async function
     try:
         loop = asyncio.get_event_loop()
     except RuntimeError:
@@ -185,15 +133,7 @@ def process_transcript(self, audio_id: str, job_id: str = None):
 
 @app.task(base=BaseTask, bind=True)
 def reprocess_transcript(self, audio_id: str, job_id: str = None):
-    """Reprocess an existing transcript (e.g., after algorithm improvements).
-    
-    Args:
-        audio_id: UUID of the audio file to reprocess
-        job_id: UUID of the associated job
-        
-    Returns:
-        Dict with reprocessing results
-    """
+    """Reprocess an existing transcript (e.g., after algorithm improvements)."""
     import asyncio
     
     async def _reprocess_transcript_async():
@@ -207,7 +147,6 @@ def reprocess_transcript(self, audio_id: str, job_id: str = None):
             try:
                 logger.info(f"Starting transcript reprocessing for audio {audio_id}")
                 
-                # First, clean up existing data
                 self.log_progress(1, 3, "Cleaning up existing data")
                 
                 await self.chromadb_client.delete_documents(where={"audio_id": audio_id})
@@ -220,10 +159,9 @@ def reprocess_transcript(self, audio_id: str, job_id: str = None):
                     "vector_indexed": False, "vector_indexed_at": None,
                     "graph_indexed": False, "graph_indexed_at": None,
                     "entities_extracted": False, "entities_extracted_at": None,
-                    "processing_status": ProcessingStatus.UPLOADED
+                    "processing_status": ProcessingStatus.PENDING_PROCESSING
                 })
                 
-                # Now reprocess
                 self.log_progress(2, 3, "Reprocessing transcript")
                 result = process_transcript.apply_async(
                     args=[audio_id],
@@ -243,7 +181,6 @@ def reprocess_transcript(self, audio_id: str, job_id: str = None):
                 await audio_repo.update_status(UUID(audio_id), ProcessingStatus.FAILED, f"Reprocessing failed: {e}")
                 raise
     
-    # Run the async function
     try:
         loop = asyncio.get_event_loop()
     except RuntimeError:

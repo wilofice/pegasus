@@ -100,7 +100,7 @@ async def upload_audio(
         
         # Add background task for processing
         background_tasks.add_task(
-            process_audio_file,
+            trigger_transcription_task,
             audio_id=audio_record.id,
             file_path=file_info["file_path"]
         )
@@ -338,64 +338,44 @@ async def get_transcript(
     }
 
 
-async def process_audio_file(audio_id: UUID, file_path: str):
-    """Background task to trigger the full audio processing pipeline.
-    
-    Args:
-        audio_id: UUID of the audio file
-        file_path: Path to the audio file
-    """
-    from core.database import async_session
+async def trigger_transcription_task(audio_id: UUID, file_path: str):
+    """Dispatches a Celery task to transcribe the audio file."""
+    from workers.tasks.transcription_tasks import transcribe_audio
     from models.job import JobType, ProcessingJob, JobStatus
-    
-    logger.info(f"Triggering full audio processing for {audio_id}")
-    
+    from core.database import async_session
+    from models.audio_file import AudioFile
+    from sqlalchemy.future import select
+
+    logger.info(f"Dispatching transcription task for audio {audio_id}")
+
     async with async_session() as db:
         try:
-            from workers.tasks.transcript_processor import process_transcript
-            from models.audio_file import AudioFile
-            from sqlalchemy.future import select
-
-            # Get user_id from audio_file
             result = await db.execute(select(AudioFile).filter(AudioFile.id == audio_id))
             audio_file = result.scalar_one_or_none()
 
             if not audio_file:
-                logger.error(f"Audio file {audio_id} not found, cannot trigger processing.")
+                logger.error(f"Audio file {audio_id} not found, cannot start transcription job.")
                 return
 
-            # Create a job record for tracking
             job = ProcessingJob(
-                job_type=JobType.TRANSCRIPT_PROCESSING,
+                job_type=JobType.TRANSCRIPTION,
                 status=JobStatus.PENDING,
-                input_data={
-                    "audio_id": str(audio_id),
-                    "user_id": audio_file.user_id,
-                    "file_path": file_path
-                },
+                input_data={"audio_id": str(audio_id), "file_path": file_path},
                 user_id=audio_file.user_id,
                 audio_file_id=audio_id
             )
-            
             db.add(job)
             await db.commit()
             await db.refresh(job)
-            
-            # Dispatch Celery task
-            result = process_transcript.delay(
-                audio_id=str(audio_id),
-                job_id=str(job.id)
-            )
-            
-            # Update job with task ID
-            job.celery_task_id = result.id
+
+            task_result = transcribe_audio.delay(audio_id=str(audio_id), job_id=str(job.id))
+            job.celery_task_id = task_result.id
             await db.commit()
-            
-            logger.info(f"Dispatched transcript processing task {result.id} for audio {audio_id}")
+
+            logger.info(f"Dispatched transcription task {task_result.id} for audio {audio_id}")
 
         except Exception as e:
-            logger.error(f"Failed to dispatch transcript processing task for {audio_id}: {e}")
-            # The worker task should handle failure reporting.
+            logger.error(f"Failed to dispatch transcription task for {audio_id}: {e}", exc_info=True)
 
 
 @router.get("/{audio_id}/indexing-status")

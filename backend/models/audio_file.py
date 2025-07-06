@@ -13,6 +13,7 @@ class ProcessingStatus(str, enum.Enum):
     """Audio file processing status."""
     UPLOADED = "uploaded"
     TRANSCRIBING = "transcribing"
+    PENDING_PROCESSING = "pending_processing"
     IMPROVING = "improving"
     COMPLETED = "completed"
     FAILED = "failed"
