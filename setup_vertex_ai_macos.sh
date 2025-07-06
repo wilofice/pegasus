@@ -9,6 +9,23 @@ prompt_for_input() {
     echo "$input"
 }
 
+# Install gcloud CLI if not already installed
+if ! command -v gcloud &> /dev/null
+then
+    echo "gcloud CLI not found. Installing..."
+    # Check if Homebrew is installed
+    if ! command -v brew &> /dev/null
+    then
+        echo "Homebrew not found. Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+    echo "Installing google-cloud-sdk via Homebrew..."
+    brew install google-cloud-sdk
+    echo "gcloud CLI installed."
+else
+    echo "gcloud CLI is already installed."
+fi
+
 # Get Google Cloud Project ID from user
 PROJECT_ID=$(prompt_for_input "Enter your Google Cloud Project ID")
 LOCATION="us-central1" # Default location as per documentation
@@ -33,14 +50,16 @@ fi
 
 echo "Extracted Agent Engine ID: $AGENT_ENGINE_ID"
 
-ENV_FILE="/Users/galahassa/Dev/pegasus/backend/.env"
+SCRIPT_DIR="$(dirname "$0")"
+ENV_FILE="$SCRIPT_DIR/backend/.env"
+ENV_EXAMPLE_FILE="$SCRIPT_DIR/backend/.env.example"
 
 echo "Updating or creating $ENV_FILE..."
 
 # Check if .env file exists, if not, create it from .env.example
 if [ ! -f "$ENV_FILE" ]; then
     echo "backend/.env not found. Creating from backend/.env.example"
-    cp /Users/galahassa/Dev/pegasus/backend/.env.example "$ENV_FILE"
+    cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
 fi
 
 # Update or add Vertex AI configuration

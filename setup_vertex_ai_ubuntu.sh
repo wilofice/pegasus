@@ -9,6 +9,21 @@ prompt_for_input() {
     echo "$input"
 }
 
+# Install gcloud CLI if not already installed
+if ! command -v gcloud &> /dev/null
+then
+    echo "gcloud CLI not found. Installing..."
+    sudo apt-get update
+    sudo apt-get install apt-transport-https ca-certificates gnupg curl -y
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+    sudo apt-get update
+    sudo apt-get install google-cloud-sdk -y
+    echo "gcloud CLI installed."
+else
+    echo "gcloud CLI is already installed."
+fi
+
 # Get Google Cloud Project ID from user
 PROJECT_ID=$(prompt_for_input "Enter your Google Cloud Project ID")
 LOCATION="us-central1" # Default location as per documentation
@@ -33,14 +48,16 @@ fi
 
 echo "Extracted Agent Engine ID: $AGENT_ENGINE_ID"
 
-ENV_FILE="/Users/galahassa/Dev/pegasus/backend/.env"
+SCRIPT_DIR="$(dirname "$0")"
+ENV_FILE="$SCRIPT_DIR/backend/.env"
+ENV_EXAMPLE_FILE="$SCRIPT_DIR/backend/.env.example"
 
 echo "Updating or creating $ENV_FILE..."
 
 # Check if .env file exists, if not, create it from .env.example
 if [ ! -f "$ENV_FILE" ]; then
     echo "backend/.env not found. Creating from backend/.env.example"
-    cp /Users/galahassa/Dev/pegasus/backend/.env.example "$ENV_FILE"
+    cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
 fi
 
 # Update or add Vertex AI configuration
