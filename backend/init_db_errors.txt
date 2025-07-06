@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "/home/mica/Desktop/pegasus/backend/scripts/init_db.py", line 18, in <module>
+    from models.base import Base
+  File "/home/mica/Desktop/pegasus/backend/models/__init__.py", line 4, in <module>
+    from .conversation_history import ConversationHistory
+  File "/home/mica/Desktop/pegasus/backend/models/conversation_history.py", line 10, in <module>
+    class ConversationHistory(Base):
+    ...<26 lines>...
+            }
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+        registry, cls_, dict_, table, mapper_kw
+    )
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/sqlalchemy/orm/decl_base.py", line 572, in __init__
+    self._extract_mappable_attributes()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/sqlalchemy/orm/decl_base.py", line 1529, in _extract_mappable_attributes
+    raise exc.InvalidRequestError(
+    ...<2 lines>...
+    )
+sqlalchemy.exc.InvalidRequestError: Attribute name 'metadata' is reserved when using the Declarative API.
