@@ -24,8 +24,6 @@ class NERService:
         model_configs = [
             ('en', 'en_core_web_sm', 'en_core_web_sm'),
             ('fr', 'fr_core_news_sm', 'fr_core_news_sm'),
-            ('es', 'es_core_news_sm', 'es_core_news_sm'),
-            ('de', 'de_core_news_sm', 'de_core_news_sm'),
         ]
         
         for lang_code, model_name, fallback in model_configs:
