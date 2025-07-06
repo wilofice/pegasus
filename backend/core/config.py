@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     api_version: str = "0.1.0"
     
     # Database
-    database_url: str = "postgresql://pegasus:pegasus@localhost/pegasus_db"
+    database_url: str = "postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db"
     
     # Neo4j Configuration
     neo4j_uri: str = "bolt://localhost:7687"
@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     
     # Celery Configuration
     celery_broker_url: str = "redis://localhost:6379/0"
-    celery_result_backend: str = "db+postgresql://pegasus:pegasus@localhost/pegasus_db"
+    celery_result_backend: str = "db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db"
     max_workers: int = 4
     task_timeout: int = 300
     
@@ -52,13 +52,13 @@ class Settings(BaseSettings):
     
     # Transcription
     transcription_engine: str = "whisper"  # "whisper" or "deepgram"
-    whisper_model: str = "base"
-    whisper_device: str = "cpu"  # "cpu" or "cuda"
+    whisper_model: str = "medium"
+    whisper_device: str = "cuda"  # "cpu" or "cuda"
     deepgram_api_key: Optional[str] = None
     deepgram_api_url: str = "https://api.deepgram.com/v1/listen"
     
     # LLM Enhancement
-    ollama_model: str = "llama2"
+    ollama_model: str = "gemma3:12b "
     ollama_timeout: int = 60
     ollama_base_url: str = "http://localhost:11434"
     enhancement_prompt_template: str = """You are a transcript editor. Your task is to correct the following transcript by:
