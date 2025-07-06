@@ -414,11 +414,102 @@ async def process_audio_file(audio_id: UUID, file_path: str):
             await audio_repo.update_status(audio_id, ProcessingStatus.COMPLETED)
             logger.info(f"Audio processing completed for {audio_id}")
             
+            # Step 7: Trigger Celery task for brain indexing
+            # Only trigger if we have an improved transcript
+            audio_file = await audio_repo.get_by_id(audio_id)
+            if audio_file and audio_file.improved_transcript:
+                try:
+                    from workers.tasks.transcript_processor import process_transcript
+                    from models.job import JobType
+                    from repositories.job_repository import JobRepository
+                    
+                    # Create a job record for tracking
+                    job_repo = JobRepository(db)
+                    job = await job_repo.create({
+                        "name": f"Process transcript for audio {audio_id}",
+                        "job_type": JobType.TRANSCRIPT_PROCESSING,
+                        "parameters": {
+                            "audio_id": str(audio_id),
+                            "user_id": audio_file.user_id
+                        },
+                        "user_id": audio_file.user_id
+                    })
+                    
+                    # Dispatch Celery task
+                    result = process_transcript.delay(
+                        audio_id=str(audio_id),
+                        job_id=str(job.id)
+                    )
+                    
+                    # Update job with task ID
+                    await job_repo.update(job.id, {"task_id": result.id})
+                    
+                    logger.info(f"Dispatched transcript processing task {result.id} for audio {audio_id}")
+                    
+                except Exception as e:
+                    # Log error but don't fail the audio processing
+                    logger.error(f"Failed to dispatch transcript processing task for {audio_id}: {e}")
+                    # Optionally update audio file with a note about indexing failure
+                    await audio_repo.update(audio_id, {
+                        "error_message": f"Transcript indexing dispatch failed: {str(e)}"
+                    })
+            
         except Exception as e:
             # Handle any unexpected errors
             error_msg = f"Processing error: {str(e)}"
             await audio_repo.update_status(audio_id, ProcessingStatus.FAILED, error_msg)
             logger.error(f"Audio processing failed for {audio_id}: {error_msg}", exc_info=True)
+
+
+@router.get("/{audio_id}/indexing-status")
+async def get_indexing_status(
+    audio_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get the brain indexing status for an audio file.
+    
+    Args:
+        audio_id: UUID of the audio file
+        
+    Returns:
+        Indexing status including vector, graph, and entity extraction status
+    """
+    audio_repo = AudioRepository(db)
+    audio_file = await audio_repo.get_by_id(audio_id)
+    
+    if not audio_file:
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    # Check if there's an active job for this audio file
+    from repositories.job_repository import JobRepository
+    from models.job import JobType, JobStatus
+    
+    job_repo = JobRepository(db)
+    active_job = await job_repo.get_active_job_for_resource(
+        resource_id=audio_id,
+        job_type=JobType.TRANSCRIPT_PROCESSING
+    )
+    
+    return {
+        "audio_id": str(audio_id),
+        "processing_status": audio_file.processing_status,
+        "indexing": {
+            "vector_indexed": audio_file.vector_indexed,
+            "vector_indexed_at": audio_file.vector_indexed_at.isoformat() if audio_file.vector_indexed_at else None,
+            "graph_indexed": audio_file.graph_indexed,
+            "graph_indexed_at": audio_file.graph_indexed_at.isoformat() if audio_file.graph_indexed_at else None,
+            "entities_extracted": audio_file.entities_extracted,
+            "entities_extracted_at": audio_file.entities_extracted_at.isoformat() if audio_file.entities_extracted_at else None
+        },
+        "active_job": {
+            "id": str(active_job.id),
+            "status": active_job.status,
+            "progress": active_job.progress,
+            "current_step": active_job.current_step,
+            "total_steps": active_job.total_steps,
+            "created_at": active_job.created_at.isoformat()
+        } if active_job else None
+    }
 
 
 @router.put("/{audio_id}/tags", response_model=AudioFileResponse)
