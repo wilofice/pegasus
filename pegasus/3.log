@@ -1,0 +1,53 @@
+
+Running Gradle task 'assembleRelease'...                        
+lib/screens/transcript_screen.dart:90:34: Error: The getter 'selectedTagProvider' isn't defined for the class '_TranscriptScreenState'.
+ - '_TranscriptScreenState' is from 'package:pegasus/screens/transcript_screen.dart' ('lib/screens/transcript_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'selectedTagProvider'.
+    final selectedTag = ref.read(selectedTagProvider);
+                                 ^^^^^^^^^^^^^^^^^^^
+lib/screens/transcript_screen.dart:106:72: Error: No named parameter with the name 'tag'.
+      final success = await _apiClient.updateAudioTags(widget.audioId, tag: tagToSave);
+                                                                       ^^^
+lib/screens/transcript_screen.dart:169:35: Error: The getter 'selectedTagProvider' isn't defined for the class '_TranscriptScreenState'.
+ - '_TranscriptScreenState' is from 'package:pegasus/screens/transcript_screen.dart' ('lib/screens/transcript_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'selectedTagProvider'.
+    final selectedTag = ref.watch(selectedTagProvider);
+                                  ^^^^^^^^^^^^^^^^^^^
+lib/screens/transcript_screen.dart:504:32: Error: The getter 'selectedTagProvider' isn't defined for the class '_TranscriptScreenState'.
+ - '_TranscriptScreenState' is from 'package:pegasus/screens/transcript_screen.dart' ('lib/screens/transcript_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'selectedTagProvider'.
+                      ref.read(selectedTagProvider.notifier).state = tag;
+                               ^^^^^^^^^^^^^^^^^^^
+lib/screens/transcript_screen.dart:507:32: Error: The getter 'selectedTagProvider' isn't defined for the class '_TranscriptScreenState'.
+ - '_TranscriptScreenState' is from 'package:pegasus/screens/transcript_screen.dart' ('lib/screens/transcript_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'selectedTagProvider'.
+                      ref.read(selectedTagProvider.notifier).state = null;
+                               ^^^^^^^^^^^^^^^^^^^
+lib/screens/transcript_screen.dart:537:26: Error: The getter 'selectedTagProvider' isn't defined for the class '_TranscriptScreenState'.
+ - '_TranscriptScreenState' is from 'package:pegasus/screens/transcript_screen.dart' ('lib/screens/transcript_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'selectedTagProvider'.
+                ref.read(selectedTagProvider.notifier).state = null;
+                         ^^^^^^^^^^^^^^^^^^^
+lib/screens/transcript_screen.dart:566:28: Error: The getter 'selectedTagProvider' isn't defined for the class '_TranscriptScreenState'.
+ - '_TranscriptScreenState' is from 'package:pegasus/screens/transcript_screen.dart' ('lib/screens/transcript_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'selectedTagProvider'.
+                  ref.read(selectedTagProvider.notifier).state = tag;
+                           ^^^^^^^^^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildRelease'.
+> Process 'command '/Users/galahassa/sdk/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 4s
+Running Gradle task 'assembleRelease'...                            4.9s
+Gradle task assembleRelease failed with exit code 1

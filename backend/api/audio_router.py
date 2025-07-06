@@ -359,7 +359,7 @@ async def trigger_transcription_task(audio_id: UUID, file_path: str):
                 return
 
             job = ProcessingJob(
-                job_type=JobType.TRANSCRIPTION,
+                job_type=JobType.TRANSCRIPT_PROCESSING,
                 status=JobStatus.PENDING,
                 input_data={"audio_id": str(audio_id), "file_path": file_path},
                 user_id=audio_file.user_id,
@@ -592,7 +592,7 @@ async def trigger_processing_task(audio_id: UUID):
                 return
 
             job = ProcessingJob(
-                job_type=JobType.PROCESSING,
+                job_type=JobType.TRANSCRIPT_PROCESSING,
                 status=JobStatus.PENDING,
                 input_data={"audio_id": str(audio_id)},
                 user_id=audio_file.user_id,

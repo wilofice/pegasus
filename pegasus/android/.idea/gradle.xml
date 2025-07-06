@@ -20,9 +20,17 @@
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/audio_session-0.1.25/android" />
             <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_core-2.32.0/android" />
             <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/firebase_messaging-14.7.10/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_isolate-2.1.0/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_sound-9.28.0/android" />
             <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/flutter_tts-3.8.5/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/just_audio-0.9.46/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/onnxruntime-1.4.1/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/path_provider_android-2.2.17/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/android" />
+            <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.10/android" />
             <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/speech_to_text-7.1.0/android" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />

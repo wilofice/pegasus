@@ -87,35 +87,36 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
   }
   
   Future<void> _saveTag() async {
-    final selectedTag = ref.read(selectedTagProvider);
+    final selectedTags = ref.read(selectedTagsProvider);
     final customController = ref.read(customTagControllerProvider);
     
-    String? tagToSave;
-    if (selectedTag != null && selectedTag.isNotEmpty) {
-      tagToSave = selectedTag;
+    List<String> tagsToSave = [];
+    if (selectedTags.isNotEmpty) {
+      tagsToSave = selectedTags;
     } else if (customController.text.isNotEmpty) {
-      tagToSave = customController.text.trim();
+      tagsToSave = [customController.text.trim()];
     }
     
-    if (tagToSave == null || tagToSave.isEmpty) {
+    if (tagsToSave.isEmpty) {
       _showErrorSnackBar('Please select or enter a tag');
       return;
     }
     
     try {
-      final success = await _apiClient.updateAudioTags(widget.audioId, tag: tagToSave);
+      final success = await _apiClient.updateAudioTags(widget.audioId, tags: tagsToSave);
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Tag "$tagToSave" saved successfully'),
+            content: Text('Tags "${tagsToSave.join(', ')}" saved successfully'),
             backgroundColor: Colors.green,
           ),
         );
         
-        // Add to available tags if it's new
+        // Add to available tags if they're new
         final availableTags = ref.read(availableTagsProvider);
-        if (!availableTags.contains(tagToSave)) {
-          ref.read(availableTagsProvider.notifier).state = [...availableTags, tagToSave];
+        final newTags = tagsToSave.where((tag) => !availableTags.contains(tag)).toList();
+        if (newTags.isNotEmpty) {
+          ref.read(availableTagsProvider.notifier).state = [...availableTags, ...newTags];
         }
       } else {
         _showErrorSnackBar('Failed to save tag');
@@ -166,7 +167,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
     final isLoading = ref.watch(isLoadingProvider);
     final transcriptData = ref.watch(transcriptDataProvider);
     final bothTranscripts = ref.watch(bothTranscriptsProvider);
-    final selectedTag = ref.watch(selectedTagProvider);
+    final selectedTags = ref.watch(selectedTagsProvider);
     final availableTags = ref.watch(availableTagsProvider);
     final customController = ref.watch(customTagControllerProvider);
     
@@ -215,7 +216,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
         controller: _tabController,
         children: [
           _buildTranscriptTab(transcriptData, bothTranscripts),
-          _buildTagsTab(selectedTag, availableTags, customController),
+          _buildTagsTab(selectedTags, availableTags, customController),
         ],
       ),
     );
@@ -426,7 +427,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
     );
   }
   
-  Widget _buildTagsTab(String? selectedTag, List<String> availableTags, TextEditingController customController) {
+  Widget _buildTagsTab(List<String> selectedTags, List<String> availableTags, TextEditingController customController) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -448,36 +449,40 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
           
           const SizedBox(height: 24),
           
-          // Current tag display
-          if (selectedTag != null && selectedTag.isNotEmpty) ...[
+          // Current tags display
+          if (selectedTags.isNotEmpty) ...[
             Text(
-              'Current Tag:',
+              'Current Tags:',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.green),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.tag, size: 16, color: Colors.green),
-                  const SizedBox(width: 6),
-                  Text(
-                    selectedTag,
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: selectedTags.map((tag) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.green),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.tag, size: 16, color: Colors.green),
+                    const SizedBox(width: 6),
+                    Text(
+                      tag,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
                 ],
               ),
+            )).toList(),
             ),
             const SizedBox(height: 24),
           ],
@@ -495,16 +500,16 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
               spacing: 8,
               runSpacing: 8,
               children: availableTags.map((tag) {
-                final isSelected = tag == selectedTag;
+                final isSelected = selectedTags.contains(tag);
                 return FilterChip(
                   label: Text(tag),
                   selected: isSelected,
                   onSelected: (selected) {
                     if (selected) {
-                      ref.read(selectedTagProvider.notifier).state = tag;
+                      ref.read(selectedTagsProvider.notifier).state = [tag];
                       customController.clear();
                     } else {
-                      ref.read(selectedTagProvider.notifier).state = null;
+                      ref.read(selectedTagsProvider.notifier).state = [];
                     }
                   },
                   backgroundColor: isSelected ? Colors.blue.withValues(alpha: 0.1) : null,
@@ -534,7 +539,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
             ),
             onChanged: (value) {
               if (value.isNotEmpty) {
-                ref.read(selectedTagProvider.notifier).state = null;
+                ref.read(selectedTagsProvider.notifier).state = [];
               }
             },
             onSubmitted: (value) {
@@ -563,7 +568,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
               return ActionChip(
                 label: Text(tag),
                 onPressed: () {
-                  ref.read(selectedTagProvider.notifier).state = tag;
+                  ref.read(selectedTagsProvider.notifier).state = [tag];
                   customController.clear();
                 },
                 backgroundColor: Colors.grey.withValues(alpha: 0.1),
