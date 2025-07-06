@@ -57,10 +57,27 @@ class Settings(BaseSettings):
     deepgram_api_key: Optional[str] = None
     deepgram_api_url: str = "https://api.deepgram.com/v1/listen"
     
-    # LLM Enhancement
-    ollama_model: str = "gemma3:12b "
-    ollama_timeout: int = 60
+    # LLM Configuration
+    llm_provider: str = "ollama"  # "ollama", "google_generative_ai", or "openai"
+    llm_timeout: float = 30.0  # General LLM timeout in seconds
+    
+    # Ollama Configuration
+    ollama_model: str = "llama2"
+    ollama_timeout: float = 60.0
     ollama_base_url: str = "http://localhost:11434"
+    
+    # Google Generative AI Configuration
+    google_generative_ai_api_key: Optional[str] = None
+    google_generative_ai_model: str = "gemini-pro"
+    gemini_api_key: Optional[str] = None  # Alternative env var name
+    
+    # OpenAI Configuration (Legacy)
+    openai_api_key: Optional[str] = None
+    openai_model: str = "gpt-3.5-turbo"
+    openai_api_url: str = "https://api.openai.com/v1"
+    llm_api_key: Optional[str] = None  # Legacy env var name
+    
+    # LLM Enhancement Settings
     enhancement_prompt_template: str = """You are a transcript editor. Your task is to correct the following transcript by:
 1. Adding proper punctuation where needed
 2. Fixing obvious grammatical errors
