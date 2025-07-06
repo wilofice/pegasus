@@ -1,0 +1,19 @@
+INFO:watchfiles.main:1 change detected
+INFO:services.chat_orchestrator_factory:Creating Chat Orchestrator V2 with default services...
+INFO:services.context_aggregator_factory:Creating Context Aggregator V2 with real services...
+INFO:services.context_ranker:Context ranker initialized with strategy: ensemble
+INFO:watchfiles.main:1 change detected
+INFO:services.ner_service:Loaded spaCy model for en: en_core_web_sm
+INFO:services.ner_service:Loaded spaCy model for fr: fr_core_news_sm
+INFO:services.context_aggregator_v2:Context Aggregator V2 initialized with modern retrieval services
+INFO:services.context_aggregator_factory:Context Aggregator V2 created successfully
+INFO:services.chat_orchestrator_factory:Plugin manager created successfully
+INFO:services.chat_orchestrator_v2:Chat Orchestrator V2 initialized with modern services
+INFO:services.chat_orchestrator_factory:Chat Orchestrator V2 created successfully
+ERROR:services.chat_orchestrator_v2:Chat processing failed: ChatMetrics.__init__() missing 6 required positional arguments: 'context_retrieval_time_ms', 'llm_generation_time_ms', 'plugin_processing_time_ms', 'context_results_count', 'top_context_score', and 'plugins_executed'
+Traceback (most recent call last):
+  File "/home/mica/Desktop/pegasus/backend/services/chat_orchestrator_v2.py", line 57, in chat
+    metrics = ChatMetrics(total_processing_time_ms=0)
+TypeError: ChatMetrics.__init__() missing 6 required positional arguments: 'context_retrieval_time_ms', 'llm_generation_time_ms', 'plugin_processing_time_ms', 'context_results_count', 'top_context_score', and 'plugins_executed'
+ERROR:api.chat_router_v2:Chat V2 processing failed: ChatResponse.__init__() missing 1 required positional argument: 'metrics'
+INFO:     192.168.1.10:34034 - "POST /chat/v2/ HTTP/1.1" 500 Internal Server Error
