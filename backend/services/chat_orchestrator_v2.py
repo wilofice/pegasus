@@ -185,9 +185,10 @@ class ChatOrchestratorV2:
             status="completed",
             limit=10, # Limit to 10 most recent
             offset=0,
-            created_after=since
+            from_date=since
         )
-        return [f.improved_transcript for f, _ in recent_audio_files]
+        audio_files, _ = recent_audio_files
+        return [f.improved_transcript for f in audio_files if f.improved_transcript]
 
     async def _save_and_process_conversation(self, repo: ConversationHistoryRepository, session_id: str, user_id: str, user_message: str, assistant_response: str, context: AggregatedContext):
         history_entry = await repo.create({
