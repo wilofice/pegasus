@@ -294,7 +294,7 @@ class ChromaDBClient:
 # Global ChromaDB client instance
 _chromadb_client: Optional[ChromaDBClient] = None
 
-async def get_chromadb_client() -> ChromaDBClient:
+def get_chromadb_client() -> ChromaDBClient:
     """Get or create the global ChromaDB client instance."""
     global _chromadb_client
     

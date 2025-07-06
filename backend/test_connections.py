@@ -51,7 +51,7 @@ async def test_chromadb():
     logger.info("Testing ChromaDB connection...")
     
     try:
-        client = await get_chromadb_client()
+        client = get_chromadb_client()
         health = await client.health_check()
         
         if health["status"] == "healthy":
