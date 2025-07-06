@@ -8,7 +8,7 @@ from middleware import SelectiveLoggingMiddleware, RequestLoggingConfig
 import logging
 logger = logging.getLogger(__name__)
 
-logger.info("Starting Pegasus Brain with settings..." + str(settings))
+logger.info("Starting Pegasus Brain with settings...\n" + str(settings))
 
 app = FastAPI(title="Pegasus Backend")
 
