@@ -1,0 +1,11 @@
+INFO:main:Database initialization completed!
+INFO:     Application startup complete.
+INFO:watchfiles.main:3 changes detected
+INFO:api.audio_router:Audio file uploaded successfully: 76b8bd84-83a9-4fd5-b73a-7dc0f8118b35
+INFO:     192.168.1.10:37566 - "POST /api/audio/upload HTTP/1.1" 200 OK
+INFO:api.audio_router:Dispatching transcription task for audio 76b8bd84-83a9-4fd5-b73a-7dc0f8118b35
+ERROR:api.audio_router:Failed to dispatch transcription task for 76b8bd84-83a9-4fd5-b73a-7dc0f8118b35: type object 'JobType' has no attribute 'TRANSCRIPTION'
+Traceback (most recent call last):
+  File "/home/mica/Desktop/pegasus/backend/api/audio_router.py", line 362, in trigger_transcription_task
+    job_type=JobType.TRANSCRIPTION,
+             ^^^^^^^^^^^^^^^^^^^^^

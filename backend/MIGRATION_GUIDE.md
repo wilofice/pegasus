@@ -143,3 +143,12 @@ python3 main.py
 ```
 
 **That's it!** Your database will now have the `tag` and `category` columns needed for the new audio tagging functionality.
+
+🔨 Creating database tables...
+✅ Created 4 tables: audio_files, processing_jobs, job_status_history, conversation_history
+
+🎉 Database initialization completed!
+
+💡 Note: If you want to use Alembic migrations later, run:
+   alembic stamp head
+
