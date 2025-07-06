@@ -11,7 +11,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import '../models/chat_v2_models.dart';
 import '../providers/chat_v2_provider.dart';
 import 'citation_card.dart';
 import 'confidence_indicator.dart';
@@ -143,7 +142,7 @@ class _EnhancedMessageBubbleState extends State<EnhancedMessageBubble>
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -186,12 +185,15 @@ class _EnhancedMessageBubbleState extends State<EnhancedMessageBubble>
 
   Widget _buildMessageText() {
     if (widget.message.isUser) {
-      // Simple text for user messages
-      return Text(
-        widget.message.text,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16,
+      // User messages with long-press copy functionality and text selection
+      return GestureDetector(
+        onLongPress: () => _showUserMessageContextMenu(),
+        child: SelectableText(
+          widget.message.text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
         ),
       );
     } else {
@@ -439,6 +441,86 @@ class _EnhancedMessageBubbleState extends State<EnhancedMessageBubble>
     );
   }
 
+  void _showUserMessageContextMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.message),
+                const SizedBox(width: 8),
+                const Text(
+                  'Message Options',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                widget.message.text,
+                style: const TextStyle(fontSize: 14),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _copyMessage();
+                    },
+                    icon: const Icon(Icons.copy),
+                    label: const Text('Copy Message'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _shareMessage();
+                    },
+                    icon: const Icon(Icons.share),
+                    label: const Text('Share'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _shareMessage() {
     // For now, copy to clipboard. In production, use share_plus package
     _copyMessage();
@@ -512,7 +594,8 @@ class _EnhancedMessageBubbleState extends State<EnhancedMessageBubble>
 
   void _handleLinkTap(String href) {
     // Handle markdown link taps
-    print('Link tapped: $href');
+    // TODO: Implement proper link handling
+    debugPrint('Link tapped: $href');
   }
 
   void _handleSuggestionTap(String suggestion) {
