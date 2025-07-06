@@ -55,16 +55,16 @@ async def run_migrations():
 async def lifespan(app: FastAPI):
     """Handle application startup and shutdown."""
     # Startup
-    logger.info("Initializing database...")
+    #logger.info("Initializing database...")
     
-    if settings.auto_migrate_on_startup:
-        logger.info("Auto-migration enabled - running migrations...")
-        await run_migrations()
-    else:
-        logger.info("Auto-migration disabled - creating tables only...")
-        await create_tables()
+    #if settings.auto_migrate_on_startup:
+        #logger.info("Auto-migration enabled - running migrations...")
+        # await run_migrations()
+    #else:
+        #logger.info("Auto-migration disabled - creating tables only...")
+        # await create_tables()
     
-    logger.info("Database initialization completed!")
+    #logger.info("Database initialization completed!")
     
     yield
     

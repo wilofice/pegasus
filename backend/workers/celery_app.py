@@ -18,6 +18,8 @@ app.config_from_object('workers.config')
 # Auto-discover tasks
 app.autodiscover_tasks([
     'workers.tasks',
+    'workers.tasks.transcription_tasks',
+    'workers.tasks.conversation_processing_tasks',
     'workers.tasks.transcript_processor',
     'workers.tasks.vector_indexer', 
     'workers.tasks.graph_builder',
