@@ -10,6 +10,7 @@ import uuid
 from services.context_aggregator_v2 import ContextAggregatorV2, AggregatedContext, AggregationConfig, AggregationStrategy
 from services.context_ranker import RankingStrategy
 from services.llm_client import get_llm_client
+from services.intelligent_prompt_builder import get_intelligent_prompt_builder
 from services.ollama_service import OllamaService
 from services.plugin_manager import PluginManager
 
@@ -372,7 +373,34 @@ class ChatOrchestratorV2:
                      plugin_results: Dict[str, Any],
                      config: ChatConfig,
                      conversation_context: ConversationContext) -> str:
-        """Build comprehensive prompt for LLM."""
+        """Build comprehensive prompt for LLM using intelligent prompt builder."""
+        try:
+            # Use intelligent prompt builder for sophisticated prompting
+            prompt_builder = get_intelligent_prompt_builder()
+            
+            intelligent_prompt = prompt_builder.build_intelligent_prompt(
+                user_message=message,
+                aggregated_context=aggregated_context,
+                plugin_results=plugin_results,
+                config=config,
+                conversation_context=conversation_context
+            )
+            
+            logger.info("Generated intelligent prompt for LLM")
+            return intelligent_prompt
+            
+        except Exception as e:
+            logger.error(f"Intelligent prompt building failed, using fallback: {e}")
+            # Fallback to original simple prompt
+            return self._build_simple_prompt(message, aggregated_context, plugin_results, config, conversation_context)
+    
+    def _build_simple_prompt(self,
+                            message: str,
+                            aggregated_context: AggregatedContext,
+                            plugin_results: Dict[str, Any],
+                            config: ChatConfig,
+                            conversation_context: ConversationContext) -> str:
+        """Build simple prompt as fallback (original implementation)."""
         try:
             prompt_parts = []
             
@@ -405,7 +433,7 @@ class ChatOrchestratorV2:
             return "\n\n".join(prompt_parts)
             
         except Exception as e:
-            logger.error(f"Prompt building failed: {e}")
+            logger.error(f"Simple prompt building failed: {e}")
             return f"Please respond to: {message}"
     
     async def _generate_local_response(self, prompt: str, config: ChatConfig) -> str:

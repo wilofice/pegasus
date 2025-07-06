@@ -450,8 +450,9 @@ class GraphBuilder:
             
             query = """
             MATCH (c:AudioChunk {id: $chunk_id})
-            MERGE (e:Entity {normalized_text: $normalized_text, type: $entity_type})
+            MERGE (e:Entity {normalized_name: $normalized_text, type: $entity_type})
             ON CREATE SET 
+                e.name = $entity_text,
                 e.text = $entity_text,
                 e.label_description = $label_description,
                 e.created_at = datetime(),
@@ -462,7 +463,7 @@ class GraphBuilder:
                 e.last_seen = datetime(),
                 e.updated_at = datetime()
             
-            MERGE (c)-[r:CONTAINS_ENTITY]->(e)
+            MERGE (c)-[r:MENTIONS]->(e)
             ON CREATE SET 
                 r.start_pos = $start_pos,
                 r.end_pos = $end_pos,
@@ -607,13 +608,13 @@ class GraphBuilder:
         """
         try:
             query = """
-            MATCH (c1:AudioChunk {id: $chunk_id})-[:CONTAINS_ENTITY]->(e:Entity)
-            MATCH (c2:AudioChunk)-[:CONTAINS_ENTITY]->(e)
+            MATCH (c1:AudioChunk {id: $chunk_id})-[:MENTIONS]->(e:Entity)
+            MATCH (c2:AudioChunk)-[:MENTIONS]->(e)
             WHERE c1 <> c2
             
             WITH c1, c2, count(e) as shared_entities,
-                 size((c1)-[:CONTAINS_ENTITY]->()) as c1_entities,
-                 size((c2)-[:CONTAINS_ENTITY]->()) as c2_entities
+                 size((c1)-[:MENTIONS]->()) as c1_entities,
+                 size((c2)-[:MENTIONS]->()) as c2_entities
             
             WITH c1, c2, shared_entities, c1_entities, c2_entities,
                  toFloat(shared_entities) / sqrt(c1_entities * c2_entities) as similarity
@@ -661,7 +662,7 @@ class GraphBuilder:
         """
         try:
             query = """
-            MATCH (e1:Entity {normalized_text: $entity_text})<-[:CONTAINS_ENTITY]-(c:AudioChunk)-[:CONTAINS_ENTITY]->(e2:Entity)
+            MATCH (e1:Entity {normalized_name: $entity_text})<-[:MENTIONS]-(c:AudioChunk)-[:MENTIONS]->(e2:Entity)
             WHERE e1 <> e2
             
             WITH e2, count(c) as co_occurrence_count,
@@ -700,7 +701,7 @@ class GraphBuilder:
             MATCH (c:AudioChunk)
             OPTIONAL MATCH (e:Entity)
             OPTIONAL MATCH (t:Topic)
-            OPTIONAL MATCH ()-[r:CONTAINS_ENTITY]->()
+            OPTIONAL MATCH ()-[r:MENTIONS]->()
             OPTIONAL MATCH ()-[r2:FOLLOWED_BY]->()
             OPTIONAL MATCH ()-[r3:RELATES_TO_TOPIC]->()
             
