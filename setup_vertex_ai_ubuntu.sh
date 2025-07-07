@@ -64,41 +64,27 @@ fi
 
 # Install google-cloud-aiplatform Python package
 echo "Installing google-cloud-aiplatform Python package..."
-pip install google-cloud-aiplatform[adk,langchain,ag2]>=1.88.0
 
 
 # Python script to create the agent engine
-LOCATION="europe-north1"
+LOCATION="europe-west4"
 
 export STAGING_BUCKET
 AGENT_ENGINE_ID=$(PROJECT_ID="$PROJECT_ID" LOCATION="$LOCATION" STAGING_BUCKET="$STAGING_BUCKET" python3 -c '
 import os
 import sys
 import vertexai
-from vertexai.preview import reasoning_engines
-from langchain_google_vertexai import VertexAI
+from vertexai import agent_engines
 
 try:
     project_id = os.environ["PROJECT_ID"]
     location = os.environ["LOCATION"]
     staging_bucket = os.environ["STAGING_BUCKET"]
     vertexai.init(project=project_id, location=location, staging_bucket=staging_bucket)
-    model = VertexAI(model_name="gemini-2.5-flash")
-    agent = reasoning_engines.LangchainAgent(
-        model=model,
-        tools=[],
-    )
-    reasoning_engine = reasoning_engines.ReasoningEngine.create(
-        agent,
-        requirements=[
-            "google-cloud-aiplatform[reasoningengine,langchain]",
-            "langchain-google-alloydb-pg"
-            "langchain-google-vertexai",
-        ]
-    )
-    print(reasoning_engine.name.split("/")[-1])
+    agent_engine = agent_engines.create()
+    print(f"Agent Engine ID: {agent_engine.name}")
 except Exception as e:
-    print(f"Error creating reasoning engine: {e}", file=sys.stderr)
+    print(f"Error creating reasoning engine: {e}")
     exit(1)
 ')
 
@@ -154,10 +140,10 @@ cat << EOF >> "$ENV_FILE"
 LLM_PROVIDER=vertex_ai
 
 # Vertex AI Configuration
-VERTEX_AI_PROJECT_ID=$PROJECT_ID
-VERTEX_AI_LOCATION=$LOCATION
-VERTEX_AI_AGENT_ENGINE_ID=$AGENT_ENGINE_ID
-VERTEX_AI_MODEL=gemini-2.0-flash
+VERTEX_AI_PROJECT_ID=gen-lang-client-0319023828
+VERTEX_AI_LOCATION=europe-west4
+VERTEX_AI_AGENT_ENGINE_ID=3290583215235923968
+VERTEX_AI_MODEL=gemini-2.5-flash
 VERTEX_AI_TIMEOUT=60.0
 VERTEX_AI_TEMPERATURE=0.7
 VERTEX_AI_MAX_TOKENS=2048
