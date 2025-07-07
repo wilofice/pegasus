@@ -1,0 +1,3 @@
+INFO:services.llm.vertex_client:{'name': 'projects/1083364725815/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/9042256633236815872/operations/3739396302551646208', 'metadata': {'@type': 'type.googleapis.com/google.cloud.aiplatform.v1beta1.CreateSessionOperationMetadata', 'genericMetadata': {'createTime': '2025-07-07T04:20:14.750891Z', 'updateTime': '2025-07-07T04:20:14.750891Z'}}}
+INFO:services.llm.vertex_client:Created Vertex AI session 3739396302551646208 for user pegasus_user
+INFO:services.llm.vertex_client:Created new persistent session: 3739396302551646208

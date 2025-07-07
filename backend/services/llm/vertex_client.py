@@ -151,6 +151,8 @@ class VertexAIClient(BaseLLMClient):
         
         response = await self._make_request("POST", self.sessions_url, data)
         
+        print(response)
+        LOGGER.info(str(response))
         # Extract session ID from the operation response
         if "name" in response:
             session_id = response["name"].split("/")[-1]
