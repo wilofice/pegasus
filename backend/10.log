@@ -1,0 +1,62 @@
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions "HTTP/1.1 200 OK"
+INFO:services.llm.vertex_client:Created Vertex AI session 280631788731105280 for user pegasus_user
+INFO:services.llm.vertex_client:Created new persistent session: 280631788731105280
+INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/280631788731105280 "HTTP/1.1 404 Not Found"
+ERROR:services.llm.vertex_client:Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 280631788731105280) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+INFO:services.llm.vertex_client:Session 280631788731105280 not found, creating new session: Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 280631788731105280) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions "HTTP/1.1 200 OK"
+INFO:services.llm.vertex_client:Created Vertex AI session 1194862513087315968 for user pegasus_user
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/1194862513087315968:appendEvent "HTTP/1.1 404 Not Found"
+ERROR:services.llm.vertex_client:Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 1194862513087315968) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+ERROR:services.llm.vertex_client:Failed to append event to session 1194862513087315968: Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 1194862513087315968) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1/projects/gen-lang-client-0319023828/locations/europe-west4/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/1194862513087315968:appendEvent "HTTP/1.1 404 Not Found"
+ERROR:services.llm.vertex_client:Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 1194862513087315968) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+ERROR:services.llm.vertex_client:Failed to append event to session 1194862513087315968: Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 1194862513087315968) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+INFO:api.chat_router_v2:Chat V2 processed successfully: 271 chars in 14326.9ms
+INFO:     192.168.1.10:49186 - "POST /chat/v2/ HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+
+
