@@ -74,7 +74,8 @@ PYTHON_SCRIPT=$(cat << EOT
 # Python script to create the agent engine
 LOCATION="us-central1"
 
-AGENT_ENGINE_ID=$(PROJECT_ID="$PROJECT_ID" LOCATION="$LOCATION" python -c '
+export STAGING_BUCKET
+AGENT_ENGINE_ID=$(PROJECT_ID="$PROJECT_ID" LOCATION="$LOCATION" STAGING_BUCKET="$STAGING_BUCKET" python -c '
 import os
 import sys
 import vertexai
@@ -84,7 +85,8 @@ from langchain_google_vertexai import VertexAI
 try:
     project_id = os.environ["PROJECT_ID"]
     location = os.environ["LOCATION"]
-    vertexai.init(project=project_id, location=location)
+    staging_bucket = os.environ["STAGING_BUCKET"]
+    vertexai.init(project=project_id, location=location, staging_bucket=staging_bucket)
     model = VertexAI(model_name="gemini-1.5-pro-001")
     agent = reasoning_engines.LangchainAgent(
         model=model,
@@ -93,7 +95,10 @@ try:
     reasoning_engine = reasoning_engines.ReasoningEngine.create(
         agent,
         requirements=[
-            "google-cloud-aiplatform[langchain,agent_engines]"
+            "google-cloud-aiplatform[all]",
+            "langchain-google-alloydb-pg"
+            "langchain-google-vertexai",
+            "cloudpickle==3.0.0"
         ]
     )
     print(reasoning_engine.name.split("/")[-1])
@@ -110,7 +115,6 @@ fi
 echo "Vertex AI Agent Engine created successfully."
 echo "Agent Engine ID: $AGENT_ENGINE_ID"
 EOT
-)
 
 AGENT_ENGINE_OUTPUT=$(python -c "$PYTHON_SCRIPT" 2>&1)
 AGENT_ENGINE_ID=$(echo "$AGENT_ENGINE_OUTPUT" | grep -oP 'AGENT_ENGINE_ID_OUTPUT:\K[^ ]+')

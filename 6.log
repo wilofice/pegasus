@@ -1,0 +1,14 @@
+Requirement already satisfied: urllib3<1.27,>=1.21.1 in /home/mica/miniconda3/lib/python3.11/site-packages (from requests<3.0.0,>=2.18.0->google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,<3.0.0dev,>=1.34.1->google-cloud-aiplatform[all]==1.71.1) (1.26.16)
+Error creating reasoning engine: 400 Reasoning Engine instance 7228866740162134016 failed to start and cannot serve traffic. Please refer to our documentation (https://cloud.google.com/vertex-ai/generative-ai/docs/reasoning-engine/troubleshooting/deploy) for checking logs and other troubleshooting tips.
+ Please refer to our documentation (https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/troubleshooting/deploy) for checking logs and other troubleshooting tips. 3: Reasoning Engine instance 7228866740162134016 failed to start and cannot serve traffic. Please refer to our documentation (https://cloud.google.com/vertex-ai/generative-ai/docs/reasoning-engine/troubleshooting/deploy) for checking logs and other troubleshooting tips.
+ Please refer to our documentation (https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/troubleshooting/deploy) for checking logs and other troubleshooting tips.
+Vertex AI Agent Engine created successfully.
+Agent Engine ID: Using bucket gen-lang-client-0319023828-vertex-ai-staging
+Writing to gs://gen-lang-client-0319023828-vertex-ai-staging/reasoning_engine/reasoning_engine.pkl
+Writing to gs://gen-lang-client-0319023828-vertex-ai-staging/reasoning_engine/requirements.txt
+Creating in-memory tarfile of extra_packages
+Writing to gs://gen-lang-client-0319023828-vertex-ai-staging/reasoning_engine/dependencies.tar.gz
+Creating ReasoningEngine
+Create ReasoningEngine backing LRO: projects/1083364725815/locations/us-central1/reasoningEngines/7228866740162134016/operations/7732577446620299264
+./setup_vertex_ai_ubuntu.sh: line 112: syntax error near unexpected token `)'
+./setup_vertex_ai_ubuntu.sh: line 112: `)'

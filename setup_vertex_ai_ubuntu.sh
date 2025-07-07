@@ -64,13 +64,14 @@ fi
 
 # Install google-cloud-aiplatform Python package
 echo "Installing google-cloud-aiplatform Python package..."
-pip install "google-cloud-aiplatform[all]==1.71.1" "langchain-google-vertexai"
+pip install google-cloud-aiplatform[adk,langchain,ag2]>=1.88.0
 
 
 # Python script to create the agent engine
-LOCATION="us-central1"
+LOCATION="europe-north1"
 
-AGENT_ENGINE_ID=$(PROJECT_ID="$PROJECT_ID" LOCATION="$LOCATION" python -c '
+export STAGING_BUCKET
+AGENT_ENGINE_ID=$(PROJECT_ID="$PROJECT_ID" LOCATION="$LOCATION" STAGING_BUCKET="$STAGING_BUCKET" python3 -c '
 import os
 import sys
 import vertexai
@@ -80,8 +81,9 @@ from langchain_google_vertexai import VertexAI
 try:
     project_id = os.environ["PROJECT_ID"]
     location = os.environ["LOCATION"]
-    vertexai.init(project=project_id, location=location)
-    model = VertexAI(model_name="gemini-1.5-pro-001")
+    staging_bucket = os.environ["STAGING_BUCKET"]
+    vertexai.init(project=project_id, location=location, staging_bucket=staging_bucket)
+    model = VertexAI(model_name="gemini-2.5-flash")
     agent = reasoning_engines.LangchainAgent(
         model=model,
         tools=[],
@@ -89,7 +91,9 @@ try:
     reasoning_engine = reasoning_engines.ReasoningEngine.create(
         agent,
         requirements=[
-            "google-cloud-aiplatform[langchain,agent_engines]"
+            "google-cloud-aiplatform[reasoningengine,langchain]",
+            "langchain-google-alloydb-pg"
+            "langchain-google-vertexai",
         ]
     )
     print(reasoning_engine.name.split("/")[-1])
@@ -105,9 +109,9 @@ fi
 
 echo "Vertex AI Agent Engine created successfully."
 echo "Agent Engine ID: $AGENT_ENGINE_ID"
-)
 
-AGENT_ENGINE_OUTPUT=$(python -c "$PYTHON_SCRIPT" 2>&1)
+
+AGENT_ENGINE_OUTPUT=$(python3 -c "$PYTHON_SCRIPT" 2>&1)
 AGENT_ENGINE_ID=$(echo "$AGENT_ENGINE_OUTPUT" | grep -oP 'AGENT_ENGINE_ID_OUTPUT:\K[^ ]+')
 
 if [ -z "$AGENT_ENGINE_ID" ]; then
