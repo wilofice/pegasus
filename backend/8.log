@@ -1,0 +1,60 @@
+RROR:services.llm_client:Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 7918736756751466496) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+INFO:services.llm_client:Session 7918736756751466496 not found, creating new session: Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 7918736756751466496) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions "HTTP/1.1 200 OK"
+INFO:services.llm_client:Created Vertex AI session 2154129233717231616 for user pegasus_user
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2154129233717231616:query "HTTP/1.1 404 Not Found"
+ERROR:services.llm_client:Vertex AI API error: 404 - 
+ERROR:services.llm_client:Session-based chat failed: Vertex AI API error: 404 - 
+Traceback (most recent call last):
+  File "/home/mica/Desktop/pegasus/backend/services/llm_client.py", line 693, in chat_with_session
+    response_data = await self._make_request("POST", query_url, query_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/Desktop/pegasus/backend/services/llm_client.py", line 460, in _make_request
+    raise RuntimeError(error_msg)
+RuntimeError: Vertex AI API error: 404 - 
+WARNING:services.llm_client:Falling back to stateless chat
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1/projects/gen-lang-client-0319023828/locations/europe-west4/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+INFO:api.chat_router_v2:Chat V2 processed successfully: 290 chars in 12782.9ms
+INFO:     192.168.1.10:33430 - "POST /chat/v2/ HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:services.context_aggregator_v2:Starting context aggregation for query: 'I want anyy...'
+Batches: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 143.16it/s]
+INFO:httpx:HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/53e9d996-e07f-444e-b166-db3de7ef593b/query "HTTP/1.1 200 OK"
+INFO:services.chromadb_manager:Found 0 results for query in audio_transcripts
+INFO:services.retrieval.chromadb_retriever:ChromaDB search returned 0 results for query: 'I want anyy...'
+INFO:watchfiles.main:1 change detected
+INFO:services.retrieval.neo4j_retriever:Neo4j search returned 0 results for query: 'I want anyy...'
+INFO:services.context_aggregator_v2:Context aggregation completed: 0 results in 122.5ms
+INFO:services.plugin_manager:No enabled plugins found for type: PluginType.ANALYSIS
+INFO:services.plugin_manager:Processed message through 0 plugins
+INFO:services.intelligent_prompt_builder:Built intelligent prompt with 6 sections, total length: 6527
+INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2154129233717231616 "HTTP/1.1 404 Not Found"
+ERROR:services.llm_client:Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 2154129233717231616) not found.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:services.llm_client:Current session 2154129233717231616 no longer valid: Vertex AI API error: 404 - {
+  "error": {
+    "code": 404,
+    "message": "Session (projectNumber: 1083364725815, reasoningEngineId: 3290583215235923968, sessionId: 2154129233717231616) not found.",
+    "status": "NOT_FOUND"
+  }
+}
