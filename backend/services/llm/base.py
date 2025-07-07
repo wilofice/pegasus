@@ -41,19 +41,30 @@ class VertexEvent:
     invocation_id: str
     timestamp: float
     content: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to API format."""
+        """Convert to Vertex AI Agent Engine API format."""
+        from datetime import datetime
+        
+        # Convert Unix timestamp to RFC3339 format for Protobuf Timestamp
+        timestamp_rfc3339 = datetime.fromtimestamp(self.timestamp).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        
         event_data = {
             "author": self.author,
             "invocationId": self.invocation_id,
-            "timestamp": self.timestamp
+            "timestamp": timestamp_rfc3339
         }
+        
+        # Format content as Content object if provided
         if self.content:
-            event_data["content"] = self.content
-        if self.metadata:
-            event_data["metadata"] = self.metadata
+            event_data["content"] = {
+                "parts": [
+                    {
+                        "text": self.content
+                    }
+                ]
+            }
+        
         return event_data
 
 

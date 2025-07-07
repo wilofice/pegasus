@@ -273,8 +273,7 @@ class VertexAIClient(BaseLLMClient):
                     author="system",
                     invocation_id=f"sys_{int(time.time() * 1000)}",
                     timestamp=time.time(),
-                    content=system_messages[0].get("content", ""),
-                    metadata={"role": "system", "type": "initialization"}
+                    content=system_messages[0].get("content", "")
                 )
                 await self.append_event(session_id, system_event)
                 if user_id == self.user_id:
@@ -293,8 +292,7 @@ class VertexAIClient(BaseLLMClient):
                 author="user",
                 invocation_id=f"user_{int(time.time() * 1000)}",
                 timestamp=time.time(),
-                content=latest_message.get("content", ""),
-                metadata={"role": "user", "message_index": len(user_messages) - 1}
+                content=latest_message.get("content", "")
             )
             
             await self.append_event(session_id, user_event)
@@ -309,8 +307,7 @@ class VertexAIClient(BaseLLMClient):
                 author="assistant", 
                 invocation_id=f"assistant_{int(time.time() * 1000)}",
                 timestamp=time.time(),
-                content=response_text,
-                metadata={"role": "assistant", "response_to": user_event.invocation_id}
+                content=response_text
             )
             
             await self.append_event(session_id, assistant_event)
