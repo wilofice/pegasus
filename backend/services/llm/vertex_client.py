@@ -150,12 +150,22 @@ class VertexAIClient(BaseLLMClient):
             data["state"] = kwargs["initial_state"]
         
         response = await self._make_request("POST", self.sessions_url, data)
+        LOGGER.info(f"Session creation response: {response}")
         
-        print(response)
-        LOGGER.info(str(response))
         # Extract session ID from the operation response
         if "name" in response:
-            session_id = response["name"].split("/")[-1]
+            # The response name format is: projects/.../sessions/{SESSION_ID}/operations/{OPERATION_ID}
+            # We need to extract the session ID, not the operation ID
+            name_parts = response["name"].split("/")
+            try:
+                session_index = name_parts.index("sessions") + 1
+                session_id = name_parts[session_index]
+                LOGGER.info(f"Extracted session ID: {session_id} from operation response")
+            except (ValueError, IndexError):
+                # Fallback: if the format is unexpected, try the old method
+                session_id = response["name"].split("/")[-1]
+                LOGGER.warning(f"Using fallback session ID extraction: {session_id}")
+            
             LOGGER.info(f"Created Vertex AI session {session_id} for user {user_id}")
             
             # Wait a moment for eventual consistency
