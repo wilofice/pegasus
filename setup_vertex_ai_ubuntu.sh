@@ -25,71 +25,86 @@ else
 fi
 
 # Authenticate gcloud CLI (this command is interactive)
-echo "Authenticating gcloud CLI. A browser window will open for login."
-gcloud auth login
+echo "Initializing gcloud CLI. This will open a browser for login and configuration."
+gcloud init
 
-# Get Google Cloud Project ID from user
-PROJECT_ID=$(prompt_for_input "Enter your Google Cloud Project ID")
-
-# Set the project for gcloud CLI
-echo "Setting gcloud project to $PROJECT_ID..."
-gcloud config set project $PROJECT_ID
+# Get the project ID from the current gcloud config
+PROJECT_ID=$(gcloud config get-value project)
+if [ -z "$PROJECT_ID" ]; then
+    echo "No project is configured. Please run 'gcloud init' again and select a project."
+    exit 1
+fi
+echo "Using project: $PROJECT_ID"
 
 LOCATION="us-central1" # Default location as per documentation
 
 echo "Enabling required Google Cloud APIs..."
 gcloud services enable aiplatform.googleapis.com --project=$PROJECT_ID
 gcloud services enable vertexai.googleapis.com --project=$PROJECT_ID
+gcloud services enable storage.googleapis.com --project=$PROJECT_ID
+
+# Create a unique bucket name for staging
+STAGING_BUCKET="gs://${PROJECT_ID}-vertex-ai-staging"
+echo -e "\nA staging bucket is required for Vertex AI to store temporary files."
+echo "The script will use the following bucket: $STAGING_BUCKET"
+echo "Checking if the bucket exists..."
+
+if gsutil ls "$STAGING_BUCKET" &>/dev/null; then
+    echo "Staging bucket already exists."
+else
+    echo "Staging bucket not found. Creating it now..."
+    gsutil mb -p "$PROJECT_ID" -l "$LOCATION" "$STAGING_BUCKET"
+    if [ $? -eq 0 ]; then
+        echo "Bucket created successfully."
+    else
+        echo "Failed to create bucket. Please check your permissions or create it manually in the Google Cloud Console."
+        exit 1
+    fi
+fi
 
 # Install google-cloud-aiplatform Python package
 echo "Installing google-cloud-aiplatform Python package..."
-pip install google-cloud-aiplatform
+pip install "google-cloud-aiplatform[all]==1.71.1" "langchain-google-vertexai"
 
 
+# Python script to create the agent engine
+LOCATION="us-central1"
+
+AGENT_ENGINE_ID=$(PROJECT_ID="$PROJECT_ID" LOCATION="$LOCATION" python -c '
+import os
+import sys
 import vertexai
 from vertexai.preview import reasoning_engines
-
-PROJECT_ID = "$PROJECT_ID"
-LOCATION = "$LOCATION"
-
-vertexai.init(project=PROJECT_ID, location=LOCATION)
+from langchain_google_vertexai import VertexAI
 
 try:
-    # Attempt to create a simple ReasoningEngine. The actual content of the engine
-    # is not critical for just getting an ID, but a minimal valid object is needed.
-    # Using a placeholder class as the actual application logic is not relevant here.
-    class PlaceholderApp:
-        def __init__(self):
-            pass
-        def predict(self, input_data):
-            return "Hello from PlaceholderApp"
-
-    # Check if an engine with a similar display name already exists
-    # This is a basic check and might need more robust handling for production
-    existing_engines = reasoning_engines.ReasoningEngine.list()
-    agent_engine_id = None
-    for engine in existing_engines:
-        if engine.display_name == "pegasus-agent-engine-$PROJECT_ID":
-            agent_engine_id = engine.name.split('/')[-1]
-            print(f"Found existing Agent Engine ID: {agent_engine_id}")
-            break
-
-    if agent_engine_id is None:
-        agent_engine = reasoning_engines.ReasoningEngine.create(
-            PlaceholderApp(),
-            display_name=f"pegasus-agent-engine-$PROJECT_ID",
-            description="Agent Engine for Pegasus backend",
-            requirements=["cloudpickle==3.0.0"], # Minimal requirement
-        )
-        agent_engine_id = agent_engine.name.split('/')[-1]
-        print(f"Created new Agent Engine ID: {agent_engine_id}")
-
-    print(f"AGENT_ENGINE_ID_OUTPUT:{agent_engine_id}")
-
+    project_id = os.environ["PROJECT_ID"]
+    location = os.environ["LOCATION"]
+    vertexai.init(project=project_id, location=location)
+    model = VertexAI(model_name="gemini-1.5-pro-001")
+    agent = reasoning_engines.LangchainAgent(
+        model=model,
+        tools=[],
+    )
+    reasoning_engine = reasoning_engines.ReasoningEngine.create(
+        agent,
+        requirements=[
+            "google-cloud-aiplatform[langchain,agent_engines]"
+        ]
+    )
+    print(reasoning_engine.name.split("/")[-1])
 except Exception as e:
-    print(f"Error creating Agent Engine: {e}")
+    print(f"Error creating reasoning engine: {e}", file=sys.stderr)
     exit(1)
-EOT
+')
+
+if [[ -z "$AGENT_ENGINE_ID" ]]; then
+    echo "Failed to create Agent Engine ID. Please check the output above for errors."
+    exit 1
+fi
+
+echo "Vertex AI Agent Engine created successfully."
+echo "Agent Engine ID: $AGENT_ENGINE_ID"
 )
 
 AGENT_ENGINE_OUTPUT=$(python -c "$PYTHON_SCRIPT" 2>&1)

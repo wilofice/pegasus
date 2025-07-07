@@ -1,0 +1,7 @@
+Requirement already satisfied: numpy>=1.21 in /home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages (from shapely<3.0.0dev->google-cloud-aiplatform) (2.2.6)
+./setup_vertex_ai_ubuntu.sh: line 49: import: command not found
+./setup_vertex_ai_ubuntu.sh: line 50: from: command not found
+./setup_vertex_ai_ubuntu.sh: line 52: PROJECT_ID: command not found
+./setup_vertex_ai_ubuntu.sh: line 53: LOCATION: command not found
+./setup_vertex_ai_ubuntu.sh: line 55: syntax error near unexpected token `project=PROJECT_ID,'
+./setup_vertex_ai_ubuntu.sh: line 55: `vertexai.init(project=PROJECT_ID, location=LOCATION)'
