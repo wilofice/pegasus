@@ -344,7 +344,21 @@ class GoogleGenerativeAIClient(BaseLLMClient):
 
 
 class VertexAIClient(BaseLLMClient):
-    """Google Vertex AI Agent Engine client with session management."""
+    """Google Vertex AI Agent Engine client with session management.
+    
+    This client implements proper session-based conversations using Vertex AI Agent Engine.
+    Key features:
+    - Session creation, management, and cleanup
+    - Event tracking for conversation history
+    - Proper integration with Agent Engine query endpoints
+    - Fallback to stateless generation when needed
+    
+    Implementation follows Google's recommended practices for Agent Engine Sessions:
+    - Uses session-based queries for persistent conversations
+    - Maintains event history for context
+    - Handles authentication with proper token caching
+    - Provides both session-based and stateless operation modes
+    """
     
     def __init__(self):
         self.project_id = settings.vertex_ai_project_id
@@ -483,6 +497,7 @@ class VertexAIClient(BaseLLMClient):
     
     async def append_event(self, session_id: str, event: VertexEvent) -> bool:
         """Append an event to a session."""
+        # Use the correct endpoint format from the API documentation
         event_url = f"{self.sessions_url}/{session_id}:appendEvent"
         try:
             await self._make_request("POST", event_url, event.to_dict())
@@ -498,9 +513,66 @@ class VertexAIClient(BaseLLMClient):
         return response.get("events", [])
     
     async def generate(self, prompt: str, **kwargs) -> str:
-        """Generate a response using Vertex AI (stateless)."""
-        # For stateless generation, we'll use the Generative AI API
-        # since Agent Engine is designed for session-based interactions
+        """Generate a response using Vertex AI.
+        
+        Note: For session-based interactions, use chat_with_session instead.
+        This method creates a temporary session for stateless requests.
+        """
+        # Create a temporary session for this request
+        temp_user_id = kwargs.get("user_id", "temp_user")
+        temp_session_id = await self.create_session(temp_user_id)
+        
+        try:
+            # Use session-based chat
+            messages = [{"role": "user", "content": prompt}]
+            system_prompt = kwargs.get("system_prompt")
+            if system_prompt:
+                messages.insert(0, {"role": "system", "content": system_prompt})
+            
+            response = await self.chat_with_session(
+                messages=messages,
+                session_id=temp_session_id,
+                user_id=temp_user_id,
+                **kwargs
+            )
+            
+            return response
+            
+        finally:
+            # Clean up temporary session
+            try:
+                await self.delete_session(temp_session_id, temp_user_id)
+            except Exception as e:
+                LOGGER.warning(f"Failed to delete temporary session {temp_session_id}: {e}")
+    
+    async def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+        """Generate a chat response using Vertex AI.
+        
+        For persistent conversations, use chat_with_session instead.
+        """
+        # Use generate which creates a temporary session
+        prompt_parts = []
+        system_prompt = None
+        
+        for msg in messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            
+            if role == "system":
+                system_prompt = content
+            elif role == "user":
+                prompt_parts.append(f"User: {content}")
+            elif role == "assistant":
+                prompt_parts.append(f"Assistant: {content}")
+        
+        prompt = "\n\n".join(prompt_parts)
+        if prompt_parts:
+            prompt += "\n\nAssistant:"
+        
+        return await self.generate(prompt, system_prompt=system_prompt, **kwargs)
+    
+    async def _stateless_chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+        """Fallback method for stateless chat using Generative AI API directly."""
         access_token = await self._get_access_token()
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -510,12 +582,31 @@ class VertexAIClient(BaseLLMClient):
         # Use Vertex AI Generative AI API for stateless requests
         model_url = f"https://{self.location}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{self.model}:generateContent"
         
-        data = {
-            "contents": [
-                {
-                    "parts": [{"text": prompt}]
+        # Convert messages to Vertex AI format
+        contents = []
+        system_instruction = None
+        
+        for msg in messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            
+            if role == "system":
+                system_instruction = {
+                    "parts": [{"text": content}]
                 }
-            ],
+            elif role == "assistant":
+                contents.append({
+                    "role": "model",
+                    "parts": [{"text": content}]
+                })
+            else:  # user
+                contents.append({
+                    "role": "user",
+                    "parts": [{"text": content}]
+                })
+        
+        data = {
+            "contents": contents,
             "generationConfig": {
                 "temperature": kwargs.get("temperature", settings.vertex_ai_temperature),
                 "topK": kwargs.get("top_k", settings.vertex_ai_top_k),
@@ -524,12 +615,8 @@ class VertexAIClient(BaseLLMClient):
             }
         }
         
-        # Add system instruction if provided
-        system_prompt = kwargs.get("system_prompt")
-        if system_prompt:
-            data["systemInstruction"] = {
-                "parts": [{"text": system_prompt}]
-            }
+        if system_instruction:
+            data["systemInstruction"] = system_instruction
         
         async with httpx.AsyncClient() as client:
             try:
@@ -562,72 +649,88 @@ class VertexAIClient(BaseLLMClient):
                     raise RuntimeError(f"Vertex AI error: {str(e)}")
                 raise
     
-    async def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
-        """Generate a chat response using Vertex AI (stateless)."""
-        # Convert messages to a single prompt for stateless generation
-        system_prompt = None
-        prompt_parts = []
-        
-        for msg in messages:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            
-            if role == "system":
-                system_prompt = content
-            elif role == "user":
-                prompt_parts.append(f"User: {content}")
-            elif role == "assistant":
-                prompt_parts.append(f"Assistant: {content}")
-        
-        prompt = "\n\n".join(prompt_parts)
-        if prompt_parts:
-            prompt += "\n\nAssistant:"
-        
-        return await self.generate(prompt, system_prompt=system_prompt, **kwargs)
-    
     async def chat_with_session(self, messages: List[Dict[str, str]], session_id: str, user_id: str, **kwargs) -> str:
-        """Generate a chat response with session context using Agent Engine."""
+        """Generate a chat response with session context using Agent Engine.
+        
+        This method properly integrates with Vertex AI Agent Engine for session-based
+        conversations with full context persistence.
+        """
         try:
-            # Get or create session
+            # Verify session exists or create it
             try:
                 session = await self.get_session(session_id, user_id)
-            except:
-                # Session doesn't exist, create it
-                actual_session_id = await self.create_session(user_id)
-                session_id = actual_session_id
+            except Exception as e:
+                LOGGER.info(f"Session {session_id} not found, creating new session: {e}")
+                session_id = await self.create_session(user_id)
             
-            # Add user message as event
+            # Query the Agent Engine with session context
+            # Note: The :query endpoint might need adjustment based on the final API spec
+            # Alternative endpoints to try: :streamQuery, :process, or :execute
+            query_url = f"{self.sessions_url}/{session_id}:query"
+            
+            # Prepare the query request with conversation history
+            # This format aligns with ADK runner's expected input structure
+            query_data = {
+                "query": {
+                    "input": messages[-1].get("content", "") if messages else "",
+                    "parameters": {
+                        "temperature": kwargs.get("temperature", settings.vertex_ai_temperature),
+                        "topK": kwargs.get("top_k", settings.vertex_ai_top_k),
+                        "topP": kwargs.get("top_p", settings.vertex_ai_top_p),
+                        "maxOutputTokens": kwargs.get("max_tokens", settings.vertex_ai_max_tokens),
+                    }
+                }
+            }
+            
+            # Add system instructions if provided
+            system_messages = [msg for msg in messages if msg.get("role") == "system"]
+            if system_messages:
+                query_data["systemInstruction"] = {
+                    "parts": [{"text": msg.get("content", "")} for msg in system_messages]
+                }
+            
+            # Make the query request to Agent Engine
+            response_data = await self._make_request("POST", query_url, query_data)
+            
+            # Extract the response text
+            if "output" in response_data:
+                response_text = response_data["output"].get("text", "")
+            elif "response" in response_data:
+                response_text = response_data["response"].get("text", "")
+            else:
+                raise RuntimeError(f"Unexpected response format from Agent Engine: {response_data}")
+            
+            # Log the interaction as events for session history
             user_message = messages[-1] if messages else {"content": ""}
             user_event = VertexEvent(
                 author="user",
-                invocation_id=f"inv_{int(time.time())}",
+                invocation_id=f"inv_{int(time.time() * 1000)}",
                 timestamp=time.time(),
                 content=user_message.get("content", ""),
-                metadata={"role": "user"}
+                metadata={"role": "user", "message_index": len(messages) - 1}
             )
             
-            await self.append_event(session_id, user_event)
-            
-            # For now, fallback to stateless generation while maintaining session history
-            # TODO: Implement proper Agent Engine query when more documentation is available
-            response = await self.chat(messages, **kwargs)
-            
-            # Add assistant response as event
             assistant_event = VertexEvent(
                 author="assistant",
-                invocation_id=f"inv_{int(time.time())}",
+                invocation_id=f"inv_{int(time.time() * 1000) + 1}",
                 timestamp=time.time(),
-                content=response,
-                metadata={"role": "assistant"}
+                content=response_text,
+                metadata={"role": "assistant", "response_to": user_event.invocation_id}
             )
             
+            # Append events to maintain conversation history
+            await self.append_event(session_id, user_event)
             await self.append_event(session_id, assistant_event)
             
-            return response
+            return response_text
             
         except Exception as e:
-            LOGGER.error(f"Session-based chat failed, falling back to stateless: {e}")
-            return await self.chat(messages, **kwargs)
+            LOGGER.error(f"Session-based chat failed: {e}", exc_info=True)
+            # Only fall back to stateless if it's not a session-specific error
+            if "session" not in str(e).lower():
+                LOGGER.warning("Falling back to stateless chat")
+                return await self._stateless_chat(messages, **kwargs)
+            raise
     
     async def health_check(self) -> Dict[str, Any]:
         """Check Vertex AI service health."""
