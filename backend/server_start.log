@@ -1,0 +1,213 @@
+INFO:__main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_ai' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Will watch for changes in these directories: ['/Users/galahassa/Dev/pegasus/backend']
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+INFO:     Started reloader process [63349] using WatchFiles
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_ai' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_ai' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [63358]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:54330 - "POST /chat/v2/ HTTP/1.1" 401 Unauthorized
+INFO:watchfiles.main:1 change detected
+INFO:services.chat_orchestrator_factory:Creating Chat Orchestrator V2 with default services...
+INFO:services.context_aggregator_factory:Creating Context Aggregator V2 with real services...
+INFO:services.context_ranker:Context ranker initialized with strategy: ensemble
+INFO:watchfiles.main:4 changes detected
+INFO:services.ner_service:Loaded spaCy model for en: en_core_web_sm
+--- Logging error ---
+Traceback (most recent call last):
+  File "/Users/galahassa/Dev/pegasus/backend/services/ner_service.py", line 32, in _load_models
+    self.models[lang_code] = spacy.load(model_name)
+                             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/spacy/__init__.py", line 52, in load
+    return util.load_model(
+           ^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/spacy/util.py", line 484, in load_model
+    raise IOError(Errors.E050.format(name=name))
+OSError: [E050] Can't find model 'fr_core_news_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/logging/__init__.py", line 1160, in emit
+    msg = self.format(record)
+          ^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/logging/__init__.py", line 999, in format
+    return fmt.format(record)
+           ^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/logging/__init__.py", line 703, in format
+    record.message = record.getMessage()
+                     ^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/logging/__init__.py", line 392, in getMessage
+    msg = msg % self.args
+          ~~~~^~~~~~~~~~~
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 135, in _main
+    return self._bootstrap(parent_sentinel)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/uvicorn/server.py", line 65, in run
+    return asyncio.run(self.serve(sockets=sockets))
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 115, in chat_v2
+    orchestrator = await get_orchestrator()
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 29, in get_orchestrator
+    _orchestrator = await get_default_chat_orchestrator()
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 243, in get_default_chat_orchestrator
+    return await ChatOrchestratorFactory.create_default_orchestrator()
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 36, in create_default_orchestrator
+    context_aggregator = await get_context_aggregator(context_aggregator_profile)
+  File "/Users/galahassa/Dev/pegasus/backend/services/context_aggregator_factory.py", line 201, in get_context_aggregator
+    return await ContextAggregatorFactory.create_optimized_aggregator(profile)
+  File "/Users/galahassa/Dev/pegasus/backend/services/context_aggregator_factory.py", line 125, in create_optimized_aggregator
+    return await ContextAggregatorFactory.create_default_aggregator()
+  File "/Users/galahassa/Dev/pegasus/backend/services/context_aggregator_factory.py", line 66, in create_default_aggregator
+    aggregator = ContextAggregatorV2(
+  File "/Users/galahassa/Dev/pegasus/backend/services/context_aggregator_v2.py", line 119, in __init__
+    self.ner_service = NERService()
+  File "/Users/galahassa/Dev/pegasus/backend/services/ner_service.py", line 19, in __init__
+    self._load_models()
+  File "/Users/galahassa/Dev/pegasus/backend/services/ner_service.py", line 37, in _load_models
+    logger.warning(f"Could not load spaCy model for {lang_code}, using blank model", e)
+Message: 'Could not load spaCy model for fr, using blank model'
+Arguments: (OSError("[E050] Can't find model 'fr_core_news_sm'. It doesn't seem to be a Python package or a valid path to a data directory."),)
+WARNING:services.ner_service:Could not load spaCy model for fr, using blank model
+INFO:services.context_aggregator_v2:Context Aggregator V2 initialized with modern retrieval services
+INFO:services.context_aggregator_factory:Context Aggregator V2 created successfully
+INFO:services.chat_orchestrator_factory:Plugin manager created successfully
+INFO:services.chat_orchestrator_v2:Chat Orchestrator V2 initialized with modern services
+INFO:services.chat_orchestrator_factory:Chat Orchestrator V2 created successfully
+ERROR:services.chat_orchestrator_v2:Chat processing failed: password authentication failed for user "pegasus_user"
+Traceback (most recent call last):
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 62, in chat
+    conversation_history = await history_repo.get_recent_for_user(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/conversation_history_repository.py", line 28, in get_recent_for_user
+    result = await self.db_session.execute(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2226, in _execute_internal
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2095, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1189, in _connection_for_bind
+    conn = bind.connect()
+           ^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3276, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 146, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3300, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 449, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 1263, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 712, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 179, in _do_get
+    with util.safe_reraise():
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 177, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 390, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 674, in __init__
+    self.__connect()
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 900, in __connect
+    with util.safe_reraise():
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 896, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/create.py", line 643, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 620, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 937, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 131, in await_only
+    return current.driver.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/asyncpg/connection.py", line 2421, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1049, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 886, in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 934, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "pegasus_user"
+INFO:api.chat_router_v2:Chat V2 processed successfully: 88 chars in 46.0ms
+INFO:     127.0.0.1:54355 - "POST /chat/v2/ HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected

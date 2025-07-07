@@ -140,7 +140,9 @@ class VertexAIClient(BaseLLMClient):
                 raise
     
     async def create_session(self, user_id: str, **kwargs) -> str:
-        """Create a new Vertex AI session."""
+        """Create a new Vertex AI session with validation."""
+        import asyncio
+        
         data = {"userId": user_id}
         
         # Add initial state if provided
@@ -153,6 +155,27 @@ class VertexAIClient(BaseLLMClient):
         if "name" in response:
             session_id = response["name"].split("/")[-1]
             LOGGER.info(f"Created Vertex AI session {session_id} for user {user_id}")
+            
+            # Wait a moment for eventual consistency
+            await asyncio.sleep(0.5)
+            
+            # Validate session was actually created and is accessible
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    await self.get_session(session_id, user_id)
+                    LOGGER.info(f"Session {session_id} validated successfully on attempt {attempt + 1}")
+                    return session_id
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        wait_time = (attempt + 1) * 0.5  # 0.5s, 1s, 1.5s
+                        LOGGER.warning(f"Session {session_id} validation failed on attempt {attempt + 1}, retrying in {wait_time}s: {e}")
+                        await asyncio.sleep(wait_time)
+                    else:
+                        LOGGER.error(f"Session {session_id} validation failed after {max_retries} attempts: {e}")
+                        # Continue anyway - session might still work for operations
+                        return session_id
+            
             return session_id
         else:
             raise RuntimeError("Failed to create Vertex AI session - no session ID returned")
@@ -189,15 +212,33 @@ class VertexAIClient(BaseLLMClient):
             return False
     
     async def append_event(self, session_id: str, event: VertexEvent) -> bool:
-        """Append an event to a session."""
+        """Append an event to a session with retry logic."""
+        import asyncio
+        
         # Use the correct endpoint format from the API documentation
         event_url = f"{self.sessions_url}/{session_id}:appendEvent"
-        try:
-            await self._make_request("POST", event_url, event.to_dict())
-            return True
-        except Exception as e:
-            LOGGER.error(f"Failed to append event to session {session_id}: {e}")
-            return False
+        
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                await self._make_request("POST", event_url, event.to_dict())
+                LOGGER.debug(f"Successfully appended event to session {session_id} on attempt {attempt + 1}")
+                return True
+            except Exception as e:
+                if "404" in str(e) and "not found" in str(e).lower():
+                    if attempt < max_retries - 1:
+                        wait_time = (attempt + 1) * 0.5  # 0.5s, 1s, 1.5s
+                        LOGGER.warning(f"Session {session_id} not found on attempt {attempt + 1}, retrying in {wait_time}s")
+                        await asyncio.sleep(wait_time)
+                        continue
+                    else:
+                        LOGGER.error(f"Session {session_id} consistently not found after {max_retries} attempts")
+                        return False
+                else:
+                    LOGGER.error(f"Failed to append event to session {session_id}: {e}")
+                    return False
+        
+        return False
     
     async def list_events(self, session_id: str) -> List[Dict[str, Any]]:
         """List events in a session."""
@@ -441,3 +482,46 @@ class VertexAIClient(BaseLLMClient):
     def get_current_session_id(self) -> Optional[str]:
         """Get the current session ID without creating a new one."""
         return self._current_session_id
+    
+    async def _wait_for_operation(self, operation_name: str) -> str:
+        """Wait for a long-running operation to complete and return the session ID."""
+        import asyncio
+        
+        # Extract operation details from the operation name
+        operation_url = f"https://{self.location}-aiplatform.googleapis.com/v1beta1/{operation_name}"
+        
+        max_wait_time = 30  # Maximum wait time in seconds
+        check_interval = 1   # Check every second
+        elapsed_time = 0
+        
+        while elapsed_time < max_wait_time:
+            try:
+                response = await self._make_request("GET", operation_url)
+                
+                if response.get("done", False):
+                    # Operation completed
+                    if "error" in response:
+                        error_msg = response["error"].get("message", "Unknown error")
+                        raise RuntimeError(f"Operation failed: {error_msg}")
+                    
+                    # Extract session ID from the response
+                    if "response" in response and "name" in response["response"]:
+                        session_id = response["response"]["name"].split("/")[-1]
+                        return session_id
+                    else:
+                        raise RuntimeError("Operation completed but no session ID found")
+                else:
+                    # Operation still in progress
+                    LOGGER.debug(f"Operation {operation_name} still in progress, waiting...")
+                    await asyncio.sleep(check_interval)
+                    elapsed_time += check_interval
+                    
+            except Exception as e:
+                if elapsed_time >= max_wait_time - check_interval:
+                    raise RuntimeError(f"Operation {operation_name} failed or timed out: {e}")
+                else:
+                    LOGGER.warning(f"Error checking operation status: {e}, retrying...")
+                    await asyncio.sleep(check_interval)
+                    elapsed_time += check_interval
+        
+        raise RuntimeError(f"Operation {operation_name} timed out after {max_wait_time} seconds")
