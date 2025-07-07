@@ -84,6 +84,8 @@ class Settings(BaseSettings):
     vertex_ai_max_tokens: int = 2048
     vertex_ai_top_k: int = 40
     vertex_ai_top_p: float = 0.95
+    # Static user ID for Vertex AI Agent sessions (single-user app)
+    vertex_ai_user_id: str = "pegasus_user"
     # Google Cloud credentials file path (optional, falls back to default auth)
     google_application_credentials: Optional[str] = None
     

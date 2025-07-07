@@ -366,17 +366,39 @@ class VertexAIClient(BaseLLMClient):
         self.agent_engine_id = settings.vertex_ai_agent_engine_id
         self.model = settings.vertex_ai_model
         self.timeout = settings.vertex_ai_timeout
+        self.user_id = settings.vertex_ai_user_id  # Static user ID for single-user app
         
         if not self.project_id:
             raise RuntimeError("VERTEX_AI_PROJECT_ID not configured in settings")
         if not self.agent_engine_id:
             raise RuntimeError("VERTEX_AI_AGENT_ENGINE_ID not configured in settings")
+        if not self.user_id:
+            raise RuntimeError("VERTEX_AI_USER_ID not configured in settings")
         
         self.base_url = f"https://{self.location}-aiplatform.googleapis.com/v1beta1"
         self.sessions_url = f"{self.base_url}/projects/{self.project_id}/locations/{self.location}/reasoningEngines/{self.agent_engine_id}/sessions"
         
+        # Persistent session for this user
+        self._current_session_id = None
+        
         # Setup authentication
         self._setup_auth()
+    
+    async def _get_or_create_session(self) -> str:
+        """Get the current persistent session or create a new one."""
+        if self._current_session_id:
+            try:
+                # Verify the session still exists
+                await self.get_session(self._current_session_id, self.user_id)
+                return self._current_session_id
+            except Exception as e:
+                LOGGER.warning(f"Current session {self._current_session_id} no longer valid: {e}")
+                self._current_session_id = None
+        
+        # Create a new persistent session
+        self._current_session_id = await self.create_session(self.user_id)
+        LOGGER.info(f"Created new persistent session: {self._current_session_id}")
+        return self._current_session_id
     
     def _setup_auth(self):
         """Setup Google Cloud authentication."""
@@ -419,7 +441,6 @@ class VertexAIClient(BaseLLMClient):
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
         }
-        
         async with httpx.AsyncClient() as client:
             try:
                 if method.upper() == "GET":
@@ -449,7 +470,6 @@ class VertexAIClient(BaseLLMClient):
     async def create_session(self, user_id: str, **kwargs) -> str:
         """Create a new Vertex AI session."""
         data = {"userId": user_id}
-        
         # Add initial state if provided
         if "initial_state" in kwargs:
             data["state"] = kwargs["initial_state"]
@@ -513,63 +533,44 @@ class VertexAIClient(BaseLLMClient):
         return response.get("events", [])
     
     async def generate(self, prompt: str, **kwargs) -> str:
-        """Generate a response using Vertex AI.
+        """Generate a response using Vertex AI with persistent session.
         
-        Note: For session-based interactions, use chat_with_session instead.
-        This method creates a temporary session for stateless requests.
+        This method always uses session-based communication for consistent context.
         """
-        # Create a temporary session for this request
-        temp_user_id = kwargs.get("user_id", "temp_user")
-        temp_session_id = await self.create_session(temp_user_id)
+        # Ensure we have a persistent session
+        session_id = await self._get_or_create_session()
         
-        try:
-            # Use session-based chat
-            messages = [{"role": "user", "content": prompt}]
-            system_prompt = kwargs.get("system_prompt")
-            if system_prompt:
-                messages.insert(0, {"role": "system", "content": system_prompt})
-            
-            response = await self.chat_with_session(
-                messages=messages,
-                session_id=temp_session_id,
-                user_id=temp_user_id,
-                **kwargs
-            )
-            
-            return response
-            
-        finally:
-            # Clean up temporary session
-            try:
-                await self.delete_session(temp_session_id, temp_user_id)
-            except Exception as e:
-                LOGGER.warning(f"Failed to delete temporary session {temp_session_id}: {e}")
+        # Use session-based chat
+        messages = [{"role": "user", "content": prompt}]
+        system_prompt = kwargs.get("system_prompt")
+        if system_prompt:
+            messages.insert(0, {"role": "system", "content": system_prompt})
+        
+        response = await self.chat_with_session(
+            messages=messages,
+            session_id=session_id,
+            user_id=self.user_id,
+            **kwargs
+        )
+        
+        return response
     
     async def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
-        """Generate a chat response using Vertex AI.
+        """Generate a chat response using Vertex AI with persistent session.
         
-        For persistent conversations, use chat_with_session instead.
+        This method always uses session-based communication for consistent context.
         """
-        # Use generate which creates a temporary session
-        prompt_parts = []
-        system_prompt = None
+        # Ensure we have a persistent session
+        session_id = await self._get_or_create_session()
         
-        for msg in messages:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            
-            if role == "system":
-                system_prompt = content
-            elif role == "user":
-                prompt_parts.append(f"User: {content}")
-            elif role == "assistant":
-                prompt_parts.append(f"Assistant: {content}")
+        response = await self.chat_with_session(
+            messages=messages,
+            session_id=session_id,
+            user_id=self.user_id,
+            **kwargs
+        )
         
-        prompt = "\n\n".join(prompt_parts)
-        if prompt_parts:
-            prompt += "\n\nAssistant:"
-        
-        return await self.generate(prompt, system_prompt=system_prompt, **kwargs)
+        return response
     
     async def _stateless_chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
         """Fallback method for stateless chat using Generative AI API directly."""
@@ -578,7 +579,6 @@ class VertexAIClient(BaseLLMClient):
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
         }
-        
         # Use Vertex AI Generative AI API for stateless requests
         model_url = f"https://{self.location}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{self.model}:generateContent"
         
@@ -614,7 +614,6 @@ class VertexAIClient(BaseLLMClient):
                 "maxOutputTokens": kwargs.get("max_tokens", settings.vertex_ai_max_tokens),
             }
         }
-        
         if system_instruction:
             data["systemInstruction"] = system_instruction
         
@@ -662,6 +661,9 @@ class VertexAIClient(BaseLLMClient):
             except Exception as e:
                 LOGGER.info(f"Session {session_id} not found, creating new session: {e}")
                 session_id = await self.create_session(user_id)
+                # Update the current session ID if this is our persistent session
+                if user_id == self.user_id:
+                    self._current_session_id = session_id
             
             # Query the Agent Engine with session context
             # Note: The :query endpoint might need adjustment based on the final API spec
@@ -681,14 +683,12 @@ class VertexAIClient(BaseLLMClient):
                     }
                 }
             }
-            
             # Add system instructions if provided
             system_messages = [msg for msg in messages if msg.get("role") == "system"]
             if system_messages:
                 query_data["systemInstruction"] = {
                     "parts": [{"text": msg.get("content", "")} for msg in system_messages]
                 }
-            
             # Make the query request to Agent Engine
             response_data = await self._make_request("POST", query_url, query_data)
             
@@ -747,7 +747,6 @@ class VertexAIClient(BaseLLMClient):
                 "model": self.model,
                 "session_count": len(response.get("sessions", []))
             }
-            
         except Exception as e:
             LOGGER.error(f"Vertex AI health check failed: {e}")
             return {
@@ -755,7 +754,25 @@ class VertexAIClient(BaseLLMClient):
                 "provider": "vertex_ai",
                 "error": str(e)
             }
-
+    
+    async def reset_session(self) -> str:
+        """Reset the persistent session by creating a new one."""
+        # Delete the current session if it exists
+        if self._current_session_id:
+            try:
+                await self.delete_session(self._current_session_id, self.user_id)
+                LOGGER.info(f"Deleted old session: {self._current_session_id}")
+            except Exception as e:
+                LOGGER.warning(f"Failed to delete old session {self._current_session_id}: {e}")
+            finally:
+                self._current_session_id = None
+        
+        # Create a new session
+        return await self._get_or_create_session()
+    
+    def get_current_session_id(self) -> Optional[str]:
+        """Get the current session ID without creating a new one."""
+        return self._current_session_id
 
 class OpenAIClient(BaseLLMClient):
     """Legacy OpenAI client for backward compatibility."""
