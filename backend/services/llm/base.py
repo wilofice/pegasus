@@ -12,6 +12,7 @@ class LLMProvider(str, Enum):
     OLLAMA = "ollama"
     GOOGLE_GENERATIVE_AI = "google_generative_ai"
     VERTEX_AI = "vertex_ai"
+    VERTEX_ADK = "vertex_adk"  # Vertex AI Agent Development Kit
     OPENAI = "openai"  # Legacy support
 
 

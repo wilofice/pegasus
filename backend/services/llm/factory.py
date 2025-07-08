@@ -37,6 +37,9 @@ class LLMClientFactory:
         elif provider == LLMProvider.VERTEX_AI:
             from .vertex_client import VertexAIClient
             return VertexAIClient()
+        elif provider == LLMProvider.VERTEX_ADK:
+            from .vertex_adk_client import VertexADKClient
+            return VertexADKClient()
         elif provider == LLMProvider.OPENAI:
             from .openai_client import OpenAIClient
             return OpenAIClient()
