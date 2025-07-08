@@ -35,20 +35,6 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                 if not audio_file or not audio_file.original_transcript:
                     raise ValueError(f"Audio file {audio_id} or its transcript not found")
 
-                from services.ollama_service import OllamaService
-                ollama_service = OllamaService()
-                
-                improvement_result = await ollama_service.improve_transcript(
-                    audio_file.original_transcript,
-                    language=audio_file.language or 'en'
-                )
-                
-                if improvement_result["success"]:
-                    await audio_repo.update(audio_uuid, {"improved_transcript": improvement_result["improved_transcript"]})
-                else:
-                    logger.warning(f"Transcript improvement failed for {audio_id}, using original.")
-                    await audio_repo.update(audio_uuid, {"improved_transcript": audio_file.original_transcript})
-
                 audio_file = await audio_repo.get_by_id(audio_uuid)
                 
                 self.log_progress(2, 7, "Chunking transcript")
@@ -109,7 +95,6 @@ def process_transcript(self, audio_id: str, job_id: str = None):
                     "entities_extracted": True, "entities_extracted_at": datetime.utcnow(),
                     "processing_status": ProcessingStatus.COMPLETED
                 })
-                
                 result = {
                     "audio_id": audio_id, "chunks_created": len(chunks), "entities_extracted": len(all_entities),
                     "vector_indexed": True, "graph_indexed": True, "processing_completed_at": datetime.utcnow().isoformat()
@@ -274,9 +259,9 @@ def process_knowledge_base(self, audio_id: str, job_id: str = None):
                 await audio_repo.update(audio_uuid, {
                     "vector_indexed": True, "vector_indexed_at": datetime.utcnow(),
                     "graph_indexed": True, "graph_indexed_at": datetime.utcnow(),
-                    "entities_extracted": True, "entities_extracted_at": datetime.utcnow()
+                    "entities_extracted": True, "entities_extracted_at": datetime.utcnow(),
+                    "processing_status": ProcessingStatus.COMPLETED
                 })
-                
                 result = {
                     "audio_id": audio_id, "chunks_created": len(chunks), "entities_extracted": len(all_entities),
                     "vector_indexed": True, "graph_indexed": True, "knowledge_base_updated_at": datetime.utcnow().isoformat(),

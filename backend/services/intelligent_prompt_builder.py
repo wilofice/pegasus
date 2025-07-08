@@ -133,6 +133,7 @@ class IntelligentPromptBuilder:
             full_prompt = "\n\n".join(valid_components)
             
             logger.info(f"Built intelligent prompt with {len(valid_components)} sections, total length: {len(full_prompt)}")
+            logger.info("Prompts: \n" + full_prompt)
             return full_prompt
             
         except Exception as e:

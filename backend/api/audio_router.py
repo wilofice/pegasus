@@ -606,7 +606,7 @@ async def _trigger_transcript_processing_after_tag_update(audio_id: UUID, has_pr
             job = ProcessingJob(
                 job_type=JobType.TRANSCRIPT_PROCESSING,
                 status=JobStatus.PENDING,
-                input_data={"audio_id": str(audio_id), "task_type": "knowledge_base_only"},
+                input_data={"audio_id": str(audio_id)},
                 user_id=audio_file.user_id,
                 audio_file_id=audio_id
             )
