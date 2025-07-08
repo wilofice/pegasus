@@ -7,6 +7,7 @@ from workers.celery_app import app
 from workers.base_task import BaseTask
 from models.audio_file import ProcessingStatus
 from core.config import settings
+from services.ollama_service import OllamaService
 
 logger = logging.getLogger(__name__)
 
@@ -48,12 +49,26 @@ def transcribe_audio(self, audio_id: str, job_id: str = None):
                     "duration_seconds": await transcription_service.get_audio_duration(audio_file.file_path)
                 })
                 
-                self.log_progress(2, 3, "Transcription complete, awaiting user review")
+                self.log_progress(2, 3, "Original transcription complete, awaiting transcript improvement")
                 await audio_repo.update_status(audio_uuid, ProcessingStatus.PENDING_REVIEW)
+
+                ollama_service = OllamaService()
+                
+                improvement_result = await ollama_service.improve_transcript(
+                    audio_file.original_transcript,
+                    language=audio_file.language or 'en'
+                )
+                
+                if improvement_result["success"]:
+                    await audio_repo.update(audio_uuid, {"improved_transcript": improvement_result["improved_transcript"]})
+                else:
+                    logger.warning(f"Transcript improvement failed for {audio_id}, using original.")
+                    await audio_repo.update(audio_uuid, {"improved_transcript": audio_file.original_transcript})
 
                 # Do NOT chain to process_transcript - wait for user confirmation
                 
-                self.log_progress(3, 3, "Transcription complete - ready for user review")
+                self.log_progress(2, 3, "Transcription complete, awaiting user review")
+                await audio_repo.update_status(audio_uuid, ProcessingStatus.PENDING_REVIEW)
 
                 return {"status": "success", "audio_id": audio_id}
 

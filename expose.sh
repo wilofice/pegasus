@@ -1,33 +1,60 @@
 #!/bin/bash
 
 # Configuration
+TUNNEL_NAME="pegasus-backend"
 BACKEND_PORT=8000
+CONFIG_FILE=".cloudflared/config.yml"
 
-echo "🚀 Starting Cloudflare Tunnel to your local service on port $BACKEND_PORT"
-
-# Check if cloudflared is installed
+# --- Installation ---
 if ! command -v cloudflared &> /dev/null; then
     echo "🔍 cloudflared not found. Installing..."
-
-    # Detect OS
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        wget -O cloudflared.tgz https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.tgz
-        tar -xvzf cloudflared.tgz
+        wget -q -O cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+        chmod +x cloudflared
         sudo mv cloudflared /usr/local/bin/
-        rm cloudflared.tgz
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        brew install cloudflared || {
-            echo "🍎 Please install Homebrew first: https://brew.sh/"
+        if ! command -v brew &> /dev/null; then
+            echo "❌ Homebrew is not installed. Please install it from https://brew.sh/"
             exit 1
-        }
+        fi
+        brew install cloudflared
     else
-        echo "❌ Unsupported OS: $OSTYPE"
+        echo "❌ Unsupported OS for automatic installation: $OSTYPE"
         exit 1
     fi
+    echo "✅ cloudflared installed."
 fi
 
-echo "✅ cloudflared is installed."
+# --- Authentication & Tunnel Creation ---
+if [ ! -f ~/.cloudflared/cert.pem ]; then
+    echo "⚠️ You need to authenticate with Cloudflare."
+    echo "Please run 'cloudflared tunnel login' and follow the instructions."
+    exit 1
+fi
 
-# Start the tunnel
-echo "🌐 Starting tunnel..."
-cloudflared tunnel --url http://localhost:$BACKEND_PORT
+if ! cloudflared tunnel list | grep -q $TUNNEL_NAME; then
+    echo "🚀 Creating tunnel '$TUNNEL_NAME'..."
+    cloudflared tunnel create $TUNNEL_NAME
+fi
+
+# --- Configuration ---
+mkdir -p .cloudflared
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "📝 Creating config file for tunnel '$TUNNEL_NAME'..."
+    cat <<EOF > $CONFIG_FILE
+tunnel: $TUNNEL_NAME
+credentials-file: /home/mica/.cloudflared/$(cloudflared tunnel list | grep $TUNNEL_NAME | awk '{print $1}').json
+
+ingress:
+  - hostname: $TUNNEL_NAME.yourdomain.com # <-- IMPORTANT: Change this to your domain
+    service: http://localhost:$BACKEND_PORT
+  - service: http_status:404
+EOF
+    echo "✅ Config file created at $CONFIG_FILE"
+    echo "🛑 IMPORTANT: Please edit the hostname in $CONFIG_FILE to your domain."
+    exit 0
+fi
+
+# --- Start Tunnel ---
+echo "🌐 Starting tunnel '$TUNNEL_NAME'..."
+cloudflared tunnel --config $CONFIG_FILE run
