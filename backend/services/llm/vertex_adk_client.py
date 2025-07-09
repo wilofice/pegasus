@@ -213,32 +213,47 @@ class VertexADKClient(BaseLLMClient):
     async def _run_agent_query(self, content: str, session_id: str) -> str:
         """Run a query through the ADK agent with session context."""
         try:
-            # Create content object for ADK
-            user_content = Content(
-                role='user', 
-                parts=[Part.from_text(content)]
-            )
+            # Create a simple text message for the agent
+            LOGGER.debug(f"Running agent query with content: {content[:100]}...")
             
-            # Run the agent with session context
-            events = self._runner.run(
-                user_id=self.user_id,
-                session_id=session_id,
-                new_message=user_content
-            )
-            
-            # Extract the final response from events
-            final_response = None
-            for event in events:
-                if event.is_final_response():
-                    if event.content and event.content.parts:
-                        final_response = event.content.parts[0].text
-                        break
-            
-            if final_response:
-                LOGGER.debug(f"ADK agent response generated for session {session_id}")
-                return final_response
-            else:
-                raise RuntimeError("No final response received from ADK agent")
+            # Try using the runner with a simpler message format
+            try:
+                # Create content object for ADK with explicit text part
+                text_part = Part.from_text(content)
+                user_content = Content(
+                    role='user', 
+                    parts=[text_part]
+                )
+                
+                # Run the agent with session context
+                events = self._runner.run(
+                    user_id=self.user_id,
+                    session_id=session_id,
+                    new_message=user_content
+                )
+                
+                # Extract the final response from events
+                final_response = None
+                for event in events:
+                    if hasattr(event, 'is_final_response') and event.is_final_response():
+                        if event.content and event.content.parts:
+                            final_response = event.content.parts[0].text
+                            break
+                    elif hasattr(event, 'content') and event.content:
+                        # Fallback: try to get response from any content event
+                        if event.content.parts and event.content.parts[0].text:
+                            final_response = event.content.parts[0].text
+                
+                if final_response:
+                    LOGGER.debug(f"ADK agent response generated for session {session_id}")
+                    return final_response
+                else:
+                    raise RuntimeError("No final response received from ADK agent")
+                    
+            except Exception as adk_error:
+                LOGGER.error(f"ADK runner error: {adk_error}")
+                # Fallback to a simple response
+                return f"I received your message: '{content}' but encountered an issue processing it. Please try again."
                 
         except Exception as e:
             LOGGER.error(f"ADK agent query failed: {e}")

@@ -88,6 +88,29 @@ class RankedResult:
                 "temporal": self.temporal_score
             }
         }
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert RankedResult to dictionary for serialization."""
+        return {
+            "id": self.id,
+            "content": self.content,
+            "source_type": self.source_type,
+            "unified_score": self.unified_score,
+            "metadata": self.metadata,
+            "semantic_score": self.semantic_score,
+            "structural_score": self.structural_score,
+            "temporal_score": self.temporal_score,
+            "ranking_factors": [
+                {
+                    "name": factor.name,
+                    "score": factor.score,
+                    "weight": factor.weight,
+                    "explanation": factor.explanation,
+                    "raw_value": factor.raw_value
+                }
+                for factor in self.ranking_factors
+            ]
+        }
 
 
 class ContextRanker:
