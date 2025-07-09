@@ -1,0 +1,98 @@
+INFO:services.intelligent_prompt_builder:Prompts: 
+=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===
+-  Today is... was a good day. I need to go to the shopping mall tomorrow....
+
+=== CONTEXTUAL INFORMATION ===\n\nADDITIONAL CONTEXT:\n[Additional 1] [MODERATE CONFIDENCE] Hello, today was a very stressful day. I had to work extensively on the company project. And there are a lot of things to do, many things. I had to call my friends and discuss with them today. I had to go out to buy toilet papers and other things for the home. I'm feeling so tired.\n\nCONTEXT SUMMARY: 1 sources analyzed\nAverage Relevance: 0.69
+
+=== CONVERSATION CONTEXT ===\nTurn 1:\n  User: How was my day ?\n  Assistant: I don't have enough information in the provided context to answer this question. To tell you about your day, I would need details from audio transcriptions, documents, or real-time analysis, which are...\nTurn 2:\n  User: How was my day ?\n  Assistant: I don't have enough information in the provided context to answer this question. To tell you about your day, I would need details from audio transcriptions, documents, or real-time analysis, which are...\nTurn 3:\n  User: Should I do groceries\n  Assistant: I don't have enough information in the provided context to answer this question. To advise you on whether you should do groceries, I would need details from audio transcriptions, documents, or real-ti...\nTurn 4:\n  User: what should I organise myself for tomorrow\n  Assistant: I don't have enough information in the provided context to answer this question. To advise you on what you should organize for tomorrow, I would need details from audio transcriptions, documents, or r...\nTurn 5:\n  User: How should I organise myself for tomorrow\n  Assistant: I don't have enough information in the provided context to answer this question. To advise you on how you should organize yourself for tomorrow, I would need details from audio transcriptions, documen...\nTurn 6:\n  User: How should I organise myself for tomorrow\n  Assistant: I don't have enough information in the provided context to answer this question. To advise you on how you should organize yourself for tomorrow, I would need details from audio transcriptions, documen...\nTurn 7:\n  User: How should I organise myself for tomorrow\n  Assistant: I don't have enough information in the provided context to answer this question. To advise you on how you should organize yourself for tomorrow, I would need details from audio transcriptions, documen...\n\nConversation Metadata:\nTotal conversation turns: 7\nValid exchanges processed: 7
+
+=== CURRENT USER REQUEST ===\nHello
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions "HTTP/1.1 200 OK"
+INFO:google_adk.google.adk.sessions.vertex_ai_session_service:Create Session response {'name': 'projects/1083364725815/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/5350993788653273088/operations/3514110768066854912', 'metadata': {'@type': 'type.googleapis.com/google.cloud.aiplatform.v1beta1.CreateSessionOperationMetadata', 'genericMetadata': {'createTime': '2025-07-09T04:40:47.615406Z', 'updateTime': '2025-07-09T04:40:47.615406Z'}}}
+INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/operations/3514110768066854912 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/operations/3514110768066854912 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/5350993788653273088 "HTTP/1.1 200 OK"
+INFO:services.llm.vertex_adk_client:Created new ADK session: 5350993788653273088
+INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/5350993788653273088 "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/5350993788653273088/events "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/5350993788653273088:appendEvent "HTTP/1.1 400 Bad Request"
+Exception in thread Thread-3 (_asyncio_thread_main):
+Traceback (most recent call last):
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/threading.py", line 1043, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/threading.py", line 994, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/adk/runners.py", line 144, in _asyncio_thread_main
+    asyncio.run(_invoke_run_async())
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/adk/runners.py", line 132, in _invoke_run_async
+    async for event in self.run_async(
+    ...<5 lines>...
+      event_queue.put(event)
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/adk/runners.py", line 195, in run_async
+    await self._append_new_message_to_session(
+    ...<4 lines>...
+    )
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/adk/runners.py", line 250, in _append_new_message_to_session
+    await self.session_service.append_event(session=session, event=event)
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/adk/sessions/vertex_ai_session_service.py", line 301, in append_event
+    await api_client.async_request(
+    ...<3 lines>...
+    )
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/genai/_api_client.py", line 1101, in async_request
+    result = await self._async_request(http_request=http_request, stream=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/genai/_api_client.py", line 1046, in _async_request
+    return await self._async_retry(  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self._async_request_once, http_request, stream
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/tenacity/asyncio/__init__.py", line 111, in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/tenacity/asyncio/__init__.py", line 153, in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/tenacity/_utils.py", line 99, in inner
+    return call(*args, **kwargs)
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/tenacity/__init__.py", line 418, in exc_check
+    raise retry_exc.reraise()
+          ~~~~~~~~~~~~~~~~~^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/tenacity/__init__.py", line 185, in reraise
+    raise self.last_attempt.result()
+          ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/tenacity/asyncio/__init__.py", line 114, in __call__
+    result = await fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/genai/_api_client.py", line 1038, in _async_request_once
+    await errors.APIError.raise_for_async_response(client_response)
+  File "/home/mica/miniconda3/envs/pegasus/lib/python3.13/site-packages/google/genai/errors.py", line 155, in raise_for_async_response
+    raise ClientError(status_code, response_json, response)
+google.genai.errors.ClientError: 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': "Invalid value at 'event.content.parts[0]' (oneof), oneof field 'data' is already set. Cannot set 'file_data'\nInvalid value at 'event.content.parts[0]' (oneof), oneof field 'data' is already set. Cannot set 'function_response'\nInvalid value at 'event.content.parts[0]' (oneof), oneof field 'data' is already set. Cannot set 'text'", 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.BadRequest', 'fieldViolations': [{'field': 'event.content.parts[0]', 'description': "Invalid value at 'event.content.parts[0]' (oneof), oneof field 'data' is already set. Cannot set 'file_data'"}, {'field': 'event.content.parts[0]', 'description': "Invalid value at 'event.content.parts[0]' (oneof), oneof field 'data' is already set. Cannot set 'function_response'"}, {'field': 'event.content.parts[0]', 'description': "Invalid value at 'event.content.parts[0]' (oneof), oneof field 'data' is already set. Cannot set 'text'"}]}]}}
+ERROR:services.llm.vertex_adk_client:ADK agent query failed: No final response received from ADK agent
+ERROR:services.llm.vertex_adk_client:ADK generation failed: Agent query failed: No final response received from ADK agent
+ERROR:services.chat_orchestrator_v2:Chat processing failed: 'RankedResult' object has no attribute 'to_dict'
+Traceback (most recent call last):
+  File "/home/mica/Desktop/pegasus/backend/services/chat_orchestrator_v2.py", line 129, in chat
+    sources=self._extract_sources(aggregated_context, config),
+            ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mica/Desktop/pegasus/backend/services/chat_orchestrator_v2.py", line 245, in _extract_sources
+    return [r.to_dict() for r in aggregated_context.results[:5]]
+            ^^^^^^^^^
+AttributeError: 'RankedResult' object has no attribute 'to_dict'
