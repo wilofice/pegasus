@@ -676,11 +676,18 @@ class Neo4jRetriever(BaseRetriever):
         
         for old_key, new_key in field_mappings.items():
             if old_key in node_data and node_data[old_key] is not None:
-                cleaned[new_key] = node_data[old_key]
+                value = node_data[old_key]
+                # Convert Neo4j DateTime objects to ISO strings for serialization
+                if old_key in ['created_at', 'updated_at'] and hasattr(value, 'to_native'):
+                    value = value.to_native().isoformat()
+                cleaned[new_key] = value
         
         # Add any additional properties not in the mapping
         for key, value in node_data.items():
             if key not in field_mappings and key not in cleaned and value is not None:
+                # Check if value is a Neo4j DateTime and convert it
+                if hasattr(value, 'to_native'):
+                    value = value.to_native().isoformat()
                 cleaned[key] = value
         
         return cleaned

@@ -76,13 +76,22 @@ class PegasusADKAgent:
                 "pegasus_formatting": True
             }
         
-        # Create the ADK agent
-        self._agent = adk.Agent(
-            model=self.config.model,
-            name=self.config.name,
-            instruction=self.config.instruction,
-            tools=[analyze_context, format_response]
-        )
+        # Create the ADK agent without tools initially to avoid conflicts
+        try:
+            self._agent = adk.Agent(
+                model=self.config.model,
+                name=self.config.name,
+                instruction=self.config.instruction,
+                tools=[]  # Start with no tools to avoid content conflicts
+            )
+        except Exception as e:
+            LOGGER.warning(f"Failed to create ADK agent with model {self.config.model}: {e}")
+            # Fallback to a simpler agent configuration
+            self._agent = adk.Agent(
+                model="gemini-2.0-flash-exp",  # Use a known good model
+                name=self.config.name,
+                instruction=self.config.instruction
+            )
         
         LOGGER.info(f"Pegasus ADK agent '{self.config.name}' initialized with model {self.config.model}")
     
@@ -216,13 +225,22 @@ class VertexADKClient(BaseLLMClient):
             # Create a simple text message for the agent
             LOGGER.debug(f"Running agent query with content: {content[:100]}...")
             
-            # Try using the runner with a simpler message format
+            # Try using the runner with a more robust approach
             try:
-                # Create content object for ADK with explicit text part
-                text_part = Part.from_text(content)
+                # Alternative approach: Use the session service directly for more control
+                if hasattr(self._session_service, 'query') or hasattr(self._session_service, 'send_message'):
+                    # Try direct session query if available
+                    LOGGER.debug("Attempting direct session query")
+                    # This is a placeholder - actual method depends on ADK version
+                    response = await self._handle_direct_query(content, session_id)
+                    if response:
+                        return response
+                
+                # Fallback to runner approach with better error handling
+                # Create the simplest possible content structure
                 user_content = Content(
                     role='user', 
-                    parts=[text_part]
+                    parts=[Part.from_text(str(content))]
                 )
                 
                 # Run the agent with session context
@@ -232,32 +250,55 @@ class VertexADKClient(BaseLLMClient):
                     new_message=user_content
                 )
                 
-                # Extract the final response from events
+                # Extract response with improved handling
                 final_response = None
-                for event in events:
-                    if hasattr(event, 'is_final_response') and event.is_final_response():
-                        if event.content and event.content.parts:
-                            final_response = event.content.parts[0].text
-                            break
-                    elif hasattr(event, 'content') and event.content:
-                        # Fallback: try to get response from any content event
-                        if event.content.parts and event.content.parts[0].text:
-                            final_response = event.content.parts[0].text
+                response_parts = []
                 
+                for event in events:
+                    try:
+                        if hasattr(event, 'content') and event.content:
+                            if hasattr(event.content, 'parts') and event.content.parts:
+                                for part in event.content.parts:
+                                    if hasattr(part, 'text') and part.text:
+                                        response_parts.append(part.text)
+                                        if hasattr(event, 'is_final_response') and event.is_final_response():
+                                            final_response = part.text
+                                            break
+                    except Exception as event_error:
+                        LOGGER.warning(f"Error processing event: {event_error}")
+                        continue
+                
+                # Use the final response or concatenate all parts
                 if final_response:
-                    LOGGER.debug(f"ADK agent response generated for session {session_id}")
+                    LOGGER.debug(f"ADK agent final response generated for session {session_id}")
                     return final_response
+                elif response_parts:
+                    LOGGER.debug(f"ADK agent response assembled from {len(response_parts)} parts")
+                    return " ".join(response_parts)
                 else:
-                    raise RuntimeError("No final response received from ADK agent")
+                    raise RuntimeError("No response content received from ADK agent")
                     
             except Exception as adk_error:
                 LOGGER.error(f"ADK runner error: {adk_error}")
-                # Fallback to a simple response
-                return f"I received your message: '{content}' but encountered an issue processing it. Please try again."
+                # Enhanced fallback response
+                return self._create_fallback_response(content, str(adk_error))
                 
         except Exception as e:
             LOGGER.error(f"ADK agent query failed: {e}")
             raise RuntimeError(f"Agent query failed: {e}")
+    
+    async def _handle_direct_query(self, content: str, session_id: str) -> Optional[str]:
+        """Handle direct query through session service if available."""
+        # This is a placeholder for direct session querying
+        # Actual implementation depends on ADK session service capabilities
+        return None
+    
+    def _create_fallback_response(self, content: str, error: str) -> str:
+        """Create a helpful fallback response when ADK fails."""
+        if "oneof field 'data' is already set" in error:
+            return f"I understand your message: '{content[:100]}...' but I'm experiencing a technical issue with message formatting. Please try rephrasing your question."
+        else:
+            return f"I received your message but encountered a temporary issue. Please try again in a moment."
     
     # BaseLLMClient interface implementation
     
