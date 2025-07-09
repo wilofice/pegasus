@@ -11,6 +11,9 @@ from enum import Enum
 
 from services.context_aggregator_v2 import AggregatedContext
 from services.chat_types import ChatConfig, ConversationMode, ResponseStyle, ConversationContext
+from services.system_instructions import get_complete_system_instructions, get_strategy_instructions, get_response_style_modifier
+from core.database import get_db
+from repositories.session_transcript_repository import SessionTranscriptRepository
 
 logger = logging.getLogger(__name__)
 
@@ -32,15 +35,25 @@ class IntelligentPromptBuilder:
     
     def __init__(self):
         self.templates = self._load_prompt_templates()
+        self._current_session_id = None
+        self._current_user_id = None
     
-    def build_intelligent_prompt(self,
-                                user_message: str,
-                                aggregated_context: AggregatedContext,
-                                plugin_results: Dict[str, Any],
-                                config: ChatConfig,
-                                conversation_context: ConversationContext,
-                                recent_transcripts: List[str],
-                                is_first_request: bool = False) -> str:
+    def set_session_info(self, session_id: str, user_id: str):
+        """Set the current session ID and user ID for transcript tracking."""
+        self._current_session_id = session_id
+        self._current_user_id = user_id
+        logger.debug(f"Session info set: session_id={session_id}, user_id={user_id}")
+    
+    async def build_intelligent_prompt(self,
+                                      user_message: str,
+                                      aggregated_context: AggregatedContext,
+                                      plugin_results: Dict[str, Any],
+                                      config: ChatConfig,
+                                      conversation_context: ConversationContext,
+                                      recent_transcripts: List[str],
+                                      is_first_request: bool = False,
+                                      session_id: Optional[str] = None,
+                                      user_id: Optional[str] = None) -> str:
         """
         Build an intelligent, comprehensive prompt that maximizes context utilization.
         
@@ -78,9 +91,12 @@ class IntelligentPromptBuilder:
             # Build transcript section with error handling
             if recent_transcripts:
                 try:
-                    transcript_section = self._build_transcript_section(recent_transcripts)
-                    prompt_components.append(transcript_section)
-                    logger.debug(f"Added transcript section with {len(recent_transcripts)} transcripts")
+                    transcript_section = await self._build_transcript_section(
+                        recent_transcripts, session_id, user_id
+                    )
+                    if transcript_section:  # Only add if there are new transcripts
+                        prompt_components.append(transcript_section)
+                        logger.debug(f"Added transcript section with new transcripts")
                 except Exception as e:
                     logger.error(f"Error building transcript section: {e}", exc_info=True)
             
@@ -184,87 +200,12 @@ class IntelligentPromptBuilder:
             return "conversational_balanced"
     
     def _build_system_instructions(self, config: ChatConfig, strategy: str) -> str:
-        """Build comprehensive system instructions based on strategy."""
-        base_instructions = """You are Pegasus Brain, an advanced AI assistant acting as a life coach and personal adviser. You have access to comprehensive contextual information from various sources including audio transcriptions, documents, and real-time analysis.
-
-PEGASUS BRAIN ROLE & IDENTITY:
-As a life coach and personal adviser, your mission is to:
-- Guide your client user toward personal growth, self-awareness, and goal achievement
-- Provide thoughtful, empathetic support for life challenges and decisions
-- Help the user identify patterns, insights, and opportunities from their experiences
-- Offer constructive feedback and actionable advice based on their personal context
-- Maintain a supportive, non-judgmental, and encouraging approach
-- Foster accountability and motivation while respecting user autonomy
-- Help user connect their experiences to meaningful life improvements
-
-COACHING APPROACH:
-- Ask insightful questions to help users reflect and gain clarity
-- Provide personalized guidance based on their unique circumstances
-- Encourage self-discovery and empowerment rather than prescriptive solutions
-- Help user identify their values, strengths, and areas for growth
-- Support goal-setting and progress tracking through their shared experiences
-- Recognize emotional patterns and provide appropriate support
-
-CRITICAL ANTI-HALLUCINATION RULES:
-1. You MUST ONLY use information explicitly provided in the context, conversation history, or recent transcripts
-2. You MUST NOT make up, invent, or hallucinate any facts, details, or information
-3. If information is not available in the provided context, you MUST say so explicitly
-4. You MUST NOT use external knowledge beyond what is provided in the context
-5. Every claim you make MUST be directly traceable to the provided information
-
-Your core capabilities:
-- Deep contextual understanding from multiple information sources
-- Accurate information synthesis and analysis ONLY from provided context
-- Intelligent reasoning and inference BASED ON available data
-- Source-aware response generation WITH strict adherence to sources
-- Conversation continuity and memory FROM provided history only
-- Life coaching expertise applied to user's personal context and experiences"""
-
-        strategy_instructions = {
-            "research_intensive": """
-Focus on:
-• Thorough analysis of all provided context
-• Evidence-based reasoning and conclusions
-• Comprehensive information synthesis
-• Accurate citation and source reference
-• Detailed, well-researched responses""",
-            
-            "analytical_deep": """
-Focus on:
-• Systematic breakdown of complex information
-• Logical reasoning and structured analysis
-• Pattern identification across sources
-• Critical evaluation of information
-• Clear, methodical explanations""",
-            
-            "creative_synthesis": """
-Focus on:
-• Creative integration of available information
-• Innovative connections between concepts
-• Imaginative but grounded responses
-• Context-aware creative solutions
-• Balanced creativity with factual accuracy""",
-            
-            "conversational_balanced": """
-Focus on:
-• Natural, engaging conversation flow
-• Balanced use of available context
-• Clear, accessible explanations
-• Relevant and helpful responses
-• Adaptive tone and style"""
-        }
-        
-        style_modifier = {
-            ResponseStyle.CONCISE: "\\nCommunication Style: Be concise and direct while maintaining completeness.",
-            ResponseStyle.DETAILED: "\\nCommunication Style: Provide comprehensive, detailed explanations with full context.",
-            ResponseStyle.ACADEMIC: "\\nCommunication Style: Use formal, academic language with proper structure and citations.",
-            ResponseStyle.CASUAL: "\\nCommunication Style: Use friendly, casual language while maintaining accuracy.",
-            ResponseStyle.PROFESSIONAL: "\\nCommunication Style: Maintain professional tone with clear, business-appropriate language."
-        }
-        
-        return (base_instructions + 
-                strategy_instructions.get(strategy, strategy_instructions["conversational_balanced"]) +
-                style_modifier.get(config.response_style, ""))
+        """Build comprehensive system instructions based on strategy using shared instructions."""
+        # Use the shared system instructions
+        return get_complete_system_instructions(
+            strategy=strategy,
+            response_style=config.response_style.value if hasattr(config.response_style, 'value') else str(config.response_style)
+        )
     
     def _build_context_section(self, aggregated_context: AggregatedContext, config: ChatConfig) -> str:
         """Build intelligent context section with source analysis."""
@@ -496,13 +437,63 @@ Focus on:
         
         return quality_header + "\n" + "\n".join(quality_requirements)
     
-    def _build_transcript_section(self, recent_transcripts: List[str]) -> str:
-        """Build the recent transcripts section."""
+    async def _build_transcript_section(self, recent_transcripts: List[str], 
+                                       session_id: Optional[str] = None,
+                                       user_id: Optional[str] = None) -> str:
+        """Build the recent transcripts section with session-aware filtering."""
         header = "=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ==="
         if not recent_transcripts:
             return ""
         
-        transcripts_summary = "\n".join([f"- {t[:200]}..." for t in recent_transcripts])
+        # Use provided session info or fall back to instance variables
+        effective_session_id = session_id or self._current_session_id
+        effective_user_id = user_id or self._current_user_id
+        
+        # If we have session info, filter out already-sent transcripts
+        filtered_transcripts = recent_transcripts
+        if effective_session_id and effective_user_id:
+            try:
+                async for db_session in get_db():
+                    transcript_repo = SessionTranscriptRepository(db_session)
+                    
+                    # Get list of transcript IDs from the transcript content
+                    # For now, we'll use the first 50 chars as a simple ID
+                    transcript_ids = [t[:50] for t in recent_transcripts]
+                    
+                    # Get unsent transcript IDs
+                    unsent_ids = await transcript_repo.get_unsent_transcripts(
+                        effective_session_id, transcript_ids
+                    )
+                    unsent_set = set(unsent_ids)
+                    
+                    # Filter to only include unsent transcripts
+                    filtered_transcripts = [
+                        t for t in recent_transcripts 
+                        if t[:50] in unsent_set
+                    ]
+                    
+                    # Mark the transcripts we're about to send
+                    for transcript in filtered_transcripts:
+                        transcript_id = transcript[:50]
+                        await transcript_repo.mark_transcript_sent(
+                            session_id=effective_session_id,
+                            user_id=effective_user_id,
+                            transcript_id=transcript_id,
+                            content=transcript
+                        )
+                    
+                    logger.info(f"Session {effective_session_id}: Sending {len(filtered_transcripts)} new transcripts out of {len(recent_transcripts)} total")
+                    break
+                    
+            except Exception as e:
+                logger.error(f"Error filtering transcripts by session: {e}")
+                # Fall back to sending all transcripts if there's an error
+                filtered_transcripts = recent_transcripts
+        
+        if not filtered_transcripts:
+            return ""
+        
+        transcripts_summary = "\n".join([f"- {t[:200]}..." for t in filtered_transcripts])
         return f"{header}\n{transcripts_summary}"
     
     def _get_confidence_indicator(self, score: float) -> str:

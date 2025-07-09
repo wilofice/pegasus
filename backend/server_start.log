@@ -2027,3 +2027,761 @@ INFO:     Started server process [33245]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:4 changes detected
+WARNING:  WatchFiles detected changes in 'services/llm/vertex_adk_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [33245]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [72087]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:4 changes detected
+INFO:watchfiles.main:4 changes detected
+INFO:watchfiles.main:4 changes detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'models/user_session.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72087]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79766]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'models/session_transcript.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79766]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79780]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'repositories/user_session_repository.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79780]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79802]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'repositories/session_transcript_repository.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79802]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79831]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'alembic/versions/010_add_session_management_tables.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79831]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79850]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/system_instructions.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79850]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79936]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/llm/vertex_adk_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79936]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79955]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/llm/vertex_adk_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79955]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79975]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/llm/vertex_adk_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79975]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [79982]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/llm/vertex_adk_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79982]
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [80014]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/intelligent_prompt_builder.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [80014]
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:12 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/intelligent_prompt_builder.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/intelligent_prompt_builder.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/intelligent_prompt_builder.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/intelligent_prompt_builder.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/intelligent_prompt_builder.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/intelligent_prompt_builder.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/chat_orchestrator_v2.py'. Reloading...
+INFO:watchfiles.main:3 changes detected
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/chat_orchestrator_v2.py'. Reloading...
+INFO:watchfiles.main:3 changes detected
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'services/chat_orchestrator_v2.py'. Reloading...
+INFO:watchfiles.main:3 changes detected
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'repositories/user_session_repository.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'test_session_improvements.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:6 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'models/user_session.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 12, in <module>
+    from models.session_transcript import SessionTranscript
+  File "/Users/galahassa/Dev/pegasus/backend/models/session_transcript.py", line 5, in <module>
+    from core.database import Base
+ImportError: cannot import name 'Base' from 'core.database' (/Users/galahassa/Dev/pegasus/backend/core/database.py)
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'models/session_transcript.py'. Reloading...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/opt/miniconda3/envs/chatbot/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/galahassa/Dev/pegasus/backend/main.py", line 6, in <module>
+    from api import chat_router, webhook_router, audio_router, game_router, chat_router_v2, llm_router
+  File "/Users/galahassa/Dev/pegasus/backend/api/chat_router_v2.py", line 11, in <module>
+    from services.chat_orchestrator_factory import get_default_chat_orchestrator
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_factory.py", line 5, in <module>
+    from services.chat_orchestrator_v2 import ChatOrchestratorV2, ChatConfig, ConversationMode, ResponseStyle
+  File "/Users/galahassa/Dev/pegasus/backend/services/chat_orchestrator_v2.py", line 13, in <module>
+    from services.intelligent_prompt_builder import get_intelligent_prompt_builder
+  File "/Users/galahassa/Dev/pegasus/backend/services/intelligent_prompt_builder.py", line 16, in <module>
+    from repositories.session_transcript_repository import SessionTranscriptRepository
+  File "/Users/galahassa/Dev/pegasus/backend/repositories/session_transcript_repository.py", line 13, in <module>
+    from .base import BaseRepository
+ModuleNotFoundError: No module named 'repositories.base'
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:1 change detected
+WARNING:  WatchFiles detected changes in 'repositories/base.py'. Reloading...
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db_1' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='cuda' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='llama2' ollama_timeout=120.0 ollama_base_url='http://localhost:11435' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='pegasus_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [80553]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:3 changes detected

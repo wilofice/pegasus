@@ -19,6 +19,9 @@ from vertexai import agent_engines
 # Local imports
 from .base import BaseLLMClient
 from core.config import settings
+from services.system_instructions import get_complete_system_instructions
+from core.database import get_db
+from repositories.user_session_repository import UserSessionRepository
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,24 +31,12 @@ class PegasusAgentConfig:
     """Configuration for the Pegasus ADK agent."""
     name: str = "pegasus_assistant"
     model: str = "gemini-2.5-flash"
-    instruction: str = """You are Pegasus, an AI assistant specialized in conversational analysis and intelligent responses.
-
-Key capabilities:
-- Analyze and respond to user queries with context awareness
-- Maintain conversation history and context across sessions
-- Provide helpful and accurate information
-- Support audio transcript analysis and improvement
-- Integrate with knowledge base for contextual responses
-
-Guidelines:
-- Be conversational and helpful
-- Maintain context from previous messages in the session
-- Provide accurate and relevant responses
-- When uncertain, acknowledge limitations and suggest alternatives
-"""
+    instruction: str = None  # Will be set dynamically from system_instructions
     timeout: float = 60.0
     temperature: float = 0.7
     max_tokens: int = 2048
+    strategy: str = "conversational_balanced"
+    response_style: str = "professional"
     
 
 
@@ -54,6 +45,12 @@ class PegasusADKAgent:
     
     def __init__(self, config: PegasusAgentConfig):
         self.config = config
+        # Set instruction from shared system instructions if not provided
+        if not self.config.instruction:
+            self.config.instruction = get_complete_system_instructions(
+                strategy=self.config.strategy,
+                response_style=self.config.response_style
+            )
         self._agent = None
         self._setup_agent()
     
@@ -195,15 +192,29 @@ class VertexADKClient(BaseLLMClient):
             raise RuntimeError(f"ADK runner initialization failed: {e}")
     
     async def _get_or_create_session(self) -> str:
-        """Get the current session or create a new one using ADK session service."""
-        if self._current_session_id:
-            # Verify session still exists
-            try:
-                # Session validation via ADK
-                return self._current_session_id
-            except Exception as e:
-                LOGGER.warning(f"Current session {self._current_session_id} is invalid: {e}")
-                self._current_session_id = None
+        """Get the current session or create a new one using ADK session service and database."""
+        # First check database for existing active session
+        try:
+            async for db_session in get_db():
+                session_repo = UserSessionRepository(db_session)
+                user_session = await session_repo.get_active_session(self.user_id)
+                
+                if user_session and user_session.session_id:
+                    # Verify the session is still valid in ADK
+                    try:
+                        # TODO: Add session validation with ADK if needed
+                        self._current_session_id = user_session.session_id
+                        LOGGER.info(f"Reusing existing session {self._current_session_id} for user {self.user_id}")
+                        return self._current_session_id
+                    except Exception as e:
+                        LOGGER.warning(f"Existing session {user_session.session_id} is invalid: {e}")
+                        # Deactivate invalid session
+                        await session_repo.deactivate_session(user_session.session_id)
+                
+                # No valid session found, create new one
+                break
+        except Exception as e:
+            LOGGER.warning(f"Error checking database for existing session: {e}")
         
         # Create new session using ADK session service
         try:
@@ -214,6 +225,17 @@ class VertexADKClient(BaseLLMClient):
             )
             self._current_session_id = session.id
             LOGGER.info(f"Created new ADK session: {self._current_session_id}")
+            
+            # Store in database
+            try:
+                async for db_session in get_db():
+                    session_repo = UserSessionRepository(db_session)
+                    await session_repo.create_session(self.user_id, self._current_session_id)
+                    LOGGER.info(f"Stored session {self._current_session_id} in database for user {self.user_id}")
+                    break
+            except Exception as e:
+                LOGGER.error(f"Failed to store session in database: {e}")
+            
             return self._current_session_id
         except Exception as e:
             LOGGER.error(f"Failed to create ADK session: {e}")

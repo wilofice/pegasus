@@ -1,0 +1,14 @@
+1) A) Improve the handling of prompts across sessions by reusing system instructions defined in "backend/services/intelligent_prompt_builder.py" within "backend/services/llm/vertex_adk_client.py". Ensure that the existing logic in "vertex_adk_client.py" remains unchanged. Avoid adding system instructions to the prompt in "intelligent_prompt_builder.py".
+
+B) Implement a mapping of user IDs to sessions in a dedicated table to prevent the creation of new sessions for each interaction.
+
+2) Enhance the "Build transcript section with error handling" in "backend/services/intelligent_prompt_builder.py". Since we are managing chats within the same session, avoid sending the last recent transcripts repeatedly to reduce API token usage. Create a table to track transcripts that have not yet been sent in the current session, utilizing the session ID from the "get_or_create_session" method in "vertex_adk_client.py".
+
+Additionally, establish a method to communicate the active user session ID to the prompt management methods in "intelligent_prompt_builder.py". Use the database for this purpose. The user ID can be found in "Settings" in "backend/core/config.py".
+
+The new table should have three columns: user_id, session_id, and is_alive. Set is_alive to false for previous sessions when a new session ID is created for a user.
+
+If the current tasks need more refinement or need adjustments in your point of view, please do so and act on it. 
+
+
+

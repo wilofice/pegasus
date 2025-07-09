@@ -188,7 +188,21 @@ class ChatOrchestratorV2:
             # Don't fail the request due to session coordination issues
 
     async def _generate_response(self, message: str, aggregated_context: AggregatedContext, plugin_results: Dict[str, Any], config: ChatConfig, context: ConversationContext, db: async_session, is_first_request: bool = False) -> str:
-        prompt = await self._build_prompt(message, aggregated_context, plugin_results, config, context, db, is_first_request)
+        # Get session ID from context or LLM client
+        session_id_for_prompt = context.session_id
+        user_id_for_prompt = context.user_id
+        
+        # Try to get session ID from LLM client if available
+        try:
+            llm_client = get_llm_client()
+            if hasattr(llm_client, 'get_current_session_id'):
+                llm_session_id = llm_client.get_current_session_id()
+                if llm_session_id:
+                    session_id_for_prompt = llm_session_id
+        except Exception:
+            pass
+        
+        prompt = await self._build_prompt(message, aggregated_context, plugin_results, config, context, db, is_first_request, session_id_for_prompt, user_id_for_prompt)
         
         if config.use_local_llm and self.ollama_service:
             return await self.ollama_service.generate_text(prompt, max_tokens=config.max_tokens, temperature=config.temperature)
@@ -196,19 +210,21 @@ class ChatOrchestratorV2:
             llm_client = get_llm_client()
             return await llm_client.generate(prompt)
 
-    async def _build_prompt(self, message: str, aggregated_context: AggregatedContext, plugin_results: Dict[str, Any], config: ChatConfig, context: ConversationContext, db: async_session, is_first_request: bool = False) -> str:
+    async def _build_prompt(self, message: str, aggregated_context: AggregatedContext, plugin_results: Dict[str, Any], config: ChatConfig, context: ConversationContext, db: async_session, is_first_request: bool = False, session_id: Optional[str] = None, user_id: Optional[str] = None) -> str:
         prompt_builder = get_intelligent_prompt_builder()
         
         recent_transcripts = await self._get_recent_transcripts(context.user_id, db)
 
-        return prompt_builder.build_intelligent_prompt(
+        return await prompt_builder.build_intelligent_prompt(
             user_message=message,
             aggregated_context=aggregated_context,
             plugin_results=plugin_results,
             config=config,
             conversation_context=context,
             recent_transcripts=recent_transcripts,
-            is_first_request=is_first_request
+            is_first_request=is_first_request,
+            session_id=session_id,
+            user_id=user_id
         )
 
     async def _get_recent_transcripts(self, user_id: str, db: async_session) -> List[str]:
