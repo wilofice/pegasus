@@ -39,12 +39,18 @@ class IntelligentPromptBuilder:
                                 plugin_results: Dict[str, Any],
                                 config: ChatConfig,
                                 conversation_context: ConversationContext,
-                                recent_transcripts: List[str]) -> str:
+                                recent_transcripts: List[str],
+                                is_first_request: bool = False) -> str:
         """
         Build an intelligent, comprehensive prompt that maximizes context utilization.
+        
+        Args:
+            is_first_request: If True, includes all components (system instructions, task instructions, 
+                            quality instructions, response framework). If False, only includes 
+                            dynamic components for session continuation.
         """
         try:
-            logger.debug(f"Starting intelligent prompt building for message: {user_message[:50]}...")
+            logger.debug(f"Starting {'session-initial' if is_first_request else 'session-continuation'} prompt building for message: {user_message[:50]}...")
             
             # Determine prompt strategy with error handling
             try:
@@ -56,14 +62,18 @@ class IntelligentPromptBuilder:
             
             prompt_components = []
             
-            # Build system instructions with error handling
-            try:
-                system_prompt = self._build_system_instructions(config, prompt_strategy)
-                prompt_components.append(system_prompt)
-                logger.debug("Added system instructions")
-            except Exception as e:
-                logger.error(f"Error building system instructions: {e}", exc_info=True)
-                prompt_components.append("You are a helpful AI assistant.")
+            # SESSION-AWARE LOGIC: Only include static components on first request
+            if is_first_request:
+                # Build system instructions with error handling
+                try:
+                    system_prompt = self._build_system_instructions(config, prompt_strategy)
+                    prompt_components.append(system_prompt)
+                    logger.debug("Added system instructions (first request)")
+                except Exception as e:
+                    logger.error(f"Error building system instructions: {e}", exc_info=True)
+                    prompt_components.append("You are a helpful AI assistant.")
+            else:
+                logger.debug("Skipping system instructions (continuing session)")
 
             # Build transcript section with error handling
             if recent_transcripts:
@@ -103,36 +113,43 @@ class IntelligentPromptBuilder:
                 except Exception as e:
                     logger.error(f"Error building conversation section: {e}", exc_info=True)
             
-            # Build task instructions with error handling
+            # SESSION-AWARE: Build task instructions (first request only or current user question)
             try:
-                task_instructions = self._build_task_instructions(user_message, aggregated_context, config)
+                task_instructions = self._build_task_instructions(user_message, aggregated_context, config, is_first_request)
                 prompt_components.append(task_instructions)
-                logger.debug("Added task instructions")
+                logger.debug(f"Added task instructions ({'full' if is_first_request else 'user question only'})")
             except Exception as e:
                 logger.error(f"Error building task instructions: {e}", exc_info=True)
                 prompt_components.append(f"=== CURRENT TASK ===\nUser Question: {user_message}")
             
-            # Build response framework with error handling
-            try:
-                response_framework = self._build_response_framework(config, aggregated_context)
-                prompt_components.append(response_framework)
-                logger.debug("Added response framework")
-            except Exception as e:
-                logger.error(f"Error building response framework: {e}", exc_info=True)
+            # SESSION-AWARE: Build response framework (first request only)
+            if is_first_request:
+                try:
+                    response_framework = self._build_response_framework(config, aggregated_context)
+                    prompt_components.append(response_framework)
+                    logger.debug("Added response framework (first request)")
+                except Exception as e:
+                    logger.error(f"Error building response framework: {e}", exc_info=True)
+            else:
+                logger.debug("Skipping response framework (continuing session)")
             
-            # Build quality instructions with error handling
-            try:
-                quality_instructions = self._build_quality_instructions(config)
-                prompt_components.append(quality_instructions)
-                logger.debug("Added quality instructions")
-            except Exception as e:
-                logger.error(f"Error building quality instructions: {e}", exc_info=True)
+            # SESSION-AWARE: Build quality instructions (first request only)
+            if is_first_request:
+                try:
+                    quality_instructions = self._build_quality_instructions(config)
+                    prompt_components.append(quality_instructions)
+                    logger.debug("Added quality instructions (first request)")
+                except Exception as e:
+                    logger.error(f"Error building quality instructions: {e}", exc_info=True)
+            else:
+                logger.debug("Skipping quality instructions (continuing session)")
             
             # Join all components, filtering out empty ones
             valid_components = [comp for comp in prompt_components if comp and comp.strip()]
             full_prompt = "\n\n".join(valid_components)
             
-            logger.info(f"Built intelligent prompt with {len(valid_components)} sections, total length: {len(full_prompt)}")
+            session_type = "session-initial" if is_first_request else "session-continuation"
+            logger.info(f"Built {session_type} intelligent prompt with {len(valid_components)} sections, total length: {len(full_prompt)}")
             logger.info("Prompts: \n" + full_prompt)
             return full_prompt
             
@@ -399,34 +416,40 @@ Focus on:
     def _build_task_instructions(self,
                                user_message: str,
                                aggregated_context: AggregatedContext,
-                               config: ChatConfig) -> str:
+                               config: ChatConfig,
+                               is_first_request: bool = False) -> str:
         """Build task-specific instructions."""
-        task_header = "=== CURRENT TASK ==="
-        
-        instructions = [
-            f"User Question/Request: {user_message}",
-            "",
-            "Task Requirements:",
-            "• Analyze ALL provided contextual information thoroughly",
-            "• Synthesize information from multiple sources when relevant",
-            "• Provide accurate, well-reasoned responses based on available context",
-            "• Acknowledge limitations when context is insufficient",
-            "• Maintain coherence with previous conversation when applicable"
-        ]
-        
-        # Add specific instructions based on context availability
-        if aggregated_context.results:
-            total_context = len(aggregated_context.results)
-            instructions.extend([
+        if is_first_request:
+            # Full task instructions for first request
+            task_header = "=== CURRENT TASK ==="
+            
+            instructions = [
+                f"User Question/Request: {user_message}",
                 "",
-                f"Context Utilization Instructions:",
-                f"• You have access to {total_context} relevant sources",
-                "• Prioritize information from higher-confidence sources",
-                "• Cross-reference information when multiple sources are available",
-                "• Identify and resolve any contradictions in the sources"
-            ])
-        
-        return task_header + "\\n" + "\\n".join(instructions)
+                "Task Requirements:",
+                "• Analyze ALL provided contextual information thoroughly",
+                "• Synthesize information from multiple sources when relevant",
+                "• Provide accurate, well-reasoned responses based on available context",
+                "• Acknowledge limitations when context is insufficient",
+                "• Maintain coherence with previous conversation when applicable"
+            ]
+            
+            # Add specific instructions based on context availability
+            if aggregated_context.results:
+                total_context = len(aggregated_context.results)
+                instructions.extend([
+                    "",
+                    f"Context Utilization Instructions:",
+                    f"• You have access to {total_context} relevant sources",
+                    "• Prioritize information from higher-confidence sources",
+                    "• Cross-reference information when multiple sources are available",
+                    "• Identify and resolve any contradictions in the sources"
+                ])
+            
+            return task_header + "\\n" + "\\n".join(instructions)
+        else:
+            # Simplified task for continuing session - just the current user question
+            return f"=== CURRENT USER REQUEST ===\\n{user_message}"
     
     def _build_response_framework(self, config: ChatConfig, aggregated_context: AggregatedContext) -> str:
         """Build response structure framework."""

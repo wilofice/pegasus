@@ -151,7 +151,7 @@ Corrected transcript:"""
     @classmethod
     def validate_llm_provider(cls, v):
         """Validate LLM provider is supported."""
-        valid_providers = ['ollama', 'google_generative_ai', 'vertex_ai', 'openai']
+        valid_providers = ['ollama', 'google_generative_ai', 'vertex_ai', 'vertex_adk', 'openai']
         if v not in valid_providers:
             raise ValueError(f'LLM provider must be one of: {valid_providers}')
         return v

@@ -1,0 +1,23 @@
+Knowing that we are using Pegasus Vertex ADK client, 
+We need to carefully implement an important change. 
+In file, 
+backend/services/intelligent_prompt_builder.py, we are using at each user request
+“ 
+def build_intelligent_prompt(self,
+                                user_message: str,
+                                aggregated_context: AggregatedContext,
+                                plugin_results: Dict[str, Any],
+                                config: ChatConfig,
+                                conversation_context: ConversationContext,
+                                recent_transcripts: List[str]) -> str:
+“ 
+To generate the final prompt to send to the vertex agent . But it is not an optimal way to do as it is adding the system instructions each time, 
+As well as the task_instructions, the quality_instructions
+And the response_framework
+. 
+The issue is that in ‘backend/services/llm/vertex_adk_client.py’, we are handling the creation of the session and its usage in a way that is transparent to client class in : ‘backend/services/chat_orchestrator_v2.py’ 
+So this component “backend/services/chat_orchestrator_v2.py” depends on “backend/services/intelligent_prompt_builder.py “ and “backend/services/llm/vertex_adk_client.py” to be coherent together to work properly. 
+
+Your task : design an optimal for chat_orchestrator_v2.py to only send the necessary components of the prompt when it should send it; First time it should all the components of the intelligent prompt build but next query should not include the system instructions each time, 
+As well as the task_instructions, the quality_instructions
+And the response_framework,

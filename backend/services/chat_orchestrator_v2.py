@@ -63,11 +63,21 @@ class ChatOrchestratorV2:
                     user_id, settings.conversation_history_lookback_days
                 )
                 
+                # Detect if this is the first request in the session
+                # This can be based on conversation history being empty
+                # or session being newly created in the LLM client
+                is_first_request = len(conversation_history) == 0
+                
+                logger.debug(f"Session state detection: session_id={session_id}, history_count={len(conversation_history)}, is_first_request={is_first_request}")
+                
                 context = ConversationContext(
                     session_id=session_id,
                     user_id=user_id,
                     conversation_history=[h.to_dict() for h in conversation_history]
                 )
+
+                # Coordinate session state with LLM client
+                await self._coordinate_llm_session(session_id, user_id, is_first_request)
 
                 # Retrieve context
                 aggregated_context = await self._retrieve_context(message, config, user_id, context, **kwargs)
@@ -81,7 +91,7 @@ class ChatOrchestratorV2:
                 # Generate response
                 llm_start = datetime.now()
                 response_text = await self._generate_response(
-                    message, aggregated_context, plugin_results, config, context, db
+                    message, aggregated_context, plugin_results, config, context, db, is_first_request
                 )
                 llm_time = (datetime.now() - llm_start).total_seconds() * 1000
                 
@@ -154,8 +164,31 @@ class ChatOrchestratorV2:
             return {}
         return await self.plugin_manager.process_message(message, aggregated_context, context.metadata)
 
-    async def _generate_response(self, message: str, aggregated_context: AggregatedContext, plugin_results: Dict[str, Any], config: ChatConfig, context: ConversationContext, db: async_session) -> str:
-        prompt = await self._build_prompt(message, aggregated_context, plugin_results, config, context, db)
+    async def _coordinate_llm_session(self, session_id: str, user_id: str, is_first_request: bool):
+        """Coordinate session state with the LLM client if it supports session management."""
+        try:
+            llm_client = get_llm_client()
+            
+            # Check if the LLM client supports session management (like VertexADKClient)
+            if hasattr(llm_client, 'get_current_session_id'):
+                current_session = llm_client.get_current_session_id()
+                logger.debug(f"LLM client current session: {current_session}")
+                
+                # If this is a first request but LLM client has a different session,
+                # we might want to reset or create a new session
+                if is_first_request and current_session:
+                    logger.info(f"First request detected but LLM client has session {current_session}, resetting")
+                    if hasattr(llm_client, 'reset_session'):
+                        await llm_client.reset_session()
+                
+            # Additional coordination logic can be added here for other session-aware clients
+            
+        except Exception as e:
+            logger.warning(f"Error coordinating LLM session: {e}")
+            # Don't fail the request due to session coordination issues
+
+    async def _generate_response(self, message: str, aggregated_context: AggregatedContext, plugin_results: Dict[str, Any], config: ChatConfig, context: ConversationContext, db: async_session, is_first_request: bool = False) -> str:
+        prompt = await self._build_prompt(message, aggregated_context, plugin_results, config, context, db, is_first_request)
         
         if config.use_local_llm and self.ollama_service:
             return await self.ollama_service.generate_text(prompt, max_tokens=config.max_tokens, temperature=config.temperature)
@@ -163,7 +196,7 @@ class ChatOrchestratorV2:
             llm_client = get_llm_client()
             return await llm_client.generate(prompt)
 
-    async def _build_prompt(self, message: str, aggregated_context: AggregatedContext, plugin_results: Dict[str, Any], config: ChatConfig, context: ConversationContext, db: async_session) -> str:
+    async def _build_prompt(self, message: str, aggregated_context: AggregatedContext, plugin_results: Dict[str, Any], config: ChatConfig, context: ConversationContext, db: async_session, is_first_request: bool = False) -> str:
         prompt_builder = get_intelligent_prompt_builder()
         
         recent_transcripts = await self._get_recent_transcripts(context.user_id, db)
@@ -174,7 +207,8 @@ class ChatOrchestratorV2:
             plugin_results=plugin_results,
             config=config,
             conversation_context=context,
-            recent_transcripts=recent_transcripts
+            recent_transcripts=recent_transcripts,
+            is_first_request=is_first_request
         )
 
     async def _get_recent_transcripts(self, user_id: str, db: async_session) -> List[str]:
