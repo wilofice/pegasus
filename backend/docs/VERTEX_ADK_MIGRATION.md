@@ -1,4 +1,9 @@
 # Vertex AI Agent Development Kit (ADK) Migration Guide
+https://google.github.io/adk-docs/agents/models/#using-google-gemini-models
+
+export GOOGLE_GENAI_USE_VERTEXAI=1
+export GOOGLE_CLOUD_PROJECT="gen-lang-client-0319023828"
+export GOOGLE_CLOUD_LOCATION="europe-west4" # e.g., us-central1
 
 ## Overview
 

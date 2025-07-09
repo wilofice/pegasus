@@ -15,7 +15,6 @@ from google import adk
 from google.adk.sessions import VertexAiSessionService
 import vertexai
 from vertexai import agent_engines
-from vertexai.generative_models import Content, Part
 
 # Local imports
 from .base import BaseLLMClient
@@ -47,6 +46,7 @@ Guidelines:
     timeout: float = 60.0
     temperature: float = 0.7
     max_tokens: int = 2048
+    
 
 
 class PegasusADKAgent:
@@ -238,17 +238,22 @@ class VertexADKClient(BaseLLMClient):
                 
                 # Fallback to runner approach with better error handling
                 # Create the simplest possible content structure
-                user_content = Content(
-                    role='user', 
-                    parts=[Part.from_text(str(content))]
+                from google.genai import types
+                from google.adk.agents import RunConfig
+                user_content = types.Content(
+                    role='user',
+                    parts=[types.Part(text=content)]
                 )
-                
+                events = []
+
+                configRun = RunConfig()
                 # Run the agent with session context
-                events = self._runner.run(
+                async for event in self._runner.run_async(
                     user_id=self.user_id,
                     session_id=session_id,
-                    new_message=user_content
-                )
+                    new_message=user_content,
+                ):
+                    events.append(event)
                 
                 # Extract response with improved handling
                 final_response = None
