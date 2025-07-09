@@ -17,7 +17,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from core.database import engine
 from models.base import Base
 # Import all models to register them with Base.metadata
-from models import AudioFile, ProcessingJob, JobStatusHistory, ConversationHistory
+from models import AudioFile, ProcessingJob, JobStatusHistory, ConversationHistory, JobStatus, session_transcript, user_session
 from sqlalchemy import text
 
 
@@ -35,7 +35,7 @@ async def init_db(drop_first=False, mark_migrations=False):
         
         # Verify tables were created
         tables_created = []
-        expected_tables = ['audio_files', 'processing_jobs', 'job_status_history', 'conversation_history']
+        expected_tables = ['audio_files', 'processing_jobs', 'job_status_history', 'conversation_history', 'session_transcripts', 'user_sessions']
         
         for table_name in expected_tables:
             try:
