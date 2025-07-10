@@ -3,6 +3,8 @@ import logging
 from typing import Optional, Dict, Any
 import httpx
 import json
+import re
+
 
 from core.config import settings
 
@@ -92,7 +94,7 @@ class OllamaService:
                 "model": self.model,
                 "prompt": prompt,
                 "stream": False,
-                "think": False,
+                "think": True,
                 "options": {
                     "temperature": 0.0,
                     "top_p": 0.5,
@@ -114,9 +116,22 @@ class OllamaService:
                 if response.status_code == 200:
                     result = response.json()
                     logger.info(f"Ollama completion successful: Result: {result}...")
+                    response_text = result.get("response", "")
+
+                    # Regular expression to extract both parts
+                    match = re.match(r"<think>\s*(.*?)\s*<think>\s*(.*)", response_text)
+
+                    if match:
+                        first_part = match.group(1)
+                        second_part = match.group(2)
+                        print("First part:", first_part)
+                        print("Second part:", second_part)
+                    else:
+                        print("Pattern not found.")
+
                     return {
                         "success": True,
-                        "response": result.get("response", ""),
+                        "response": second_part.strip(),
                         "model": result.get("model"),
                         "created_at": result.get("created_at"),
                         "done": result.get("done", True)
@@ -245,6 +260,10 @@ Keep the summary clear, concise, and informative."""
         
         logger.info("Generating transcript summary with Ollama")
         result = await self.generate_completion(user_prompt, system_prompt)
+        
+        response = result.get("response", "")
+
+
         
         if result["success"]:
             return {
