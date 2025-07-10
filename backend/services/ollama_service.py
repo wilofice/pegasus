@@ -92,7 +92,7 @@ class OllamaService:
                 "model": self.model,
                 "prompt": prompt,
                 "stream": False,
-                "think": True,
+                "think": False,
                 "options": {
                     "temperature": 0.0,
                     "top_p": 0.5,
