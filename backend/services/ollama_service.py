@@ -92,6 +92,7 @@ class OllamaService:
                 "model": self.model,
                 "prompt": prompt,
                 "stream": False,
+                "think": True,
                 "options": {
                     "temperature": 0.0,
                     "top_p": 0.5,
@@ -112,6 +113,7 @@ class OllamaService:
                 
                 if response.status_code == 200:
                     result = response.json()
+                    logger.info(f"Ollama completion successful: Result: {result}...")
                     return {
                         "success": True,
                         "response": result.get("response", ""),

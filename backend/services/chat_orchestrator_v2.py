@@ -233,7 +233,7 @@ class ChatOrchestratorV2:
         recent_audio_files = await audio_repo.list_with_filters(
             user_id=user_id,
             status="completed",
-            limit=10, # Limit to 10 most recent
+            limit=20, # Limit to 10 most recent
             offset=0,
             from_date=since
         )
