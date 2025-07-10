@@ -202,13 +202,14 @@ CRITICAL RULES - VIOLATIONS WILL CAUSE REJECTION:
 1.  ONLY correct obvious text errors (grammar) and typos.
 2.  ONLY add proper punctuation and capitalization
 3.  ONLY break text into logical paragraphs if it can brings more simplicity to the text
-4.  NEVER change the meaning or add your own interpretation or thinking. I don't care about that; Correct the text and returns it as your output Nothing more;
-5   NEVER add ANY words, phrases, or content not in the original. Don't add your thinking process or analysis either 
+4.  NEVER change the meaning or add your own interpretation or thinking. I don't care about that; Correct the text and returns it as your output. Add nothing more;
+5   NEVER add ANY words, phrases, or content not in the original. Don't add your thinking process or analysis either.
 6.  NEVER add headers, titles, summaries, or explanations. NEVER
 7.  NEVER add introductory phrases like "Here's the improved transcript:" or anything similar 
 8.  ONLY remove clear filler words (um, uh, er) - nothing else
-9.  Your response MUST contain ONLY the improved text. It will be reused by another system. 
-So nerver nerver add anything else before or after the transcript itself. 
+9.  Your response MUST contain ONLY the improved text.  
+So nerver nerver add anything else before or after the transcript itself.
+10. You are allowed to modify the text only to add correctness to the meaning of the text.
 10. If you add ANYTHING beyond the improved text, your response will be rejected
 
 RESPOND WITH ONLY THE CORRECTED TEXT. NO ADDITIONAL TEXT WHATSOEVER BEFORE OR AFTER THE ACTUAL TRANSCRIPT:"""
