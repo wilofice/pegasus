@@ -4,8 +4,7 @@ from typing import Optional, Dict, Any
 import httpx
 import json
 import re
-
-
+from datetime import datetime
 from core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -128,7 +127,19 @@ class OllamaService:
                         print("First part:", first_part)
                         print("Second part:", second_part)
                     else:
-                        print("Pattern not found.")
+                        second_part = response_text.strip()
+                        first_part = response.get("thinking", "").strip()
+                        print("First part (thinking):", first_part)
+                        print("Second part (response):", second_part)
+
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+                    # Create filename
+                    filename = f"text_analysis_{timestamp}.txt"
+
+                    # Write to file
+                    with open(filename, "w") as f:
+                        f.write(first_part)
 
                     return {
                         "success": True,
