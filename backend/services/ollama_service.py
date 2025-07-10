@@ -135,7 +135,7 @@ class OllamaService:
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
                     # Create filename
-                    filename = f"text_analysis_{timestamp}.txt"
+                    filename = f"analysis/text_analysis_{timestamp}.txt"
 
                     # Write to file
                     with open(filename, "w") as f:
