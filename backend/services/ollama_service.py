@@ -120,7 +120,8 @@ class OllamaService:
 
                     # Regular expression to extract both parts
                     match = re.match(r"<think>\s*(.*?)\s*<think>\s*(.*)", response_text)
-
+                    first_part = ""
+                    second_part = ""
                     if match:
                         first_part = match.group(1)
                         second_part = match.group(2)
