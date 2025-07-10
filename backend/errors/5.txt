@@ -1,0 +1,96 @@
+INFO:services.retrieval.chromadb_retriever:ChromaDB retriever initialized with collection: audio_transcripts
+INFO:services.neo4j_client:Successfully connected to Neo4j at bolt://localhost:7687
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT person_name IF NOT EXISTS FOR (e:Person) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT person_name FOR (e:Person) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT person_name IF NOT EXISTS FOR (p:Person) REQUIRE p.name IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT person_name IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT location_name IF NOT EXISTS FOR (e:Location) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT location_name FOR (e:Location) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT location_name IF NOT EXISTS FOR (l:Location) REQUIRE l.name IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT location_name IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT organization_name IF NOT EXISTS FOR (e:Organization) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT organization_name FOR (e:Organization) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT organization_name IF NOT EXISTS FOR (o:Organization) REQUIRE o.name IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT organization_name IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT topic_name IF NOT EXISTS FOR (e:Topic) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT topic_name FOR (e:Topic) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT topic_name IF NOT EXISTS FOR (t:Topic) REQUIRE t.name IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT topic_name IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT project_name IF NOT EXISTS FOR (e:Project) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT project_name FOR (e:Project) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT project_name IF NOT EXISTS FOR (p:Project) REQUIRE p.name IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT project_name IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE (e.id) IS UNIQUE` has no effect.} {description: `CONSTRAINT entity_id FOR (e:Entity) REQUIRE (e.id) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT entity_id IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT entity_normalized_name IF NOT EXISTS FOR (e:Entity) REQUIRE (e.normalized_name) IS UNIQUE` has no effect.} {description: `CONSTRAINT entity_normalized_name FOR (e:Entity) REQUIRE (e.normalized_name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT entity_normalized_name IF NOT EXISTS FOR (e:Entity) REQUIRE e.normalized_name IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT entity_normalized_name IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT chunk_id IF NOT EXISTS FOR (e:AudioChunk) REQUIRE (e.id) IS UNIQUE` has no effect.} {description: `CONSTRAINT chunk_id FOR (e:AudioChunk) REQUIRE (e.id) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT chunk_id IF NOT EXISTS FOR (c:AudioChunk) REQUIRE c.id IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT chunk_id IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT user_id IF NOT EXISTS FOR (e:User) REQUIRE (e.id) IS UNIQUE` has no effect.} {description: `CONSTRAINT user_id FOR (e:User) REQUIRE (e.id) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE'
+INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT user_id IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX audio_chunk_text IF NOT EXISTS FOR (e:AudioChunk) ON (e.text)` has no effect.} {description: `RANGE INDEX audio_chunk_text FOR (e:AudioChunk) ON (e.text)` already exists.} {position: None} for query: 'CREATE INDEX audio_chunk_text IF NOT EXISTS FOR (c:AudioChunk) ON (c.text)'
+INFO:services.neo4j_client:Created index: CREATE INDEX audio_chunk_text IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX entity_mentions IF NOT EXISTS FOR (e:Entity) ON (e.mention_count)` has no effect.} {description: `RANGE INDEX entity_mentions FOR (e:Entity) ON (e.mention_count)` already exists.} {position: None} for query: 'CREATE INDEX entity_mentions IF NOT EXISTS FOR (e:Entity) ON (e.mention_count)'
+INFO:services.neo4j_client:Created index: CREATE INDEX entity_mentions IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX chunk_timestamp IF NOT EXISTS FOR (e:AudioChunk) ON (e.timestamp)` has no effect.} {description: `RANGE INDEX chunk_timestamp FOR (e:AudioChunk) ON (e.timestamp)` already exists.} {position: None} for query: 'CREATE INDEX chunk_timestamp IF NOT EXISTS FOR (c:AudioChunk) ON (c.timestamp)'
+INFO:services.neo4j_client:Created index: CREATE INDEX chunk_timestamp IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX chunk_date IF NOT EXISTS FOR (e:AudioChunk) ON (e.date)` has no effect.} {description: `RANGE INDEX chunk_date FOR (e:AudioChunk) ON (e.date)` already exists.} {position: None} for query: 'CREATE INDEX chunk_date IF NOT EXISTS FOR (c:AudioChunk) ON (c.date)'
+INFO:services.neo4j_client:Created index: CREATE INDEX chunk_date IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX chunk_user_id IF NOT EXISTS FOR (e:AudioChunk) ON (e.user_id)` has no effect.} {description: `RANGE INDEX chunk_user_id FOR (e:AudioChunk) ON (e.user_id)` already exists.} {position: None} for query: 'CREATE INDEX chunk_user_id IF NOT EXISTS FOR (c:AudioChunk) ON (c.user_id)'
+INFO:services.neo4j_client:Created index: CREATE INDEX chunk_user_id IF NOT EXISTS
+INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX entity_user_id IF NOT EXISTS FOR (e:Entity) ON (e.user_id)` has no effect.} {description: `RANGE INDEX entity_user_id FOR (e:Entity) ON (e.user_id)` already exists.} {position: None} for query: 'CREATE INDEX entity_user_id IF NOT EXISTS FOR (e:Entity) ON (e.user_id)'
+INFO:services.neo4j_client:Created index: CREATE INDEX entity_user_id IF NOT EXISTS
+INFO:services.retrieval.neo4j_retriever:Neo4j retriever initialized successfully
+Batches: 100%|███████████████████████████████████| 1/1 [00:00<00:00, 79.59it/s]
+INFO:httpx:HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/53e9d996-e07f-444e-b166-db3de7ef593b/query "HTTP/1.1 200 OK"
+INFO:services.chromadb_manager:Found 0 results for query in audio_transcripts
+INFO:services.retrieval.chromadb_retriever:ChromaDB search returned 0 results for query: 'Pegasus, review my previous statement...'
+ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
+"            AND c.user_id = $user_id"
+             ^}
+ERROR:services.neo4j_client:Query:
+            MATCH (e)
+            WHERE e.name =~ $entity_pattern OR e.normalized_name =~ $normalized_pattern
+            MATCH (c:AudioChunk)-[:MENTIONS]->(e)
+            AND c.user_id = $user_id
+            RETURN DISTINCT c, e,
+                   count{(c)-[:MENTIONS]->()} as entity_count,
+                   e.mention_count as entity_frequency
+            ORDER BY entity_frequency DESC, entity_count DESC
+            LIMIT $limit
+
+ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Pegasus, review my previous statement.*', 'normalized_pattern': '.*pegasus, review my previous statement.*', 'limit': 6, 'user_id': 'flutter_user'}
+ERROR:services.retrieval.neo4j_retriever:Failed to find entity mentions for Pegasus, review my previous statement: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
+"            AND c.user_id = $user_id"
+             ^}
+ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: The property existence syntax `... exists(variable.property)` is no longer supported. Please use `variable.property IS NOT NULL` instead. (line 5, column 55 (offset: 231))
+"            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)"
+                                                       ^}
+ERROR:services.neo4j_client:Query:
+            MATCH (start)
+            WHERE start.name =~ $entity_pattern OR start.normalized_name =~ $normalized_pattern
+            MATCH path = (start)-[r*1..2]-(connected)
+            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)
+            WITH connected, start, path, length(path) as distance
+            RETURN DISTINCT connected,
+                   labels(connected) as types,
+                   distance,
+                   type(relationships(path)[0]) as first_relationship,
+                   count{(connected)-[]->()} + count{(connected)<-[]->()} as connection_count
+            ORDER BY distance ASC, connection_count DESC
+            LIMIT $limit
+
+ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Pegasus, review my previous statement.*', 'normalized_pattern': '.*pegasus, review my previous statement.*', 'limit': 6, 'user_id': 'flutter_user'}
+ERROR:services.retrieval.neo4j_retriever:Failed to find connections for Pegasus, review my previous statement: {code: Neo.ClientError.Statement.SyntaxError} {message: The property existence syntax `... exists(variable.property)` is no longer supported. Please use `variable.property IS NOT NULL` instead. (line 5, column 55 (offset: 231))
+"            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)"
+                                                       ^}
+INFO:services.retrieval.neo4j_retriever:Neo4j search returned 0 results for query: 'Pegasus, review my previous statement...'
+ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
+"            AND c.user_id = $user_id"
+             ^}
+ERROR:services.neo4j_client:Query:
+            MATCH (e)
+            WHERE e.name =~ $entity_pattern OR e.normalized_name =~ $normalized_pattern
+            MATCH (c:AudioChunk)-[:MENTIONS]->(e)
+            AND c.user_id = $user_id
+            RETURN DISTINCT c, e,
+                   count{(c)-[:MENTIONS]->()} as entity_count,
+                   e.mention_count as entity_frequency
+            ORDER BY entity_frequency DESC, entity_count DESC
+            LIMIT $limit
+
+ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Pegasus, review my previous statement.*', 'normalized_pattern': '.*pegasus, review my previous statement.*', 'limit': 5, 'user_id': 'flutter_user'}
+ERROR:services.retrieval.neo4j_retriever:Failed to find entity mentions for Pegasus, review my previous statement: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
+"            AND c.user_id = $user_id"
+             ^}
+INFO:services.context_aggregator_v2:Context aggregation completed: 0 results in 2315.7ms

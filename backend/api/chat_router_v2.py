@@ -7,7 +7,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Header, status, Query
 from pydantic import BaseModel, Field
-
+from core.config import settings
 from services.chat_orchestrator_factory import get_default_chat_orchestrator
 from services.chat_orchestrator_v2 import ChatOrchestratorV2
 from services.chat_types import ChatConfig, ConversationMode, ResponseStyle, ChatResponse
@@ -112,6 +112,7 @@ async def chat_v2(
     - Session management and conversation history
     """
     try:
+        request.user_id = settings.vertex_ai_user_id
         orchestrator = await get_orchestrator()
         
         # Build configuration from request

@@ -76,17 +76,17 @@ class IntelligentPromptBuilder:
             prompt_components = []
             
             # SESSION-AWARE LOGIC: Only include static components on first request
-            if is_first_request:
-                # Build system instructions with error handling
-                try:
-                    system_prompt = self._build_system_instructions(config, prompt_strategy)
-                    prompt_components.append(system_prompt)
-                    logger.debug("Added system instructions (first request)")
-                except Exception as e:
-                    logger.error(f"Error building system instructions: {e}", exc_info=True)
-                    prompt_components.append("You are a helpful AI assistant.")
-            else:
-                logger.debug("Skipping system instructions (continuing session)")
+            # if is_first_request:
+            #     # Build system instructions with error handling
+            #     try:
+            #         system_prompt = self._build_system_instructions(config, prompt_strategy)
+            #         prompt_components.append(system_prompt)
+            #         logger.debug("Added system instructions (first request)")
+            #     except Exception as e:
+            #         logger.error(f"Error building system instructions: {e}", exc_info=True)
+            #         prompt_components.append("You are a helpful AI assistant.")
+            # else:
+            #     logger.debug("Skipping system instructions (continuing session)")
 
             # Build transcript section with error handling
             if recent_transcripts:
@@ -150,15 +150,15 @@ class IntelligentPromptBuilder:
                 logger.debug("Skipping response framework (continuing session)")
             
             # SESSION-AWARE: Build quality instructions (first request only)
-            if is_first_request:
-                try:
-                    quality_instructions = self._build_quality_instructions(config)
-                    prompt_components.append(quality_instructions)
-                    logger.debug("Added quality instructions (first request)")
-                except Exception as e:
-                    logger.error(f"Error building quality instructions: {e}", exc_info=True)
-            else:
-                logger.debug("Skipping quality instructions (continuing session)")
+            # if is_first_request:
+            #     try:
+            #         quality_instructions = self._build_quality_instructions(config)
+            #         prompt_components.append(quality_instructions)
+            #         logger.debug("Added quality instructions (first request)")
+            #     except Exception as e:
+            #         logger.error(f"Error building quality instructions: {e}", exc_info=True)
+            # else:
+            #     logger.debug("Skipping quality instructions (continuing session)")
             
             # Join all components, filtering out empty ones
             valid_components = [comp for comp in prompt_components if comp and comp.strip()]

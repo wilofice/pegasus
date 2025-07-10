@@ -29,7 +29,7 @@ LOGGER = logging.getLogger(__name__)
 @dataclass
 class PegasusAgentConfig:
     """Configuration for the Pegasus ADK agent."""
-    name: str = "pegasus_assistant"
+    name: str = "Pegasus"
     model: str = "gemini-2.5-flash"
     instruction: str = None  # Will be set dynamically from system_instructions
     timeout: float = 60.0
@@ -50,9 +50,32 @@ class PegasusADKAgent:
             self.config.instruction = get_complete_system_instructions(
                 strategy=self.config.strategy,
                 response_style=self.config.response_style
-            )
+            ) + self._build_quality_instructions()
+
         self._agent = None
         self._setup_agent()
+
+    def _build_quality_instructions(self) -> str:
+        """Build quality assurance instructions."""
+        quality_header = "=== QUALITY REQUIREMENTS ==="
+
+        quality_requirements = [
+            "Ensure your response:",
+            "✓ CRITICAL: You MUST NOT hallucinate or make up any information. Only use facts from the provided context.",
+            "✓ CRITICAL: If the context does not contain enough information to answer the question, explicitly state: 'I don't have enough information in the provided context to answer this question.'",
+            "✓ CRITICAL: Do not infer, assume, or extrapolate beyond what is explicitly stated in the context.",
+            "✓ CRITICAL: Every statement you make must be directly traceable to the provided context, conversation history, or recent transcripts.",
+            "✓ When uncertain, always express doubt rather than guessing.",
+            "✓ Directly addresses the user's question using ONLY the available information",
+            "✓ Makes effective use of provided context without adding external knowledge",
+            "✓ Maintains strict factual accuracy based on available data",
+            "✓ Is coherent and well-structured",
+            "✓ Matches the requested style and tone",
+            "✓ Provides appropriate level of detail from available information",
+            "✓ Clearly distinguishes between what you know from context and what you cannot determine"
+        ]
+
+        return "\n" + quality_header + "\n" + "\n".join(quality_requirements)
     
     def _setup_agent(self):
         """Setup the ADK agent with Pegasus-specific configuration."""
