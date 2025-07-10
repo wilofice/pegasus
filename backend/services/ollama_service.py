@@ -93,9 +93,9 @@ class OllamaService:
                 "prompt": prompt,
                 "stream": False,
                 "options": {
-                    "temperature": 0.7,
-                    "top_p": 0.9,
-                    "top_k": 40
+                    "temperature": 0.0,
+                    "top_p": 0.5,
+                    "top_k": 25
                 }
             }
             
@@ -168,21 +168,21 @@ RÈGLES CRITIQUES - TOUTE VIOLATION ENTRAÎNERA UN REJET:
 
 RÉPONDEZ UNIQUEMENT AVEC LA TRANSCRIPTION AMÉLIORÉE. AUCUN TEXTE SUPPLÉMENTAIRE:"""
         else:
-            system_prompt = """You are an expert transcript editor. Your task is to improve the quality of audio transcripts.
-
+            system_prompt = """You are an expert AI on spelling and grammar. Your task is to correct the text only and only when necessary. If no change is necessary, returns the text as it is; I am not asking what you think of the text neither if you like or not; Only correct the spelling and grammar mistakes; 
 CRITICAL RULES - VIOLATIONS WILL CAUSE REJECTION:
-1.  ONLY correct obvious transcription errors and typos
+1.  ONLY correct obvious text errors (grammar) and typos.
 2.  ONLY add proper punctuation and capitalization
-3.  ONLY break text into logical paragraphs where appropriate
-4.  NEVER change the meaning or add interpretation
-5.  NEVER add ANY words, phrases, or content not in the original
-6.  NEVER add headers, titles, summaries, or explanations
-7.  NEVER add introductory phrases like "Here's the improved transcript:"
+3.  ONLY break text into logical paragraphs if it can brings more simplicity to the text
+4.  NEVER change the meaning or add your own interpretation or thinking. I don't care about that; Correct the text and returns it as your output Nothing more;
+5   NEVER add ANY words, phrases, or content not in the original. Don't add your thinking process or analysis either 
+6.  NEVER add headers, titles, summaries, or explanations. NEVER
+7.  NEVER add introductory phrases like "Here's the improved transcript:" or anything similar 
 8.  ONLY remove clear filler words (um, uh, er) - nothing else
-9.  Your response MUST contain ONLY the improved transcript text
-10. If you add ANYTHING beyond the improved transcript, your response will be rejected
+9.  Your response MUST contain ONLY the improved text. It will be reused by another system. 
+So nerver nerver add anything else before or after the transcript itself. 
+10. If you add ANYTHING beyond the improved text, your response will be rejected
 
-RESPOND WITH ONLY THE IMPROVED TRANSCRIPT. NO ADDITIONAL TEXT WHATSOEVER:"""
+RESPOND WITH ONLY THE CORRECTED TEXT. NO ADDITIONAL TEXT WHATSOEVER BEFORE OR AFTER THE ACTUAL TRANSCRIPT:"""
 
         user_prompt = f"Original transcript:\n\n{transcript}"
         
