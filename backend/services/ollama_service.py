@@ -128,7 +128,7 @@ class OllamaService:
                         print("Second part:", second_part)
                     else:
                         second_part = response_text.strip()
-                        first_part = response.get("thinking", "").strip()
+                        first_part = result.get("thinking", "").strip()
                         print("First part (thinking):", first_part)
                         print("Second part (response):", second_part)
 
