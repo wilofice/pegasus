@@ -120,14 +120,14 @@ class IntelligentPromptBuilder:
                     logger.error(f"Error building plugin section: {e}", exc_info=True)
             
             # Build conversation section with error handling
-            if conversation_context and hasattr(conversation_context, 'conversation_history') and conversation_context.conversation_history:
-                try:
-                    history_section = self._build_conversation_section(conversation_context)
-                    if history_section.strip():  # Only add if not empty
-                        prompt_components.append(history_section)
-                        logger.debug(f"Added conversation section with {len(conversation_context.conversation_history)} exchanges")
-                except Exception as e:
-                    logger.error(f"Error building conversation section: {e}", exc_info=True)
+            # if conversation_context and hasattr(conversation_context, 'conversation_history') and conversation_context.conversation_history:
+            #     try:
+            #         history_section = self._build_conversation_section(conversation_context)
+            #         if history_section.strip():  # Only add if not empty
+            #             prompt_components.append(history_section)
+            #             logger.debug(f"Added conversation section with {len(conversation_context.conversation_history)} exchanges")
+            #     except Exception as e:
+            #         logger.error(f"Error building conversation section: {e}", exc_info=True)
             
             # SESSION-AWARE: Build task instructions (first request only or current user question)
             try:
@@ -139,15 +139,15 @@ class IntelligentPromptBuilder:
                 prompt_components.append(f"=== CURRENT TASK ===\nUser Question: {user_message}")
             
             # SESSION-AWARE: Build response framework (first request only)
-            if is_first_request:
-                try:
-                    response_framework = self._build_response_framework(config, aggregated_context)
-                    prompt_components.append(response_framework)
-                    logger.debug("Added response framework (first request)")
-                except Exception as e:
-                    logger.error(f"Error building response framework: {e}", exc_info=True)
-            else:
-                logger.debug("Skipping response framework (continuing session)")
+            # if is_first_request:
+            #     try:
+            #         response_framework = self._build_response_framework(config, aggregated_context)
+            #         prompt_components.append(response_framework)
+            #         logger.debug("Added response framework (first request)")
+            #     except Exception as e:
+            #         logger.error(f"Error building response framework: {e}", exc_info=True)
+            # else:
+            #     logger.debug("Skipping response framework (continuing session)")
             
             # SESSION-AWARE: Build quality instructions (first request only)
             # if is_first_request:
@@ -355,42 +355,32 @@ class IntelligentPromptBuilder:
             return ""  # Return empty string on critical error
     
     def _build_task_instructions(self,
-                               user_message: str,
-                               aggregated_context: AggregatedContext,
-                               config: ChatConfig,
-                               is_first_request: bool = False) -> str:
+                            user_message: str,
+                            aggregated_context: AggregatedContext,
+                            config: ChatConfig,
+                            is_first_request: bool = False) -> str:
         """Build task-specific instructions."""
         if is_first_request:
-            # Full task instructions for first request
             task_header = "=== CURRENT TASK ==="
-            
             instructions = [
-                f"User Question/Request: {user_message}",
-                "",
-                "Task Requirements:",
-                "• Analyze ALL provided contextual information thoroughly",
-                "• Synthesize information from multiple sources when relevant",
-                "• Provide accurate, well-reasoned responses based on available context",
-                "• Acknowledge limitations when context is insufficient",
-                "• Maintain coherence with previous conversation when applicable"
+                f"User Request: {user_message}",
+                "• Analyze the request using provided context only",
+                "• Prioritize explicit user inputs, then recent transcripts/documents"
             ]
             
-            # Add specific instructions based on context availability
             if aggregated_context.results:
                 total_context = len(aggregated_context.results)
                 instructions.extend([
                     "",
-                    f"Context Utilization Instructions:",
-                    f"• You have access to {total_context} relevant sources",
-                    "• Prioritize information from higher-confidence sources",
-                    "• Cross-reference information when multiple sources are available",
-                    "• Identify and resolve any contradictions in the sources"
+                    f"Context Instructions ({total_context} sources):",
+                    "• Use highest-confidence sources first",
+                    "• Cross-reference to resolve conflicts",
+                    "• Explicitly state if context is insufficient"
                 ])
             
-            return task_header + "\\n" + "\\n".join(instructions)
+            return task_header + "\n" + "\n".join(instructions)
         else:
-            # Simplified task for continuing session - just the current user question
-            return f"=== CURRENT USER REQUEST ===\\n{user_message}"
+            return f"=== CURRENT USER REQUEST ===\n{user_message}"
     
     def _build_response_framework(self, config: ChatConfig, aggregated_context: AggregatedContext) -> str:
         """Build response structure framework."""
