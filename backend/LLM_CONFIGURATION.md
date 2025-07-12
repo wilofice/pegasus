@@ -33,7 +33,7 @@ export LLM_PROVIDER=openai
 
 ```bash
 # Ollama base URL (default: http://localhost:11434)
-export OLLAMA_BASE_URL=http://localhost:11435
+export OLLAMA_BASE_URL=http://localhost:11434
 
 # Ollama model to use (default: llama2)
 export OLLAMA_MODEL=llama2
@@ -155,7 +155,7 @@ Create a `.env` file in your backend directory:
 LLM_PROVIDER=ollama
 
 # Ollama configuration
-OLLAMA_BASE_URL=http://localhost:11435
+OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama2
 OLLAMA_TIMEOUT=60
 

@@ -92,7 +92,7 @@ python -m spacy download fr_core_news_sm
 ### Configuration Values
 
 Current configuration shows:
-- `OLLAMA_BASE_URL=http://localhost:11435` 
+- `OLLAMA_BASE_URL=http://localhost:11434` 
 - `OLLAMA_MODEL=llama2`
 
 These were intentionally set by the user and left unchanged.

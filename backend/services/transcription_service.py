@@ -6,6 +6,7 @@ import httpx
 import whisper
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import torch
 
 from core.config import settings
 
@@ -37,6 +38,12 @@ class TranscriptionService:
         Returns:
             Dictionary with transcription results
         """
+        if torch.backends.mps.is_available():
+            device = "mps"
+        else:
+            device = "cpu"
+
+        print(f"Using device for whisper: {device}")
         try:
             # Run Whisper in a thread pool to avoid blocking
             loop = asyncio.get_event_loop()

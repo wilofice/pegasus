@@ -33,6 +33,7 @@ def main():
             '--without-gossip',
             '--without-mingle',
             '--without-heartbeat',
+            '--pool=solo',
         ]
         
         # Add queue specification

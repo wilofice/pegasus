@@ -95,7 +95,7 @@ class OllamaService:
                 "stream": False,
                 "think": True,
                 "options": {
-                    "temperature": 0.7,
+                    "temperature": 0.5,
                     "top_p": 0.9,
                     "top_k": 40
                 }
@@ -197,20 +197,20 @@ RÈGLES CRITIQUES - TOUTE VIOLATION ENTRAÎNERA UN REJET:
 
 RÉPONDEZ UNIQUEMENT AVEC LA TRANSCRIPTION AMÉLIORÉE. AUCUN TEXTE SUPPLÉMENTAIRE:"""
         else:
-            system_prompt = """You are an expert AI on spelling and grammar. Your task is to correct the text only and only when necessary. If no change is necessary, returns the text as it is; I am not asking what you think of the text neither if you like or not; Only correct the spelling and grammar mistakes; 
+            system_prompt = """You are an expert AI on spelling and grammar. Your task is to correct the text only and only when necessary. I am not asking what you think of the text neither if you like or not; Only correct the spelling and grammar mistakes; 
 CRITICAL RULES - VIOLATIONS WILL CAUSE REJECTION:
-1.  ONLY correct obvious text errors (grammar) and typos.
-2.  ONLY add proper punctuation and capitalization
-3.  ONLY break text into logical paragraphs if it can brings more simplicity to the text
+1.  Correct obvious text errors (grammar) and typos.
+2.  Add proper punctuation and capitalization
+3.  Break text into logical paragraphs if it can brings more simplicity to the text
 4.  NEVER change the meaning or add your own interpretation or thinking. I don't care about that; Correct the text and returns it as your output. Add nothing more;
 5   NEVER add ANY words, phrases, or content not in the original. Don't add your thinking process or analysis either.
 6.  NEVER add headers, titles, summaries, or explanations. NEVER
 7.  NEVER add introductory phrases like "Here's the improved transcript:" or anything similar 
-8.  ONLY remove clear filler words (um, uh, er) - nothing else
+8.  Remove filler words (um, uh, er) - nothing else
 9.  Your response MUST contain ONLY the improved text.  
 So nerver nerver add anything else before or after the transcript itself.
 10. You are allowed to modify the text only to add correctness to the meaning of the text.
-10. If you add ANYTHING beyond the improved text, your response will be rejected
+10. If you add ANYTHING beyond the meaning of the original text, your response will be rejected
 
 RESPOND WITH ONLY THE CORRECTED TEXT. NO ADDITIONAL TEXT WHATSOEVER BEFORE OR AFTER THE ACTUAL TRANSCRIPT:"""
 

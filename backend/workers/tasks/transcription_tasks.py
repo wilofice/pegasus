@@ -50,7 +50,7 @@ def transcribe_audio(self, audio_id: str, job_id: str = None):
                 })
                 
                 self.log_progress(2, 3, "Original transcription complete, awaiting transcript improvement")
-                await audio_repo.update_status(audio_uuid, ProcessingStatus.PENDING_REVIEW)
+                await audio_repo.update_status(audio_uuid, ProcessingStatus.IMPROVING)
 
                 ollama_service = OllamaService()
                 

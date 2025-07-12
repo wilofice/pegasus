@@ -87,22 +87,6 @@ services:
     networks:
       - pegasus_network
 
-  # Ollama - Local LLM (existing service)
-  ollama:
-    image: ollama/ollama:latest
-    container_name: pegasus_ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/tags || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - pegasus_network
-
 networks:
   pegasus_network:
     driver: bridge
@@ -115,4 +99,3 @@ volumes:
   neo4j_import:
   neo4j_plugins:
   chromadb_data:
-  ollama_data:
