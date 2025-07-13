@@ -9,3 +9,9 @@ final ThemeData appTheme = ThemeData(
   primarySwatch: PegasusTheme.primarySwatch,
   brightness: Brightness.light,
 );
+
+
+final ThemeData darkAppTheme = ThemeData(
+  primarySwatch: PegasusTheme.primarySwatch,
+  brightness: Brightness.dark,
+);
