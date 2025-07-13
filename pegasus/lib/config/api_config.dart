@@ -5,7 +5,7 @@ class ApiConfig {
   /// Update this URL to point to your backend server:
   /// - Development: 'http://192.168.1.15:9000' or 'http://localhost:9000'
   /// - Production: 'https://your-api.domain.com'
-  static const String baseUrl = 'http://192.168.1.22:9000';
+  static const String baseUrl = 'http://192.168.1.18:9000';
   
   /// Default authentication token (if needed)
   /// Set to null if no authentication is required

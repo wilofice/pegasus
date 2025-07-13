@@ -57,7 +57,7 @@ class _TranscriptScreenState extends ConsumerState<TranscriptScreen> with Ticker
       ref.read(transcriptDataProvider.notifier).state = transcriptData;
       
       // Load both transcripts if processing is complete
-      if (transcriptData != null && transcriptData['status'] == 'completed') {
+      if (transcriptData != null && (transcriptData['status'] == 'completed' || transcriptData['status'] == 'pending_review')) {
         final bothTranscripts = await _apiClient.getBothTranscripts(widget.audioId);
         ref.read(bothTranscriptsProvider.notifier).state = bothTranscripts;
       }
