@@ -27,6 +27,8 @@ class PegasusApp extends StatelessWidget {
     return MaterialApp(
       title: 'Pegasus',
       theme: appTheme,
+      darkTheme: darkAppTheme,
+      themeMode: ThemeMode.system,
       home: const HomeScreen(),
       routes: {
         '/transcript': (context) {
