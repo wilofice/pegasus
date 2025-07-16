@@ -2,6 +2,7 @@ fastapi
 uvicorn
 requests
 chromadb
+qdrant-client>=1.7.0
 
 # Database
 sqlalchemy>=2.0.0

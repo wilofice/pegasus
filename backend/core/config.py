@@ -22,10 +22,15 @@ class Settings(BaseSettings):
     neo4j_user: str = "neo4j"
     neo4j_password: str = "pegasus_neo4j_password"
     
-    # ChromaDB Configuration
+    # ChromaDB Configuration (deprecated - use Qdrant instead)
     chromadb_host: str = "localhost"
     chromadb_port: int = 8001
     chromadb_collection_name: str = "pegasus_transcripts"
+    
+    # Qdrant Configuration
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
+    qdrant_collection_name: str = "pegasus_transcripts"
     
     # Redis Configuration
     redis_url: str = "redis://localhost:6379/0"

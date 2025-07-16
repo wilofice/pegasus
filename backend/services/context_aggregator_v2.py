@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-from services.retrieval.chromadb_retriever import ChromaDBRetriever
+from services.retrieval.qdrant_retriever import QdrantRetriever
 from services.retrieval.neo4j_retriever import Neo4jRetriever
 from services.retrieval.base import BaseRetriever, RetrievalResult, RetrievalFilter, ResultType
 from services.context_ranker import ContextRanker, RankingStrategy, RankingWeights, RankedResult
@@ -105,12 +105,12 @@ class ContextAggregatorV2:
     """Modern context aggregator with retrieval service and ranking integration."""
     
     def __init__(self,
-                 chromadb_retriever: ChromaDBRetriever,
+                 qdrant_retriever: QdrantRetriever,
                  neo4j_retriever: Neo4jRetriever,
                  context_ranker: ContextRanker,
                  default_config: Optional[AggregationConfig] = None):
         """Initialize context aggregator."""
-        self.chromadb_retriever = chromadb_retriever
+        self.qdrant_retriever = qdrant_retriever
         self.neo4j_retriever = neo4j_retriever
         self.context_ranker = context_ranker
         self.default_config = default_config or AggregationConfig()
@@ -179,7 +179,7 @@ class ContextAggregatorV2:
             metrics.total_retrieval_time_ms = retrieval_time
             
             # Count results by source
-            metrics.vector_results_count = len([r for r in all_results if 'chromadb' in r.source.lower()])
+            metrics.vector_results_count = len([r for r in all_results if 'qdrant' in r.source.lower()])
             metrics.graph_results_count = len([r for r in all_results if 'neo4j' in r.source.lower()])
             
             # Apply deduplication if enabled
@@ -256,10 +256,8 @@ class ContextAggregatorV2:
                                    **kwargs) -> List[RetrievalResult]:
         """Perform vector-only retrieval."""
         try:
-            if not self.chromadb_retriever._initialized:
-                await self.chromadb_retriever.initialize()
-            
-            results = await self.chromadb_retriever.search(
+            # Note: QdrantRetriever doesn't need initialization like ChromaDB
+            results = await self.qdrant_retriever.retrieve(
                 query=query,
                 filters=filters,
                 limit=config.max_results,
@@ -316,8 +314,7 @@ class ContextAggregatorV2:
                 # Parallel retrieval
                 tasks = []
                 
-                if not self.chromadb_retriever._initialized:
-                    tasks.append(self.chromadb_retriever.initialize())
+                # Note: QdrantRetriever doesn't need initialization
                 if not self.neo4j_retriever._initialized:
                     tasks.append(self.neo4j_retriever.initialize())
                 
@@ -325,8 +322,8 @@ class ContextAggregatorV2:
                     await asyncio.gather(*tasks, return_exceptions=True)
                 
                 # Perform searches in parallel
-                vector_task = self.chromadb_retriever.search(
-                    query=query, filters=filters, limit=vector_limit, user_id=user_id, **kwargs
+                vector_task = self.qdrant_retriever.retrieve(
+                    query=query, limit=vector_limit, user_id=user_id, **kwargs
                 )
                 graph_task = self.neo4j_retriever.search(
                     query=query, filters=filters, limit=graph_limit, user_id=user_id, **kwargs
@@ -346,10 +343,8 @@ class ContextAggregatorV2:
                     
             else:
                 # Sequential retrieval
-                if not self.chromadb_retriever._initialized:
-                    await self.chromadb_retriever.initialize()
-                vector_results = await self.chromadb_retriever.search(
-                    query=query, filters=filters, limit=vector_limit, user_id=user_id, **kwargs
+                vector_results = await self.qdrant_retriever.retrieve(
+                    query=query, limit=vector_limit, user_id=user_id, **kwargs
                 )
                 
                 if not self.neo4j_retriever._initialized:
@@ -569,11 +564,11 @@ class ContextAggregatorV2:
     def _get_retrievers_used(self, strategy: AggregationStrategy) -> List[str]:
         """Get list of retrievers used for given strategy."""
         if strategy == AggregationStrategy.VECTOR_ONLY:
-            return ["chromadb"]
+            return ["qdrant"]
         elif strategy == AggregationStrategy.GRAPH_ONLY:
             return ["neo4j"]
         else:
-            return ["chromadb", "neo4j"]
+            return ["qdrant", "neo4j"]
     
     async def health_check(self) -> Dict[str, Any]:
         """Check health of context aggregator and dependencies."""
@@ -586,10 +581,10 @@ class ContextAggregatorV2:
             
             # Check retriever health
             try:
-                chromadb_health = await self.chromadb_retriever.health_check()
-                health["dependencies"]["chromadb_retriever"] = chromadb_health
+                chromadb_health = await self.qdrant_retriever.health_check()
+                health["dependencies"]["qdrant_retriever"] = qdrant_health
             except Exception as e:
-                health["dependencies"]["chromadb_retriever"] = {"status": "unhealthy", "error": str(e)}
+                health["dependencies"]["qdrant_retriever"] = {"status": "unhealthy", "error": str(e)}
             
             try:
                 neo4j_health = await self.neo4j_retriever.health_check()
