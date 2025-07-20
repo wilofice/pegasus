@@ -1,7 +1,92 @@
 version: '3.8'
 
 services:
-  # Qdrant vector database (replacing ChromaDB)
+  # PostgreSQL - Existing database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pegasus_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pegasus_db}
+      POSTGRES_USER: ${POSTGRES_USER:-pegasus_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pegasus_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pegasus_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pegasus_network
+
+  # Redis - Job queue broker
+  redis:
+    image: redis:7-alpine
+    container_name: pegasus_redis
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pegasus_network
+
+  # Neo4j - Graph database
+  neo4j:
+    image: neo4j:5-community
+    container_name: pegasus_neo4j
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-pegasus_neo4j_password}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
+      NEO4J_apoc_import_file_use__neo4j__config: "true"
+      NEO4J_dbms_memory_heap_initial__size: "512M"
+      NEO4J_dbms_memory_heap_max__size: "1G"
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - pegasus_network
+
+  # ChromaDB - Vector database
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: pegasus_chromadb
+    environment:
+      ANONYMIZED_TELEMETRY: "false"
+      PERSIST_DIRECTORY: "/chroma/data"
+      IS_PERSISTENT: "TRUE"
+    ports:
+      - "8001:8000"  # Map to 8001 to avoid conflict with backend
+    volumes:
+      - chromadb_data:/chroma/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/heartbeat || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pegasus_network
+
   qdrant:
     image: qdrant/qdrant:latest
     container_name: pegasus-qdrant
@@ -14,74 +99,48 @@ services:
       - QDRANT__LOG_LEVEL=INFO
     restart: unless-stopped
 
-  # Neo4j graph database
-  neo4j:
-    image: neo4j:5-community
-    container_name: pegasus-neo4j
+  # FastAPI Backend
+  backend:
+    build: .
+    container_name: pegasus_backend
+    command: uvicorn main:app --host 0.0.0.0 --port 9000
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "9000:9000"
     volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-    environment:
-      - NEO4J_AUTH=neo4j/pegasus123
-      - NEO4J_PLUGINS=["apoc"]
-      - NEO4J_dbms_memory_heap_max__size=1G
-    restart: unless-stopped
+      - .:/app
+    depends_on:
+      - postgres
+      - redis
+      - neo4j
+      - chromadb
+      - qdrant
+    networks:
+      - pegasus_network
 
-  # Redis for caching and session management
-  redis:
-    image: redis:7-alpine
-    container_name: pegasus-redis
-    ports:
-      - "6379:6379"
+  # Celery Worker
+  celery_worker:
+    build: .
+    container_name: pegasus_celery_worker
+    command: python start_worker.py
     volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    restart: unless-stopped
-
-  # PostgreSQL database
-  postgres:
-    image: postgres:15-alpine
-    container_name: pegasus-postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=pegasus
-      - POSTGRES_USER=pegasus
-      - POSTGRES_PASSWORD=pegasus123
-    restart: unless-stopped
-
-  # Ollama for local LLM inference
-  ollama:
-    image: ollama/ollama:latest
-    container_name: pegasus-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_models:/root/.ollama
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-    restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-
-volumes:
-  qdrant_storage:
-  neo4j_data:
-  neo4j_logs:
-  redis_data:
-  postgres_data:
-  ollama_models:
+      - .:/app
+    depends_on:
+      - backend
+      - redis
+      - postgres
+    networks:
+      - pegasus_network
 
 networks:
-  default:
-    name: pegasus-network
+  pegasus_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+  chromadb_data:
+  qdrant_storage:

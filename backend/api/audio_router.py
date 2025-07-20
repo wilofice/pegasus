@@ -458,7 +458,9 @@ async def update_audio_tags(
         raise HTTPException(status_code=404, detail="Audio file not found")
     
     # Update tags/categories
-    update_data = {}
+    update_data = {
+        "improved_transcript": audio_file.improved_transcript.strip()
+    }
     if tag_update.tags is not None:
         # Clean and filter tags
         clean_tags = [tag.strip() for tag in tag_update.tags if tag.strip()]

@@ -158,6 +158,8 @@ class RequestResponseLoggingMiddleware(BaseHTTPMiddleware):
                         response_data["body"] = body[:1000] + "..." if len(body) > 1000 else body
                 else:
                     response_data["body"] = f"<LARGE_BODY: {len(body)} bytes>"
+            else:
+                response_data["body"] = json.loads(response)
         except Exception as e:
             response_data["body_error"] = str(e)
         
