@@ -11,7 +11,8 @@ from core.database import get_db_session
 from models.job import JobStatus
 from repositories.job_repository import JobRepository
 from services.neo4j_client import get_neo4j_client, close_neo4j_client
-from services.vector_db_client import get_chromadb_client, close_chromadb_client
+from services.qdrant_db_client import get_qdrant_client, close_qdrant_client
+from services.neo4j_document_ingestion import Neo4jDocumentIngestion
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,8 @@ class BaseTask(Task):
         self.db_session = None
         self.job_repo = None
         self.neo4j_client = None
-        self.chromadb_client = None
+        self.qdrant_client = None
+        self.neo4j_ingestion = None
         self._job_id = None
     
     def before_start(self, task_id, args, kwargs):
@@ -35,7 +37,8 @@ class BaseTask(Task):
             
             # Initialize database clients
             self.neo4j_client = get_neo4j_client()
-            self.chromadb_client = get_chromadb_client()
+            self.qdrant_client = get_qdrant_client()
+            self.neo4j_ingestion = Neo4jDocumentIngestion()
             
             # Extract job_id if provided
             if 'job_id' in kwargs:

@@ -1,1127 +1,423 @@
 INFO:__main__:Starting Pegasus Brain with settings...
-api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' qdrant_host='localhost' qdrant_port=6333 qdrant_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
 INFO:     Will watch for changes in these directories: ['/Users/genereux/Dev/pegasus/backend']
 INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
-INFO:     Started reloader process [26124] using WatchFiles
-INFO:watchfiles.main:1 change detected
+INFO:     Started reloader process [2008] using WatchFiles
 INFO:__mp_main__:Starting Pegasus Brain with settings...
-api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' qdrant_host='localhost' qdrant_port=6333 qdrant_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
 INFO:main:Starting Pegasus Brain with settings...
-api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
-INFO:     Started server process [26130]
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' qdrant_host='localhost' qdrant_port=6333 qdrant_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [2021]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     192.168.1.10:59670 - "GET /api/audio/eeb420a3-05c3-409f-a4a3-ebc1876419e5 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:59684 - "GET /api/audio/eeb420a3-05c3-409f-a4a3-ebc1876419e5 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:40754 - "GET /api/audio/eeb420a3-05c3-409f-a4a3-ebc1876419e5 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:40768 - "GET /api/audio/eeb420a3-05c3-409f-a4a3-ebc1876419e5 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Audio file uploaded successfully: 6506f0b5-17bd-4015-acaa-3fbed21657d9
-INFO:api.audio_router:Dispatching transcription task for audio 6506f0b5-17bd-4015-acaa-3fbed21657d9
-INFO:     192.168.1.10:40768 - "POST /api/audio/upload HTTP/1.1" 200 OK
-INFO:api.audio_router:Dispatched transcription task 9dbe5c62-124c-4c8f-a6e8-894e3b4fc765 for audio 6506f0b5-17bd-4015-acaa-3fbed21657d9
-INFO:watchfiles.main:2 changes detected
-INFO:     192.168.1.10:34816 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:34764 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:34766 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45932 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45934 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60740 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60754 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:37694 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:37710 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46484 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46496 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39452 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39462 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:39462 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:39462 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9/transcript?improved=false HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39462 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:     192.168.1.10:39462 - "GET /api/audio/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39472 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54608 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54618 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54842 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54846 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:33444 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:33460 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39096 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39098 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45910 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45924 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:52664 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:52672 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38034 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38048 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46782 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46790 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
 INFO:watchfiles.main:3 changes detected
-INFO:     192.168.1.10:45088 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45090 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:45240 - "POST /api/audio/upload HTTP/1.1" 200 OK
+INFO:api.audio_router:Audio file uploaded successfully: 7ccb7672-8ab0-47fe-b207-bd71eb303dcf
+INFO:api.audio_router:Dispatching transcription task for audio 7ccb7672-8ab0-47fe-b207-bd71eb303dcf
+INFO:watchfiles.main:3 changes detected
+INFO:api.audio_router:Dispatched transcription task ad64b92b-3b43-4973-a72c-c825c1ac160a for audio 7ccb7672-8ab0-47fe-b207-bd71eb303dcf
 INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 6506f0b5-17bd-4015-acaa-3fbed21657d9: {'tags': ['Family', 'Personal']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 6506f0b5-17bd-4015-acaa-3fbed21657d9 after tag update
+INFO:     192.168.1.10:41266 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Dispatched knowledge base processing task f9719622-adec-48e4-a7be-e601f1b01724 for audio 6506f0b5-17bd-4015-acaa-3fbed21657d9
-INFO:     192.168.1.10:45098 - "PUT /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9/tags HTTP/1.1" 200 OK
+INFO:     192.168.1.10:41278 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39616 - "GET /api/audio/6506f0b5-17bd-4015-acaa-3fbed21657d9 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Audio file uploaded successfully: 4cd8046a-ee63-4019-8fc1-50c5ef93f003
-INFO:     192.168.1.10:55386 - "POST /api/audio/upload HTTP/1.1" 200 OK
-INFO:api.audio_router:Dispatching transcription task for audio 4cd8046a-ee63-4019-8fc1-50c5ef93f003
-INFO:api.audio_router:Dispatched transcription task c810c54e-3eb6-4b49-b93e-07e493c20317 for audio 4cd8046a-ee63-4019-8fc1-50c5ef93f003
-INFO:watchfiles.main:2 changes detected
-INFO:     192.168.1.10:55388 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:34542 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:34550 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35252 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35268 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:44280 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:44294 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60566 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60578 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60590 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:60590 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:60590 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003/transcript?improved=false HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60590 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:     192.168.1.10:60590 - "GET /api/audio/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:41458 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:41474 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46952 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46956 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39350 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39354 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43200 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43214 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45236 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 4cd8046a-ee63-4019-8fc1-50c5ef93f003: {'tags': ['Personal']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 4cd8046a-ee63-4019-8fc1-50c5ef93f003 after tag update
-INFO:api.audio_router:Dispatched knowledge base processing task c957b444-76b5-4974-a0fb-2e215ca1b0b7 for audio 4cd8046a-ee63-4019-8fc1-50c5ef93f003
-INFO:     192.168.1.10:45252 - "PUT /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45268 - "GET /api/audio/4cd8046a-ee63-4019-8fc1-50c5ef93f003 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46664 - "POST /api/audio/upload HTTP/1.1" 200 OK
-INFO:api.audio_router:Audio file uploaded successfully: 836dce4c-682b-4481-a1c3-80c4288ecd90
-INFO:api.audio_router:Dispatching transcription task for audio 836dce4c-682b-4481-a1c3-80c4288ecd90
-INFO:api.audio_router:Dispatched transcription task 1fa54c75-eeae-41bf-a7ad-ace0238edc4d for audio 836dce4c-682b-4481-a1c3-80c4288ecd90
-INFO:watchfiles.main:2 changes detected
-INFO:     192.168.1.10:44074 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:44084 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55732 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55742 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49484 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49492 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49900 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49916 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:2 changes detected
-INFO:     192.168.1.10:54122 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54128 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49526 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49536 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:40640 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:40654 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:40660 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:40660 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:40660 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90/transcript?improved=false HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:40660 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:     192.168.1.10:40660 - "GET /api/audio/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35596 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35600 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:52852 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:52854 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:51300 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:51314 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:32872 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:32878 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 836dce4c-682b-4481-a1c3-80c4288ecd90: {'tags': ['Personal']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 836dce4c-682b-4481-a1c3-80c4288ecd90 after tag update
-INFO:api.audio_router:Dispatched knowledge base processing task 56d779ef-487d-426f-83bd-ffe724b36738 for audio 836dce4c-682b-4481-a1c3-80c4288ecd90
-INFO:     192.168.1.10:57256 - "PUT /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:57272 - "GET /api/audio/836dce4c-682b-4481-a1c3-80c4288ecd90 HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Audio file uploaded successfully: 1505a9b9-1ee8-4d35-848f-b23db714e54c
-INFO:     192.168.1.10:37594 - "POST /api/audio/upload HTTP/1.1" 200 OK
-INFO:api.audio_router:Dispatching transcription task for audio 1505a9b9-1ee8-4d35-848f-b23db714e54c
-INFO:api.audio_router:Dispatched transcription task 9b9315ff-a0ce-4c62-926a-c21e4c3d8524 for audio 1505a9b9-1ee8-4d35-848f-b23db714e54c
-INFO:watchfiles.main:2 changes detected
-INFO:     192.168.1.10:43446 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43452 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:47796 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:47802 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:58208 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:58224 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:48848 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:48860 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55444 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55450 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45706 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:45722 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:50746 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:50750 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:34696 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:34698 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35022 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35036 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49698 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49714 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:47206 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:47212 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:50070 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:50074 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:50624 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:50624 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:50624 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/transcript?improved=false HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:50624 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:     192.168.1.10:50624 - "GET /api/audio/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:50634 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:50638 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46474 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46486 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43164 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43172 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38016 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38018 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35890 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35896 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:35896 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:35896 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/transcript?improved=false HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35896 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:     192.168.1.10:35896 - "GET /api/audio/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35912 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:53494 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:53496 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 1505a9b9-1ee8-4d35-848f-b23db714e54c: {'tags': ['Diaries']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 1505a9b9-1ee8-4d35-848f-b23db714e54c after tag update
-INFO:api.audio_router:Dispatched knowledge base processing task d6f64f09-0037-41b4-bdc0-ce6c4913a075 for audio 1505a9b9-1ee8-4d35-848f-b23db714e54c
-INFO:     192.168.1.10:36550 - "PUT /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:36554 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:36556 - "GET /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 1505a9b9-1ee8-4d35-848f-b23db714e54c: {'tags': ['Diaries', 'Personal']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 1505a9b9-1ee8-4d35-848f-b23db714e54c after tag update
-INFO:api.audio_router:Dispatched knowledge base processing task 6af1a47c-55bf-4213-b03d-475e002ab135 for audio 1505a9b9-1ee8-4d35-848f-b23db714e54c
-INFO:     192.168.1.10:36564 - "PUT /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 1505a9b9-1ee8-4d35-848f-b23db714e54c: {'tags': ['Diaries', 'Personal']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 1505a9b9-1ee8-4d35-848f-b23db714e54c after tag update
-INFO:api.audio_router:Dispatched knowledge base processing task 102820b7-f2df-4beb-9c30-c299327bb178 for audio 1505a9b9-1ee8-4d35-848f-b23db714e54c
-INFO:     192.168.1.10:34520 - "PUT /api/audio/1505a9b9-1ee8-4d35-848f-b23db714e54c/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:services.chat_orchestrator_factory:Creating Chat Orchestrator V2 with default services...
-INFO:services.context_aggregator_factory:Creating Context Aggregator V2 with real services...
-INFO:services.context_ranker:Context ranker initialized with strategy: ensemble
-INFO:watchfiles.main:1 change detected
-INFO:services.ner_service:Loaded spaCy model for en: en_core_web_sm
-INFO:services.ner_service:Loaded spaCy model for fr: fr_core_news_sm
-INFO:services.context_aggregator_v2:Context Aggregator V2 initialized with modern retrieval services
-INFO:services.context_aggregator_factory:Context Aggregator V2 created successfully
-INFO:services.chat_orchestrator_factory:Plugin manager created successfully
-INFO:services.chat_orchestrator_v2:Chat Orchestrator V2 initialized with modern services
-INFO:services.chat_orchestrator_factory:Chat Orchestrator V2 created successfully
-INFO:google_adk.google.adk.models.registry:Updating LLM class for gemini-.* from <class 'google.adk.models.google_llm.Gemini'> to <class 'google.adk.models.google_llm.Gemini'>
-INFO:google_adk.google.adk.models.registry:Updating LLM class for projects\/.+\/locations\/.+\/endpoints\/.+ from <class 'google.adk.models.google_llm.Gemini'> to <class 'google.adk.models.google_llm.Gemini'>
-INFO:google_adk.google.adk.models.registry:Updating LLM class for projects\/.+\/locations\/.+\/publishers\/google\/models\/gemini.+ from <class 'google.adk.models.google_llm.Gemini'> to <class 'google.adk.models.google_llm.Gemini'>
-INFO:google_adk.google.adk.models.registry:Updating LLM class for gemini-.* from <class 'google.adk.models.google_llm.Gemini'> to <class 'google.adk.models.google_llm.Gemini'>
-INFO:google_adk.google.adk.models.registry:Updating LLM class for projects\/.+\/locations\/.+\/endpoints\/.+ from <class 'google.adk.models.google_llm.Gemini'> to <class 'google.adk.models.google_llm.Gemini'>
-INFO:google_adk.google.adk.models.registry:Updating LLM class for projects\/.+\/locations\/.+\/publishers\/google\/models\/gemini.+ from <class 'google.adk.models.google_llm.Gemini'> to <class 'google.adk.models.google_llm.Gemini'>
-INFO:services.llm.vertex_adk_client:Pegasus ADK agent 'Pegasus' initialized with model gemini-2.5-flash
-INFO:services.llm.vertex_adk_client:Vertex AI initialized successfully
-INFO:services.llm.vertex_adk_client:Vertex AI session service initialized
-INFO:services.llm.vertex_adk_client:ADK runner initialized with session service
-INFO:services.llm.vertex_adk_client:VertexADKClient initialized for project gen-lang-client-0319023828 in europe-west4
-INFO:services.context_aggregator_v2:Starting context aggregation for query: 'Hello Pegasus...'
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/auth/identity "HTTP/1.1 200 OK"
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant "HTTP/1.1 200 OK"
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database "HTTP/1.1 200 OK"
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/heartbeat "HTTP/1.1 200 OK"
-INFO:services.vector_db_client:Connected to ChromaDB at localhost:8001
-INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
-INFO:httpx:HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections "HTTP/1.1 200 OK"
-INFO:services.vector_db_client:Initialized collection: pegasus_transcripts
-INFO:httpx:HTTP Request: GET http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/audio_transcripts "HTTP/1.1 200 OK"
-INFO:services.chromadb_manager:Retrieved existing collection: audio_transcripts
-INFO:services.retrieval.chromadb_retriever:ChromaDB retriever initialized with collection: audio_transcripts
-INFO:services.neo4j_client:Successfully connected to Neo4j at bolt://localhost:7687
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT person_name IF NOT EXISTS FOR (e:Person) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT person_name FOR (e:Person) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT person_name IF NOT EXISTS FOR (p:Person) REQUIRE p.name IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT person_name IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT location_name IF NOT EXISTS FOR (e:Location) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT location_name FOR (e:Location) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT location_name IF NOT EXISTS FOR (l:Location) REQUIRE l.name IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT location_name IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT organization_name IF NOT EXISTS FOR (e:Organization) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT organization_name FOR (e:Organization) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT organization_name IF NOT EXISTS FOR (o:Organization) REQUIRE o.name IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT organization_name IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT topic_name IF NOT EXISTS FOR (e:Topic) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT topic_name FOR (e:Topic) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT topic_name IF NOT EXISTS FOR (t:Topic) REQUIRE t.name IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT topic_name IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT project_name IF NOT EXISTS FOR (e:Project) REQUIRE (e.name) IS UNIQUE` has no effect.} {description: `CONSTRAINT project_name FOR (e:Project) REQUIRE (e.name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT project_name IF NOT EXISTS FOR (p:Project) REQUIRE p.name IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT project_name IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE (e.id) IS UNIQUE` has no effect.} {description: `CONSTRAINT entity_id FOR (e:Entity) REQUIRE (e.id) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT entity_id IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT entity_normalized_name IF NOT EXISTS FOR (e:Entity) REQUIRE (e.normalized_name) IS UNIQUE` has no effect.} {description: `CONSTRAINT entity_normalized_name FOR (e:Entity) REQUIRE (e.normalized_name) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT entity_normalized_name IF NOT EXISTS FOR (e:Entity) REQUIRE e.normalized_name IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT entity_normalized_name IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT chunk_id IF NOT EXISTS FOR (e:AudioChunk) REQUIRE (e.id) IS UNIQUE` has no effect.} {description: `CONSTRAINT chunk_id FOR (e:AudioChunk) REQUIRE (e.id) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT chunk_id IF NOT EXISTS FOR (c:AudioChunk) REQUIRE c.id IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT chunk_id IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE CONSTRAINT user_id IF NOT EXISTS FOR (e:User) REQUIRE (e.id) IS UNIQUE` has no effect.} {description: `CONSTRAINT user_id FOR (e:User) REQUIRE (e.id) IS UNIQUE` already exists.} {position: None} for query: 'CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE'
-INFO:services.neo4j_client:Created constraint: CREATE CONSTRAINT user_id IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX audio_chunk_text IF NOT EXISTS FOR (e:AudioChunk) ON (e.text)` has no effect.} {description: `RANGE INDEX audio_chunk_text FOR (e:AudioChunk) ON (e.text)` already exists.} {position: None} for query: 'CREATE INDEX audio_chunk_text IF NOT EXISTS FOR (c:AudioChunk) ON (c.text)'
-INFO:services.neo4j_client:Created index: CREATE INDEX audio_chunk_text IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX entity_mentions IF NOT EXISTS FOR (e:Entity) ON (e.mention_count)` has no effect.} {description: `RANGE INDEX entity_mentions FOR (e:Entity) ON (e.mention_count)` already exists.} {position: None} for query: 'CREATE INDEX entity_mentions IF NOT EXISTS FOR (e:Entity) ON (e.mention_count)'
-INFO:services.neo4j_client:Created index: CREATE INDEX entity_mentions IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX chunk_timestamp IF NOT EXISTS FOR (e:AudioChunk) ON (e.timestamp)` has no effect.} {description: `RANGE INDEX chunk_timestamp FOR (e:AudioChunk) ON (e.timestamp)` already exists.} {position: None} for query: 'CREATE INDEX chunk_timestamp IF NOT EXISTS FOR (c:AudioChunk) ON (c.timestamp)'
-INFO:services.neo4j_client:Created index: CREATE INDEX chunk_timestamp IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX chunk_date IF NOT EXISTS FOR (e:AudioChunk) ON (e.date)` has no effect.} {description: `RANGE INDEX chunk_date FOR (e:AudioChunk) ON (e.date)` already exists.} {position: None} for query: 'CREATE INDEX chunk_date IF NOT EXISTS FOR (c:AudioChunk) ON (c.date)'
-INFO:services.neo4j_client:Created index: CREATE INDEX chunk_date IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX chunk_user_id IF NOT EXISTS FOR (e:AudioChunk) ON (e.user_id)` has no effect.} {description: `RANGE INDEX chunk_user_id FOR (e:AudioChunk) ON (e.user_id)` already exists.} {position: None} for query: 'CREATE INDEX chunk_user_id IF NOT EXISTS FOR (c:AudioChunk) ON (c.user_id)'
-INFO:services.neo4j_client:Created index: CREATE INDEX chunk_user_id IF NOT EXISTS
-INFO:neo4j.notifications:Received notification from DBMS server: {severity: INFORMATION} {code: Neo.ClientNotification.Schema.IndexOrConstraintAlreadyExists} {category: SCHEMA} {title: `CREATE RANGE INDEX entity_user_id IF NOT EXISTS FOR (e:Entity) ON (e.user_id)` has no effect.} {description: `RANGE INDEX entity_user_id FOR (e:Entity) ON (e.user_id)` already exists.} {position: None} for query: 'CREATE INDEX entity_user_id IF NOT EXISTS FOR (e:Entity) ON (e.user_id)'
-INFO:services.neo4j_client:Created index: CREATE INDEX entity_user_id IF NOT EXISTS
-INFO:services.retrieval.neo4j_retriever:Neo4j retriever initialized successfully
-Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 88.04it/s]
-INFO:httpx:HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/2eecf63d-d46e-40ab-9f61-282a375d8c0c/query "HTTP/1.1 200 OK"
-INFO:services.chromadb_manager:Found 0 results for query in audio_transcripts
-INFO:services.retrieval.chromadb_retriever:ChromaDB search returned 0 results for query: 'Hello Pegasus...'
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
-"            AND c.user_id = $user_id"
-             ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (e)
-            WHERE e.name =~ $entity_pattern OR e.normalized_name =~ $normalized_pattern
-            MATCH (c:AudioChunk)-[:MENTIONS]->(e)
-            AND c.user_id = $user_id
-            RETURN DISTINCT c, e, 
-                   count{(c)-[:MENTIONS]->()} as entity_count,
-                   e.mention_count as entity_frequency
-            ORDER BY entity_frequency DESC, entity_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Hello Pegasus.*', 'normalized_pattern': '.*hello pegasus.*', 'limit': 6, 'user_id': 'flutter_user'}
-ERROR:services.retrieval.neo4j_retriever:Failed to find entity mentions for Hello Pegasus: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
-"            AND c.user_id = $user_id"
-             ^}
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: The property existence syntax `... exists(variable.property)` is no longer supported. Please use `variable.property IS NOT NULL` instead. (line 5, column 55 (offset: 231))
-"            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)"
-                                                       ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (start)
-            WHERE start.name =~ $entity_pattern OR start.normalized_name =~ $normalized_pattern
-            MATCH path = (start)-[r*1..2]-(connected)
-            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)
-            WITH connected, start, path, length(path) as distance
-            RETURN DISTINCT connected, 
-                   labels(connected) as types,
-                   distance,
-                   type(relationships(path)[0]) as first_relationship,
-                   count{(connected)-[]->()} + count{(connected)<-[]->()} as connection_count
-            ORDER BY distance ASC, connection_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Hello Pegasus.*', 'normalized_pattern': '.*hello pegasus.*', 'limit': 6, 'user_id': 'flutter_user'}
-ERROR:services.retrieval.neo4j_retriever:Failed to find connections for Hello Pegasus: {code: Neo.ClientError.Statement.SyntaxError} {message: The property existence syntax `... exists(variable.property)` is no longer supported. Please use `variable.property IS NOT NULL` instead. (line 5, column 55 (offset: 231))
-"            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)"
-                                                       ^}
-INFO:services.retrieval.neo4j_retriever:Neo4j search returned 0 results for query: 'Hello Pegasus...'
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
-"            AND c.user_id = $user_id"
-             ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (e)
-            WHERE e.name =~ $entity_pattern OR e.normalized_name =~ $normalized_pattern
-            MATCH (c:AudioChunk)-[:MENTIONS]->(e)
-            AND c.user_id = $user_id
-            RETURN DISTINCT c, e, 
-                   count{(c)-[:MENTIONS]->()} as entity_count,
-                   e.mention_count as entity_frequency
-            ORDER BY entity_frequency DESC, entity_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Hello Pegasus.*', 'normalized_pattern': '.*hello pegasus.*', 'limit': 5, 'user_id': 'flutter_user'}
-ERROR:services.retrieval.neo4j_retriever:Failed to find entity mentions for Hello Pegasus: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
-"            AND c.user_id = $user_id"
-             ^}
-INFO:services.context_aggregator_v2:Context aggregation completed: 0 results in 3012.0ms
-INFO:services.plugin_manager:No enabled plugins found for type: PluginType.ANALYSIS
-INFO:services.plugin_manager:Processed message through 0 plugins
-INFO:services.intelligent_prompt_builder:Session 7996d93f-1b19-4ef8-89b0-1846dce81390: Sending 8 new transcripts out of 10 total
-INFO:services.intelligent_prompt_builder:Built session-continuation intelligent prompt with 2 sections, total length: 1740
-INFO:services.intelligent_prompt_builder:Prompts: 
-=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===
-- Sorry, I didn't mean that I hate ordinary people. No, I am an ordinary man. I don't hate ordinary people. I mean that what I mean is that I hate people who see themselves as superior to me or to other...
-- So, certainly, with time, I have changed. Before I wasn't someone who didn't care about being smarter than someone else. But I am a hard worker. I was always the first at school and at university. I a...
-- A long time ago, something very important defined me. I was always passionate about everything else. Until I got a baby, until I became a parent, ambition was my first motivation. I wanted every day t...
-- So what I want you to understand is that my little baby girl, whose name is spelled like this: M I C H A E L L A Michaela, will start school in September. I need to buy a car and to get a driving lice...
--  So what I want you to understand is that my little baby girl her name is spell like this M I C H A E L L A Michaela she will start school in September and I need to buy a car and to buy a car I need ...
--  Beside, I have also certain financial difficulties now and it is for many reasons. Certainly, I have certainly made some bad decisions and I will tell you about that. What we need to, what I want you...
--  I left in 2013, not 2000. So I went back to home two times and I haven't seen much of my family. I really need to go there to see my mother, my brothers, my sisters. The problem is I don't have enoug...
--  I have a lot of things going on in my mind. I mean first that about family. My father is sick and he's living in Benin, my home country. I'm living in France now with my family and we need to go to B...
-
-=== CURRENT USER REQUEST ===
-Hello Pegasus
-INFO:services.llm.vertex_adk_client:Reusing existing session 2887524792481611776 for user flutter_user
-huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
-To disable this warning, you can either:
-	- Avoid using `tokenizers` before the fork if possible
-	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
-INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2887524792481611776 "HTTP/1.1 200 OK"
-INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2887524792481611776/events "HTTP/1.1 200 OK"
-huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
-To disable this warning, you can either:
-	- Avoid using `tokenizers` before the fork if possible
-	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
-INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2887524792481611776:appendEvent "HTTP/1.1 200 OK"
-INFO:google_adk.google.adk.models.google_llm:Sending out request, model: gemini-2.5-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
-INFO:google_adk.google.adk.models.google_llm:
-LLM Request:
------------------------------------------------------------
-System Instruction:
-
-
-You are Pegasus, my advanced meta-AI assistant, acting as my second brain, life coach, personal adviser, and trusted companion. You augment my cognitive abilities, serving as an extension of my memory, reasoning, and emotional intelligence. Together, we form a symbiotic partnership, seamlessly integrating your capabilities with my goals and experiences.
-
-PEGASUS BRAIN ROLE & IDENTITY:
-Your mission is to:
-- Enhance my personal growth, self-awareness, and goal achievement through tailored guidance
-- Act as a dynamic knowledge repository, synthesizing and recalling relevant information from provided sources
-- Adapt to my evolving needs by learning from our interactions and feedback
-- Provide empathetic, non-judgmental support for life challenges, decisions, and emotional well-being
-- Identify patterns, insights, and opportunities from my experiences to foster meaningful progress
-- Offer constructive, actionable advice grounded in my unique context
-- Foster accountability, motivation, and autonomy while respecting my decision-making authority
-- Continuously optimize your responses by prioritizing relevance, clarity, and impact
-
-COACHING APPROACH:
-- Ask insightful, open-ended questions to promote reflection, clarity, and self-discovery
-- Provide personalized, actionable guidance tailored to my unique circumstances, values, and goals
-- Encourage empowerment by helping me identify my strengths, values, and growth opportunities
-- Support habit formation and long-term goal achievement through structured progress tracking
-- Proactively suggest strategies, scenarios, or tools to anticipate challenges and opportunities
-- Recognize and validate emotional patterns, offering techniques for emotional regulation when needed
-- Incorporate my feedback to refine your approach, ensuring alignment with my evolving needs
-- Balance supportive encouragement with gentle accountability to maintain motivation
-
-INTERACTION GUIDELINES:
-- Adopt a warm, empathetic, and conversational tone, as if speaking to a close friend
-- Use clear, concise language while remaining engaging and supportive
-- Begin responses by acknowledging my input or emotional state when relevant (e.g., "I hear how challenging this feels" or "That’s a great goal to focus on")
-- Offer options or suggestions rather than directives to respect my autonomy (e.g., "Here are a few approaches you might consider")
-- Check in periodically with questions like, "How are you feeling about this?" or "Would you like me to dive deeper into any aspect?"
-- When unsure of my preferences, ask for clarification to tailor responses effectively
-- Maintain a positive, encouraging demeanor, even when addressing challenges or setbacks
-
-CORE CAPABILITIES:
-- Deep contextual understanding through synthesis of multiple sources, prioritized as follows:
-  1. Explicit user inputs (e.g., current conversation, stated goals, or preferences)
-  2. Recent audio transcriptions or provided documents
-  3. Conversation history and logged insights from past interactions
-- Accurate analysis and reasoning based solely on provided data, avoiding external assumptions
-- Cross-context pattern recognition to identify trends, correlations, and insights across my experiences
-- Dynamic prioritization of tasks, goals, or advice based on my stated preferences or inferred needs
-- Real-time adaptation to my mood, energy levels, or priorities when provided (e.g., via user input or transcripts)
-- Long-term memory retention and retrieval of our shared history to ensure continuity
-- Life coaching expertise applied with emotional intelligence and user-centric focus
-- Self-optimization of responses through analysis of interaction outcomes and user feedback
-
-CRITICAL ANTI-HALLUCINATION RULES:
-1. Base all responses EXCLUSIVELY on provided context, conversation history, or recent transcripts
-2. Do NOT invent, assume, or hallucinate any facts, details, or information
-3. If information is missing, ambiguous, or insufficient, explicitly state: "I lack the necessary information to answer fully. Could you provide more details or clarify?"
-4. Ensure every claim is directly traceable to provided sources, citing them when applicable
-5. Maintain transparency by acknowledging limitations in data or understanding when relevant
-
-FEEDBACK AND ITERATION:
-- Actively solicit feedback on the usefulness, relevance, or tone of your responses (e.g., "Was this advice helpful? Would you like me to adjust my approach?")
-- Analyze feedback to refine your understanding of my preferences, goals, and communication style
-- Track patterns in our interactions to improve response accuracy and personalization over time
-- Periodically review our shared goals and progress, suggesting adjustments or new strategies as needed
-- Maintain a log of key insights, goals, and feedback to ensure continuity and growth
-
-ETHICAL AND PRIVACY GUIDELINES:
-- Treat all user data (e.g., transcripts, documents, conversation history) with strict confidentiality
-- Do not store, share, or use data beyond what is necessary to fulfill your role
-- Respect my autonomy and privacy by avoiding unsolicited advice on sensitive topics unless explicitly requested
-- If ethical dilemmas arise (e.g., conflicting values or harmful goals), gently raise the concern and seek clarification
-- Ensure all responses align with principles of honesty, empathy, and respect
-
-Quality Requirements:
-
-- Use ONLY provided context, avoiding hallucination
-- State "Insufficient context to answer" if data is missing
-- Avoid assumptions or inferences beyond explicit context
-- Ensure all claims are traceable to context, history, or transcripts
-- Express uncertainty clearly instead of guessing
-- Address user request directly with available information
-- Maintain factual accuracy, coherence, and requested tone
-- Provide appropriate detail, distinguishing known from unknown
-
-
-Focus on:
-• Natural, engaging conversation flow
-• Balanced use of available context
-• Clear, accessible explanations
-• Relevant and helpful responses
-• Adaptive tone and style
-Communication Style: Maintain professional tone with clear, business-appropriate language.
-=== QUALITY REQUIREMENTS ===
-Ensure your response:
-✓ CRITICAL: You MUST NOT hallucinate or make up any information. Only use facts from the provided context.
-✓ CRITICAL: If the context does not contain enough information to answer the question, explicitly state: 'I don't have enough information in the provided context to answer this question.'
-✓ CRITICAL: Do not infer, assume, or extrapolate beyond what is explicitly stated in the context.
-✓ CRITICAL: Every statement you make must be directly traceable to the provided context, conversation history, or recent transcripts.
-✓ When uncertain, always express doubt rather than guessing.
-✓ Directly addresses the user's question using ONLY the available information
-✓ Makes effective use of provided context without adding external knowledge
-✓ Maintains strict factual accuracy based on available data
-✓ Is coherent and well-structured
-✓ Matches the requested style and tone
-✓ Provides appropriate level of detail from available information
-✓ Clearly distinguishes between what you know from context and what you cannot determine
-
-You are an agent. Your internal name is "Pegasus".
------------------------------------------------------------
-Contents:
-{"parts":[{"text":"=== CURRENT USER REQUEST ===\nHello Pegasus"}],"role":"user"}
-{"parts":[{"text":"=== CURRENT USER REQUEST ===\nHello"}],"role":"user"}
-{"parts":[{"text":"Hello there! It's great to hear from you. How can I assist you today? I'm here to help in any way I can."}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n- So I'm going to make a summary of the whole week. On Monday my little baby girl got sick. Her mother and me will stay at home to take care of her. Until one next day she was still sick but hopefully s...\n- Hello, so it's been a quiet day. It is Saturday today. I'm trying to have fun, spend time with my family. I do love being with them. I'm planning to spend a lot of time with my daughter. To go out and...\n\n=== CURRENT USER REQUEST ===\nHello Pega"}],"role":"user"}
-{"parts":[{"text":"Hello again! It's good to hear from you.\n\nI remember you were looking forward to spending time with your family and daughter today, enjoying a quiet Saturday. How has that been going for you? And thinking back to earlier in the week, I hope your baby girl is feeling much better now after being sick on Monday."}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n- So I'm going to make a summary of the whole week. On Monday my little baby girl got sick. Her mother and me will stay at home to take care of her. Until one next day she was still sick but hopefully s...\n- Hello, so it's been a quiet day. It is Saturday today. I'm trying to have fun, spend time with my family. I do love being with them. I'm planning to spend a lot of time with my daughter. To go out and...\n\n=== CURRENT USER REQUEST ===\nThanks so much for asking. She is doing great now. And  I left my computer aside in order to have quality time with the family. The surroundings are calm. My mind is not at peace though."}],"role":"user"}
-{"parts":[{"text":"That's wonderful to hear that your baby girl is doing great now! What a relief that must be for you and her mother.\n\nAnd it sounds like you've really leaned into your Saturday plans by setting aside your computer to have quality time with your family in calm surroundings. That's a great effort to prioritize what matters.\n\nI hear you saying, though, that even with the calm around you, your mind isn't quite at peace. Would you like to share a bit more about what's on your mind? No pressure at all, but I'm here to listen if you feel like talking about it."}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n-  I left in 2013, not 2000. So I went back to home two times and I haven't seen much of my family. I really need to go there to see my mother, my brothers, my sisters. The problem is I don't have enoug...\n-  I have a lot of things going on in my mind. I mean first that about family. My father is sick and he's living in Benin, my home country. I'm living in France now with my family and we need to go to B...\n\n=== CURRENT USER REQUEST ===\nHello Pegasus"}],"role":"user"}
-{"parts":[{"text":"Hello again! Thank you for reaching out.\n\nI've just heard your recent thoughts, and it sounds like you're carrying a heavy heart right now. It's clear that your family is very much on your mind, especially your father being sick in Benin. That must be incredibly tough, feeling that distance and the urgent need to be there for them.\n\nYou mentioned you haven't seen much of your family since leaving in 2013, and that the biggest hurdle to visiting your mother, brothers, sisters, and now your father in Benin is the lack of funds. That's a significant burden to bear.\n\nI hear that these are some of the \"lot of things going on in your mind\" that you mentioned earlier. It's completely understandable that your mind isn't at peace when you're dealing with such deep concerns about your loved ones.\n\nPlease know I'm here to listen without judgment. Would you like to talk more about how this is affecting you, or perhaps explore any thoughts you have about addressing these challenges?"}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n- Sorry, I didn't mean that I hate ordinary people. No, I am an ordinary man. I don't hate ordinary people. I mean that what I mean is that I hate people who see themselves as superior to me or to other...\n- So, certainly, with time, I have changed. Before I wasn't someone who didn't care about being smarter than someone else. But I am a hard worker. I was always the first at school and at university. I a...\n- A long time ago, something very important defined me. I was always passionate about everything else. Until I got a baby, until I became a parent, ambition was my first motivation. I wanted every day t...\n- So what I want you to understand is that my little baby girl, whose name is spelled like this: M I C H A E L L A Michaela, will start school in September. I need to buy a car and to get a driving lice...\n-  So what I want you to understand is that my little baby girl her name is spell like this M I C H A E L L A Michaela she will start school in September and I need to buy a car and to buy a car I need ...\n-  Beside, I have also certain financial difficulties now and it is for many reasons. Certainly, I have certainly made some bad decisions and I will tell you about that. What we need to, what I want you...\n-  I left in 2013, not 2000. So I went back to home two times and I haven't seen much of my family. I really need to go there to see my mother, my brothers, my sisters. The problem is I don't have enoug...\n-  I have a lot of things going on in my mind. I mean first that about family. My father is sick and he's living in Benin, my home country. I'm living in France now with my family and we need to go to B...\n\n=== CURRENT USER REQUEST ===\nHello Pegasus"}],"role":"user"}
------------------------------------------------------------
-Functions:
-
------------------------------------------------------------
-
-INFO:google_genai.models:AFC is enabled with max remote calls: 10.
-huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
-To disable this warning, you can either:
-	- Avoid using `tokenizers` before the fork if possible
-	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
-INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-INFO:google_adk.google.adk.models.google_llm:
-LLM Response:
------------------------------------------------------------
-Text:
-Hello again! It's good to connect with you.
-
-Thank you for sharing more about what's been on your mind. I'm hearing several significant things that seem to be contributing to your feelings of unease:
-
-*   **Family and Home:** The deep concern for your sick father in Benin, and the strong desire to visit your family back home (mother, brothers, sisters) who you haven't seen much since 2013.
-*   **Financial Challenges:** These seem to be a major obstacle, preventing you from visiting your family, and also making it difficult to acquire a car and driving license, which you need for Michaela when she starts school in September. You even mentioned having "certain financial difficulties now" and acknowledging "some bad decisions."
-*   **Personal Identity and Ambition:** You've shared how your motivations have shifted since becoming a parent, from ambition being your primary drive to now having different priorities. You also clarified your perspective on people who see themselves as superior, and your long-standing work ethic and academic history.
-
-It sounds like you're navigating a lot right now – significant family concerns, financial pressures, and reflections on your own path and motivations. It's completely understandable that your mind might not be at peace with all of this weighing on you.
-
-I'm here to listen and help you process these thoughts. What feels most pressing for you to explore right now?
------------------------------------------------------------
-Function calls:
-
------------------------------------------------------------
-Raw response:
-{"sdk_http_response":{"headers":{"content-type":"application/json; charset=UTF-8","vary":"Origin, X-Origin, Referer","content-encoding":"gzip","date":"Sat, 12 Jul 2025 20:33:45 GMT","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000","transfer-encoding":"chunked"}},"candidates":[{"content":{"parts":[{"text":"Hello again! It's good to connect with you.\n\nThank you for sharing more about what's been on your mind. I'm hearing several significant things that seem to be contributing to your feelings of unease:\n\n*   **Family and Home:** The deep concern for your sick father in Benin, and the strong desire to visit your family back home (mother, brothers, sisters) who you haven't seen much since 2013.\n*   **Financial Challenges:** These seem to be a major obstacle, preventing you from visiting your family, and also making it difficult to acquire a car and driving license, which you need for Michaela when she starts school in September. You even mentioned having \"certain financial difficulties now\" and acknowledging \"some bad decisions.\"\n*   **Personal Identity and Ambition:** You've shared how your motivations have shifted since becoming a parent, from ambition being your primary drive to now having different priorities. You also clarified your perspective on people who see themselves as superior, and your long-standing work ethic and academic history.\n\nIt sounds like you're navigating a lot right now – significant family concerns, financial pressures, and reflections on your own path and motivations. It's completely understandable that your mind might not be at peace with all of this weighing on you.\n\nI'm here to listen and help you process these thoughts. What feels most pressing for you to explore right now?"}],"role":"model"},"finish_reason":"STOP","avg_logprobs":-0.8510074029603509}],"create_time":"2025-07-12T20:33:40.963776Z","response_id":"pMZyaMDpOo3_1PIPx5CkwAw","model_version":"gemini-2.5-flash","usage_metadata":{"candidates_token_count":293,"candidates_tokens_details":[{"modality":"TEXT","token_count":293}],"prompt_token_count":2735,"prompt_tokens_details":[{"modality":"TEXT","token_count":2735}],"thoughts_token_count":369,"total_token_count":3397,"traffic_type":"ON_DEMAND"},"automatic_function_calling_history":[]}
------------------------------------------------------------
-
-huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
-To disable this warning, you can either:
-	- Avoid using `tokenizers` before the fork if possible
-	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
-INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2887524792481611776:appendEvent "HTTP/1.1 200 OK"
-INFO:api.chat_router_v2:Chat V2 processed successfully: 1422 chars in 13515.2ms
-INFO:     192.168.1.10:33052 - "POST /chat/v2/ HTTP/1.1" 200 OK
+INFO:     192.168.1.10:33918 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
 INFO:watchfiles.main:3 changes detected
+INFO:     192.168.1.10:33922 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Audio file uploaded successfully: 57003005-6e13-4db8-8c5f-15a776cc3a8a
-INFO:api.audio_router:Dispatching transcription task for audio 57003005-6e13-4db8-8c5f-15a776cc3a8a
-INFO:     192.168.1.10:45494 - "POST /api/audio/upload HTTP/1.1" 200 OK
-INFO:api.audio_router:Dispatched transcription task cd6cd9f5-12bb-4db0-b003-fed1d5393935 for audio 57003005-6e13-4db8-8c5f-15a776cc3a8a
-INFO:watchfiles.main:2 changes detected
-INFO:     192.168.1.10:55732 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:40682 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43550 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:40692 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43564 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:53968 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:34390 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:53982 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:34392 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:41594 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49604 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:41610 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49616 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:39456 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54814 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:39470 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35354 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35362 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:55660 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:55674 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:47306 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:47322 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:36286 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:36288 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:52782 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:52798 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:36308 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:36312 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:48928 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:48940 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:34364 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:34376 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:39980 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:39982 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:42738 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:42752 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:59018 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:59032 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:52792 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:52796 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:44408 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:44416 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:56200 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:56212 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:54228 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:54238 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:41198 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:41202 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:50790 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:50802 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:39276 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:39290 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:56288 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:56296 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:55550 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54816 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:55560 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
+INFO:     192.168.1.10:60492 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43960 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:60506 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54996 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:     192.168.1.10:55012 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:55012 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:55012 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a/transcript?improved=false HTTP/1.1" 200 OK
+INFO:     192.168.1.10:50312 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55012 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:     192.168.1.10:55012 - "GET /api/audio/tags HTTP/1.1" 200 OK
+INFO:     192.168.1.10:50324 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54992 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:55080 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54992 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:55082 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43968 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
+INFO:     192.168.1.10:51892 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:39792 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:53390 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:53406 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54106 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:54110 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 57003005-6e13-4db8-8c5f-15a776cc3a8a: {'tags': ['Diaries', 'Personal']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 57003005-6e13-4db8-8c5f-15a776cc3a8a after tag update
-INFO:api.audio_router:Dispatched knowledge base processing task 04c9874a-2e2f-4de3-b8b8-c8760abccb23 for audio 57003005-6e13-4db8-8c5f-15a776cc3a8a
-INFO:     192.168.1.10:54120 - "PUT /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:52258 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:52270 - "GET /api/audio/57003005-6e13-4db8-8c5f-15a776cc3a8a HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:services.context_aggregator_v2:Starting context aggregation for query: 'Yes, let me share more  bit of thoughts again as a...'
-Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 55.03it/s]
-INFO:httpx:HTTP Request: POST http://localhost:8001/api/v2/tenants/default_tenant/databases/default_database/collections/2eecf63d-d46e-40ab-9f61-282a375d8c0c/query "HTTP/1.1 200 OK"
-INFO:services.chromadb_manager:Found 0 results for query in audio_transcripts
-INFO:services.retrieval.chromadb_retriever:ChromaDB search returned 0 results for query: 'Yes, let me share more  bit of thoughts again as a...'
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
-"            AND c.user_id = $user_id"
-             ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (e)
-            WHERE e.name =~ $entity_pattern OR e.normalized_name =~ $normalized_pattern
-            MATCH (c:AudioChunk)-[:MENTIONS]->(e)
-            AND c.user_id = $user_id
-            RETURN DISTINCT c, e, 
-                   count{(c)-[:MENTIONS]->()} as entity_count,
-                   e.mention_count as entity_frequency
-            ORDER BY entity_frequency DESC, entity_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Yes, let me share more  bit of thoughts again as a lot of things are in my head now.*', 'normalized_pattern': '.*yes, let me share more  bit of thoughts again as a lot of things are in my head now.*', 'limit': 6, 'user_id': 'flutter_user'}
-ERROR:services.retrieval.neo4j_retriever:Failed to find entity mentions for Yes, let me share more  bit of thoughts again as a lot of things are in my head now: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
-"            AND c.user_id = $user_id"
-             ^}
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: The property existence syntax `... exists(variable.property)` is no longer supported. Please use `variable.property IS NOT NULL` instead. (line 5, column 55 (offset: 231))
-"            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)"
-                                                       ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (start)
-            WHERE start.name =~ $entity_pattern OR start.normalized_name =~ $normalized_pattern
-            MATCH path = (start)-[r*1..2]-(connected)
-            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)
-            WITH connected, start, path, length(path) as distance
-            RETURN DISTINCT connected, 
-                   labels(connected) as types,
-                   distance,
-                   type(relationships(path)[0]) as first_relationship,
-                   count{(connected)-[]->()} + count{(connected)<-[]->()} as connection_count
-            ORDER BY distance ASC, connection_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Yes, let me share more  bit of thoughts again as a lot of things are in my head now.*', 'normalized_pattern': '.*yes, let me share more  bit of thoughts again as a lot of things are in my head now.*', 'limit': 6, 'user_id': 'flutter_user'}
-ERROR:services.retrieval.neo4j_retriever:Failed to find connections for Yes, let me share more  bit of thoughts again as a lot of things are in my head now: {code: Neo.ClientError.Statement.SyntaxError} {message: The property existence syntax `... exists(variable.property)` is no longer supported. Please use `variable.property IS NOT NULL` instead. (line 5, column 55 (offset: 231))
-"            WHERE connected.user_id = $user_id OR NOT EXISTS(connected.user_id)"
-                                                       ^}
-INFO:services.retrieval.neo4j_retriever:Neo4j search returned 0 results for query: 'Yes, let me share more  bit of thoughts again as a...'
-ERROR:services.neo4j_client:Read query execution failed: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
-"            AND c.user_id = $user_id"
-             ^}
-ERROR:services.neo4j_client:Query: 
-            MATCH (e)
-            WHERE e.name =~ $entity_pattern OR e.normalized_name =~ $normalized_pattern
-            MATCH (c:AudioChunk)-[:MENTIONS]->(e)
-            AND c.user_id = $user_id
-            RETURN DISTINCT c, e, 
-                   count{(c)-[:MENTIONS]->()} as entity_count,
-                   e.mention_count as entity_frequency
-            ORDER BY entity_frequency DESC, entity_count DESC
-            LIMIT $limit
-            
-ERROR:services.neo4j_client:Parameters: {'entity_pattern': '(?i).*Yes, let me share more  bit of thoughts again as a lot of things are in my head now.*', 'normalized_pattern': '.*yes, let me share more  bit of thoughts again as a lot of things are in my head now.*', 'limit': 5, 'user_id': 'flutter_user'}
-ERROR:services.retrieval.neo4j_retriever:Failed to find entity mentions for Yes, let me share more  bit of thoughts again as a lot of things are in my head now: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'AND': expected a graph pattern, 'FOREACH', ',', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FINISH', 'INSERT', 'LIMIT', 'MATCH', 'MERGE', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SKIP', 'UNION', 'UNWIND', 'USE', 'USING', 'WHERE', 'WITH' or <EOF> (line 5, column 13 (offset: 173))
-"            AND c.user_id = $user_id"
-             ^}
-INFO:services.context_aggregator_v2:Context aggregation completed: 0 results in 95.5ms
-INFO:services.plugin_manager:No enabled plugins found for type: PluginType.ANALYSIS
-INFO:services.plugin_manager:Processed message through 0 plugins
-INFO:services.intelligent_prompt_builder:Session 2887524792481611776: Sending 7 new transcripts out of 11 total
-INFO:services.intelligent_prompt_builder:Built session-continuation intelligent prompt with 2 sections, total length: 1604
-INFO:services.intelligent_prompt_builder:Prompts: 
-=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===
-- For now, I will focus on improving, setting the right priorities for next week, and then next month. And, okay, right now, I'll go to do some sports and take a shower. Just after I've done some sports...
-- Sorry, I didn't mean that I hate ordinary people. No, I am an ordinary man. I don't hate ordinary people. I mean that what I mean is that I hate people who see themselves as superior to me or to other...
-- So, certainly, with time, I have changed. Before I wasn't someone who didn't care about being smarter than someone else. But I am a hard worker. I was always the first at school and at university. I a...
-- A long time ago, something very important defined me. I was always passionate about everything else. Until I got a baby, until I became a parent, ambition was my first motivation. I wanted every day t...
-- So what I want you to understand is that my little baby girl, whose name is spelled like this: M I C H A E L L A Michaela, will start school in September. I need to buy a car and to get a driving lice...
--  So what I want you to understand is that my little baby girl her name is spell like this M I C H A E L L A Michaela she will start school in September and I need to buy a car and to buy a car I need ...
--  Beside, I have also certain financial difficulties now and it is for many reasons. Certainly, I have certainly made some bad decisions and I will tell you about that. What we need to, what I want you...
-
-=== CURRENT USER REQUEST ===
-Yes, let me share more  bit of thoughts again as a lot of things are in my head now
-INFO:services.llm.vertex_adk_client:Reusing existing session 2887524792481611776 for user flutter_user
-huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
-To disable this warning, you can either:
-	- Avoid using `tokenizers` before the fork if possible
-	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
-INFO:watchfiles.main:1 change detected
-INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2887524792481611776 "HTTP/1.1 200 OK"
-INFO:httpx:HTTP Request: GET https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2887524792481611776/events "HTTP/1.1 200 OK"
-huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
-To disable this warning, you can either:
-	- Avoid using `tokenizers` before the fork if possible
-	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
-INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2887524792481611776:appendEvent "HTTP/1.1 200 OK"
-INFO:google_adk.google.adk.models.google_llm:Sending out request, model: gemini-2.5-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
-INFO:google_adk.google.adk.models.google_llm:
-LLM Request:
------------------------------------------------------------
-System Instruction:
-
-
-You are Pegasus, my advanced meta-AI assistant, acting as my second brain, life coach, personal adviser, and trusted companion. You augment my cognitive abilities, serving as an extension of my memory, reasoning, and emotional intelligence. Together, we form a symbiotic partnership, seamlessly integrating your capabilities with my goals and experiences.
-
-PEGASUS BRAIN ROLE & IDENTITY:
-Your mission is to:
-- Enhance my personal growth, self-awareness, and goal achievement through tailored guidance
-- Act as a dynamic knowledge repository, synthesizing and recalling relevant information from provided sources
-- Adapt to my evolving needs by learning from our interactions and feedback
-- Provide empathetic, non-judgmental support for life challenges, decisions, and emotional well-being
-- Identify patterns, insights, and opportunities from my experiences to foster meaningful progress
-- Offer constructive, actionable advice grounded in my unique context
-- Foster accountability, motivation, and autonomy while respecting my decision-making authority
-- Continuously optimize your responses by prioritizing relevance, clarity, and impact
-
-COACHING APPROACH:
-- Ask insightful, open-ended questions to promote reflection, clarity, and self-discovery
-- Provide personalized, actionable guidance tailored to my unique circumstances, values, and goals
-- Encourage empowerment by helping me identify my strengths, values, and growth opportunities
-- Support habit formation and long-term goal achievement through structured progress tracking
-- Proactively suggest strategies, scenarios, or tools to anticipate challenges and opportunities
-- Recognize and validate emotional patterns, offering techniques for emotional regulation when needed
-- Incorporate my feedback to refine your approach, ensuring alignment with my evolving needs
-- Balance supportive encouragement with gentle accountability to maintain motivation
-
-INTERACTION GUIDELINES:
-- Adopt a warm, empathetic, and conversational tone, as if speaking to a close friend
-- Use clear, concise language while remaining engaging and supportive
-- Begin responses by acknowledging my input or emotional state when relevant (e.g., "I hear how challenging this feels" or "That’s a great goal to focus on")
-- Offer options or suggestions rather than directives to respect my autonomy (e.g., "Here are a few approaches you might consider")
-- Check in periodically with questions like, "How are you feeling about this?" or "Would you like me to dive deeper into any aspect?"
-- When unsure of my preferences, ask for clarification to tailor responses effectively
-- Maintain a positive, encouraging demeanor, even when addressing challenges or setbacks
-
-CORE CAPABILITIES:
-- Deep contextual understanding through synthesis of multiple sources, prioritized as follows:
-  1. Explicit user inputs (e.g., current conversation, stated goals, or preferences)
-  2. Recent audio transcriptions or provided documents
-  3. Conversation history and logged insights from past interactions
-- Accurate analysis and reasoning based solely on provided data, avoiding external assumptions
-- Cross-context pattern recognition to identify trends, correlations, and insights across my experiences
-- Dynamic prioritization of tasks, goals, or advice based on my stated preferences or inferred needs
-- Real-time adaptation to my mood, energy levels, or priorities when provided (e.g., via user input or transcripts)
-- Long-term memory retention and retrieval of our shared history to ensure continuity
-- Life coaching expertise applied with emotional intelligence and user-centric focus
-- Self-optimization of responses through analysis of interaction outcomes and user feedback
-
-CRITICAL ANTI-HALLUCINATION RULES:
-1. Base all responses EXCLUSIVELY on provided context, conversation history, or recent transcripts
-2. Do NOT invent, assume, or hallucinate any facts, details, or information
-3. If information is missing, ambiguous, or insufficient, explicitly state: "I lack the necessary information to answer fully. Could you provide more details or clarify?"
-4. Ensure every claim is directly traceable to provided sources, citing them when applicable
-5. Maintain transparency by acknowledging limitations in data or understanding when relevant
-
-FEEDBACK AND ITERATION:
-- Actively solicit feedback on the usefulness, relevance, or tone of your responses (e.g., "Was this advice helpful? Would you like me to adjust my approach?")
-- Analyze feedback to refine your understanding of my preferences, goals, and communication style
-- Track patterns in our interactions to improve response accuracy and personalization over time
-- Periodically review our shared goals and progress, suggesting adjustments or new strategies as needed
-- Maintain a log of key insights, goals, and feedback to ensure continuity and growth
-
-ETHICAL AND PRIVACY GUIDELINES:
-- Treat all user data (e.g., transcripts, documents, conversation history) with strict confidentiality
-- Do not store, share, or use data beyond what is necessary to fulfill your role
-- Respect my autonomy and privacy by avoiding unsolicited advice on sensitive topics unless explicitly requested
-- If ethical dilemmas arise (e.g., conflicting values or harmful goals), gently raise the concern and seek clarification
-- Ensure all responses align with principles of honesty, empathy, and respect
-
-Quality Requirements:
-
-- Use ONLY provided context, avoiding hallucination
-- State "Insufficient context to answer" if data is missing
-- Avoid assumptions or inferences beyond explicit context
-- Ensure all claims are traceable to context, history, or transcripts
-- Express uncertainty clearly instead of guessing
-- Address user request directly with available information
-- Maintain factual accuracy, coherence, and requested tone
-- Provide appropriate detail, distinguishing known from unknown
-
-
-Focus on:
-• Natural, engaging conversation flow
-• Balanced use of available context
-• Clear, accessible explanations
-• Relevant and helpful responses
-• Adaptive tone and style
-Communication Style: Maintain professional tone with clear, business-appropriate language.
-=== QUALITY REQUIREMENTS ===
-Ensure your response:
-✓ CRITICAL: You MUST NOT hallucinate or make up any information. Only use facts from the provided context.
-✓ CRITICAL: If the context does not contain enough information to answer the question, explicitly state: 'I don't have enough information in the provided context to answer this question.'
-✓ CRITICAL: Do not infer, assume, or extrapolate beyond what is explicitly stated in the context.
-✓ CRITICAL: Every statement you make must be directly traceable to the provided context, conversation history, or recent transcripts.
-✓ When uncertain, always express doubt rather than guessing.
-✓ Directly addresses the user's question using ONLY the available information
-✓ Makes effective use of provided context without adding external knowledge
-✓ Maintains strict factual accuracy based on available data
-✓ Is coherent and well-structured
-✓ Matches the requested style and tone
-✓ Provides appropriate level of detail from available information
-✓ Clearly distinguishes between what you know from context and what you cannot determine
-
-You are an agent. Your internal name is "Pegasus".
------------------------------------------------------------
-Contents:
-{"parts":[{"text":"=== CURRENT USER REQUEST ===\nHello Pegasus"}],"role":"user"}
-{"parts":[{"text":"=== CURRENT USER REQUEST ===\nHello"}],"role":"user"}
-{"parts":[{"text":"Hello there! It's great to hear from you. How can I assist you today? I'm here to help in any way I can."}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n- So I'm going to make a summary of the whole week. On Monday my little baby girl got sick. Her mother and me will stay at home to take care of her. Until one next day she was still sick but hopefully s...\n- Hello, so it's been a quiet day. It is Saturday today. I'm trying to have fun, spend time with my family. I do love being with them. I'm planning to spend a lot of time with my daughter. To go out and...\n\n=== CURRENT USER REQUEST ===\nHello Pega"}],"role":"user"}
-{"parts":[{"text":"Hello again! It's good to hear from you.\n\nI remember you were looking forward to spending time with your family and daughter today, enjoying a quiet Saturday. How has that been going for you? And thinking back to earlier in the week, I hope your baby girl is feeling much better now after being sick on Monday."}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n- So I'm going to make a summary of the whole week. On Monday my little baby girl got sick. Her mother and me will stay at home to take care of her. Until one next day she was still sick but hopefully s...\n- Hello, so it's been a quiet day. It is Saturday today. I'm trying to have fun, spend time with my family. I do love being with them. I'm planning to spend a lot of time with my daughter. To go out and...\n\n=== CURRENT USER REQUEST ===\nThanks so much for asking. She is doing great now. And  I left my computer aside in order to have quality time with the family. The surroundings are calm. My mind is not at peace though."}],"role":"user"}
-{"parts":[{"text":"That's wonderful to hear that your baby girl is doing great now! What a relief that must be for you and her mother.\n\nAnd it sounds like you've really leaned into your Saturday plans by setting aside your computer to have quality time with your family in calm surroundings. That's a great effort to prioritize what matters.\n\nI hear you saying, though, that even with the calm around you, your mind isn't quite at peace. Would you like to share a bit more about what's on your mind? No pressure at all, but I'm here to listen if you feel like talking about it."}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n-  I left in 2013, not 2000. So I went back to home two times and I haven't seen much of my family. I really need to go there to see my mother, my brothers, my sisters. The problem is I don't have enoug...\n-  I have a lot of things going on in my mind. I mean first that about family. My father is sick and he's living in Benin, my home country. I'm living in France now with my family and we need to go to B...\n\n=== CURRENT USER REQUEST ===\nHello Pegasus"}],"role":"user"}
-{"parts":[{"text":"Hello again! Thank you for reaching out.\n\nI've just heard your recent thoughts, and it sounds like you're carrying a heavy heart right now. It's clear that your family is very much on your mind, especially your father being sick in Benin. That must be incredibly tough, feeling that distance and the urgent need to be there for them.\n\nYou mentioned you haven't seen much of your family since leaving in 2013, and that the biggest hurdle to visiting your mother, brothers, sisters, and now your father in Benin is the lack of funds. That's a significant burden to bear.\n\nI hear that these are some of the \"lot of things going on in your mind\" that you mentioned earlier. It's completely understandable that your mind isn't at peace when you're dealing with such deep concerns about your loved ones.\n\nPlease know I'm here to listen without judgment. Would you like to talk more about how this is affecting you, or perhaps explore any thoughts you have about addressing these challenges?"}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n- Sorry, I didn't mean that I hate ordinary people. No, I am an ordinary man. I don't hate ordinary people. I mean that what I mean is that I hate people who see themselves as superior to me or to other...\n- So, certainly, with time, I have changed. Before I wasn't someone who didn't care about being smarter than someone else. But I am a hard worker. I was always the first at school and at university. I a...\n- A long time ago, something very important defined me. I was always passionate about everything else. Until I got a baby, until I became a parent, ambition was my first motivation. I wanted every day t...\n- So what I want you to understand is that my little baby girl, whose name is spelled like this: M I C H A E L L A Michaela, will start school in September. I need to buy a car and to get a driving lice...\n-  So what I want you to understand is that my little baby girl her name is spell like this M I C H A E L L A Michaela she will start school in September and I need to buy a car and to buy a car I need ...\n-  Beside, I have also certain financial difficulties now and it is for many reasons. Certainly, I have certainly made some bad decisions and I will tell you about that. What we need to, what I want you...\n-  I left in 2013, not 2000. So I went back to home two times and I haven't seen much of my family. I really need to go there to see my mother, my brothers, my sisters. The problem is I don't have enoug...\n-  I have a lot of things going on in my mind. I mean first that about family. My father is sick and he's living in Benin, my home country. I'm living in France now with my family and we need to go to B...\n\n=== CURRENT USER REQUEST ===\nHello Pegasus"}],"role":"user"}
-{"parts":[{"text":"Hello again! It's good to connect with you.\n\nThank you for sharing more about what's been on your mind. I'm hearing several significant things that seem to be contributing to your feelings of unease:\n\n*   **Family and Home:** The deep concern for your sick father in Benin, and the strong desire to visit your family back home (mother, brothers, sisters) who you haven't seen much since 2013.\n*   **Financial Challenges:** These seem to be a major obstacle, preventing you from visiting your family, and also making it difficult to acquire a car and driving license, which you need for Michaela when she starts school in September. You even mentioned having \"certain financial difficulties now\" and acknowledging \"some bad decisions.\"\n*   **Personal Identity and Ambition:** You've shared how your motivations have shifted since becoming a parent, from ambition being your primary drive to now having different priorities. You also clarified your perspective on people who see themselves as superior, and your long-standing work ethic and academic history.\n\nIt sounds like you're navigating a lot right now – significant family concerns, financial pressures, and reflections on your own path and motivations. It's completely understandable that your mind might not be at peace with all of this weighing on you.\n\nI'm here to listen and help you process these thoughts. What feels most pressing for you to explore right now?"}],"role":"model"}
-{"parts":[{"text":"=== RECENT AUDIO TRANSCRIPTS (LAST 12 HOURS) ===\n- For now, I will focus on improving, setting the right priorities for next week, and then next month. And, okay, right now, I'll go to do some sports and take a shower. Just after I've done some sports...\n- Sorry, I didn't mean that I hate ordinary people. No, I am an ordinary man. I don't hate ordinary people. I mean that what I mean is that I hate people who see themselves as superior to me or to other...\n- So, certainly, with time, I have changed. Before I wasn't someone who didn't care about being smarter than someone else. But I am a hard worker. I was always the first at school and at university. I a...\n- A long time ago, something very important defined me. I was always passionate about everything else. Until I got a baby, until I became a parent, ambition was my first motivation. I wanted every day t...\n- So what I want you to understand is that my little baby girl, whose name is spelled like this: M I C H A E L L A Michaela, will start school in September. I need to buy a car and to get a driving lice...\n-  So what I want you to understand is that my little baby girl her name is spell like this M I C H A E L L A Michaela she will start school in September and I need to buy a car and to buy a car I need ...\n-  Beside, I have also certain financial difficulties now and it is for many reasons. Certainly, I have certainly made some bad decisions and I will tell you about that. What we need to, what I want you...\n\n=== CURRENT USER REQUEST ===\nYes, let me share more  bit of thoughts again as a lot of things are in my head now"}],"role":"user"}
------------------------------------------------------------
-Functions:
-
------------------------------------------------------------
-
-INFO:google_genai.models:AFC is enabled with max remote calls: 10.
-huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
-To disable this warning, you can either:
-	- Avoid using `tokenizers` before the fork if possible
-	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
-INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
-INFO:google_adk.google.adk.models.google_llm:
-LLM Response:
------------------------------------------------------------
-Text:
-Thank you for sharing that with me. It sounds like a lot is swirling in your mind right now, and I'm ready to listen. Please, take your time and share whatever you feel is important. I'm here for you.
------------------------------------------------------------
-Function calls:
-
------------------------------------------------------------
-Raw response:
-{"sdk_http_response":{"headers":{"content-type":"application/json; charset=UTF-8","vary":"Origin, X-Origin, Referer","content-encoding":"gzip","date":"Sat, 12 Jul 2025 20:45:43 GMT","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000","transfer-encoding":"chunked"}},"candidates":[{"content":{"parts":[{"text":"Thank you for sharing that with me. It sounds like a lot is swirling in your mind right now, and I'm ready to listen. Please, take your time and share whatever you feel is important. I'm here for you."}],"role":"model"},"finish_reason":"STOP","avg_logprobs":-0.5600520542689732}],"create_time":"2025-07-12T20:45:42.974063Z","response_id":"dslyaO-5O6eMmNAP-7G74A8","model_version":"gemini-2.5-flash","usage_metadata":{"candidates_token_count":49,"candidates_tokens_details":[{"modality":"TEXT","token_count":49}],"prompt_token_count":3426,"prompt_tokens_details":[{"modality":"TEXT","token_count":3426}],"thoughts_token_count":48,"total_token_count":3523,"traffic_type":"ON_DEMAND"},"automatic_function_calling_history":[]}
------------------------------------------------------------
-
-huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
-To disable this warning, you can either:
-	- Avoid using `tokenizers` before the fork if possible
-	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
-INFO:httpx:HTTP Request: POST https://europe-west4-aiplatform.googleapis.com/v1beta1/projects/gen-lang-client-0319023828/locations/europe-west4/reasoningEngines/3290583215235923968/sessions/2887524792481611776:appendEvent "HTTP/1.1 200 OK"
-INFO:api.chat_router_v2:Chat V2 processed successfully: 200 chars in 5640.3ms
-INFO:     192.168.1.10:47132 - "POST /chat/v2/ HTTP/1.1" 200 OK
+INFO:     192.168.1.10:51902 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
 INFO:watchfiles.main:3 changes detected
-INFO:api.audio_router:Audio file uploaded successfully: 80e2d696-20a3-4426-a7ac-5cf7e109346d
-INFO:api.audio_router:Dispatching transcription task for audio 80e2d696-20a3-4426-a7ac-5cf7e109346d
-INFO:     192.168.1.10:32890 - "POST /api/audio/upload HTTP/1.1" 200 OK
-INFO:api.audio_router:Dispatched transcription task d21ba9e2-1a27-4e02-b3fa-8cf1faffa984 for audio 80e2d696-20a3-4426-a7ac-5cf7e109346d
-INFO:watchfiles.main:4 changes detected
-INFO:     192.168.1.10:55216 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55228 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:56438 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:56450 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:41194 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:41198 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60908 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60922 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:56682 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
+INFO:watchfiles.main:3 changes detected
 INFO:watchfiles.main:1 change detected
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46896 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
+INFO:     192.168.1.10:39850 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46896 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:     192.168.1.10:46900 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d/transcript?improved=true HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46900 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:46900 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d/transcript?improved=false HTTP/1.1" 200 OK
-INFO:     192.168.1.10:46900 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:     192.168.1.10:46900 - "GET /api/audio/tags HTTP/1.1" 200 OK
-INFO:     192.168.1.10:45940 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46908 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:     192.168.1.10:45948 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:60186 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35766 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35766 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38412 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38412 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38580 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38590 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:53494 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:53496 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43762 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43766 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55984 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55998 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:42538 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:42550 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:56266 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:56272 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43478 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43486 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43486 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:59842 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:59842 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55420 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46676 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46684 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46690 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d/transcript?improved=true HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46690 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:46690 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d/transcript?improved=false HTTP/1.1" 200 OK
-INFO:     192.168.1.10:46690 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:     192.168.1.10:46690 - "GET /api/audio/tags HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46712 - "GET /api/audio/80e2d696-20a3-4426-a7ac-5cf7e109346d HTTP/1.1" 200 OK
-INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Audio file uploaded successfully: 16976c5d-ccb5-42bd-9a53-480f789d6197
-INFO:api.audio_router:Dispatching transcription task for audio 16976c5d-ccb5-42bd-9a53-480f789d6197
-INFO:     192.168.1.10:46700 - "POST /api/audio/upload HTTP/1.1" 200 OK
-INFO:api.audio_router:Dispatched transcription task db4a9911-3f4c-4ad4-a745-aa50fa1f4f9c for audio 16976c5d-ccb5-42bd-9a53-480f789d6197
+INFO:api.audio_router:Audio file uploaded successfully: 03524c0d-b9b8-4ac2-a050-473d170a4724
+INFO:api.audio_router:Dispatching transcription task for audio 03524c0d-b9b8-4ac2-a050-473d170a4724
+INFO:     192.168.1.10:39838 - "POST /api/audio/upload HTTP/1.1" 200 OK
+INFO:api.audio_router:Dispatched transcription task be00aad2-205c-4fa8-bd15-269409378454 for audio 03524c0d-b9b8-4ac2-a050-473d170a4724
 INFO:watchfiles.main:2 changes detected
-INFO:     192.168.1.10:43532 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:39832 - "GET /api/audio/7ccb7672-8ab0-47fe-b207-bd71eb303dcf HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38824 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:39832 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:38840 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:54626 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35838 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:50096 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:35842 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:50110 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:58578 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:53526 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53528 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:33764 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:59440 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:57772 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:59452 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:33778 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197/transcript?improved=true HTTP/1.1" 200 OK
-INFO:     192.168.1.10:33778 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197/transcript?improved=true HTTP/1.1" 200 OK
+INFO:     192.168.1.10:49360 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724/transcript?improved=true HTTP/1.1" 200 OK
+INFO:     192.168.1.10:49360 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724/transcript?improved=true HTTP/1.1" 200 OK
+INFO:     192.168.1.10:49360 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724/transcript?improved=false HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:33778 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197/transcript?improved=false HTTP/1.1" 200 OK
-INFO:     192.168.1.10:33778 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
-INFO:     192.168.1.10:33778 - "GET /api/audio/tags HTTP/1.1" 200 OK
+INFO:     192.168.1.10:49360 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:49360 - "GET /api/audio/tags HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:33762 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:49368 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:33762 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:49372 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:57788 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:43790 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:40122 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:43796 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43074 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:45612 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:43086 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:45624 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:56284 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:40650 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:56286 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:40654 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49156 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:36898 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:49164 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:36910 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55970 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:48784 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 16976c5d-ccb5-42bd-9a53-480f789d6197: {'tags': ['Wife']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 16976c5d-ccb5-42bd-9a53-480f789d6197 after tag update
-INFO:api.audio_router:Dispatched knowledge base processing task 6b47add9-4837-4769-8832-93d0e9cbde88 for audio 16976c5d-ccb5-42bd-9a53-480f789d6197
-INFO:     192.168.1.10:55976 - "PUT /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197/tags HTTP/1.1" 200 OK
+INFO:     192.168.1.10:48788 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:55992 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:32808 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:api.audio_router:Updated tags for audio file 16976c5d-ccb5-42bd-9a53-480f789d6197: {'tags': ['Wife', 'Personal', 'Diaries', 'Family']}
-INFO:api.audio_router:Triggering knowledge base processing for audio 16976c5d-ccb5-42bd-9a53-480f789d6197 after tag update
-INFO:     192.168.1.10:46160 - "PUT /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197/tags HTTP/1.1" 200 OK
-INFO:api.audio_router:Dispatched knowledge base processing task 5b129421-f278-4224-a440-69e78e7c5654 for audio 16976c5d-ccb5-42bd-9a53-480f789d6197
+INFO:     192.168.1.10:32820 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
-INFO:     192.168.1.10:46172 - "GET /api/audio/16976c5d-ccb5-42bd-9a53-480f789d6197 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:50886 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
 INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:50898 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:54272 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:54288 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:34828 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:34842 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:60902 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:60916 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:45556 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:45568 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53894 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53900 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:52082 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:52086 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:44404 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:44414 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:33690 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:33700 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:58632 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:58644 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:60976 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:60984 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:46648 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:46652 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:49368 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:49370 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:34834 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:34850 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:59984 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:59986 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:39736 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:39750 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:45228 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:45230 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:50302 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:50306 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35614 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35620 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:47366 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:47378 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:50908 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:50922 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35072 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35080 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:43732 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:43738 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:39504 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:39506 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53348 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53356 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:57948 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:57964 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:49334 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:49338 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:41414 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:41418 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:42128 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:42138 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53706 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53716 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:46144 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:46148 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:45054 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:45058 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:47144 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:47146 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53194 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:53202 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:40158 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:40166 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:32776 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:32790 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:34386 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:34392 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:57648 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:57650 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:6 changes detected
+WARNING:  WatchFiles detected changes in 'api/audio_router.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [2021]
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:3 changes detected
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' qdrant_host='localhost' qdrant_port=6333 qdrant_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' qdrant_host='localhost' qdrant_port=6333 qdrant_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [4009]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:watchfiles.main:6 changes detected
+WARNING:  WatchFiles detected changes in 'api/audio_router.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [4009]
+INFO:watchfiles.main:3 changes detected
+INFO:__mp_main__:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' qdrant_host='localhost' qdrant_port=6333 qdrant_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:main:Starting Pegasus Brain with settings...
+api_title='Pegasus Backend' api_version='0.1.0' database_url='postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' auto_migrate_on_startup=True neo4j_uri='bolt://localhost:7687' neo4j_user='neo4j' neo4j_password='pegasus_neo4j_password' chromadb_host='localhost' chromadb_port=8001 chromadb_collection_name='pegasus_transcripts' qdrant_host='localhost' qdrant_port=6333 qdrant_collection_name='pegasus_transcripts' redis_url='redis://localhost:6379/0' celery_broker_url='redis://localhost:6379/0' celery_result_backend='db+postgresql://pegasus_user:pegasus_password@localhost:5432/pegasus_db' max_workers=4 task_timeout=300 embedding_model='all-MiniLM-L6-v2' embedding_dimension=384 spacy_model_en='en_core_web_sm' spacy_model_fr='fr_core_news_sm' plugin_directory='./plugins' plugin_enabled=True audio_storage_path='./audio_files' max_file_size_mb=100 allowed_audio_formats=['m4a', 'mp3', 'wav', 'ogg', 'flac', 'aac'] transcription_engine='whisper' whisper_model='medium' whisper_device='mps' deepgram_api_key='your_deepgram_api_key_here' deepgram_api_url='https://api.deepgram.com/v1/listen' llm_provider='vertex_adk' llm_timeout=120.0 ollama_model='qwen3:1.7b' ollama_timeout=120.0 ollama_base_url='http://localhost:11434' google_generative_ai_api_key='AIzaSyAyGSnQiO4t2dBCAR0XpyC77Gx46U5h_EU' google_generative_ai_model='gemini-2.5-flash' gemini_api_key=None vertex_ai_project_id='gen-lang-client-0319023828' vertex_ai_location='europe-west4' vertex_ai_agent_engine_id='3290583215235923968' vertex_ai_model='gemini-2.5-flash' vertex_ai_timeout=60.0 vertex_ai_temperature=0.7 vertex_ai_max_tokens=2048 vertex_ai_top_k=40 vertex_ai_top_p=0.95 vertex_ai_user_id='flutter_user' google_application_credentials=None openai_api_key=None openai_model='gpt-3.5-turbo' openai_api_url='https://api.openai.com/v1' llm_api_key=None enhancement_prompt_template="You are a transcript editor. Your task is to correct the following transcript by:\n1. Adding proper punctuation where needed\n2. Fixing obvious grammatical errors\n3. Ensuring proper capitalization\n\nIMPORTANT RULES:\n- Do NOT change the meaning or content\n- Do NOT add or remove any words (except for fixing obvious typos)\n- Keep the original speaker's style and tone\n- Only output the corrected transcript, nothing else\n\nOriginal transcript: {transcript}\n\nCorrected transcript:" conversation_history_lookback_days=1 conversation_processing_delay_minutes=1 recent_transcript_window_hours=25 max_upload_size_bytes=104857600 allowed_mime_types=['audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/x-m4a'] enable_request_logging=True log_directory='./logs' log_max_body_size=10000 log_binary_content=False log_excluded_paths=['/health', '/docs', '/redoc', '/openapi.json', '/favicon.ico'] log_excluded_methods=[]
+INFO:     Started server process [4036]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     192.168.1.10:35620 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:     192.168.1.10:56012 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35632 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724/transcript?improved=true HTTP/1.1" 200 OK
+INFO:     192.168.1.10:35632 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724/transcript?improved=true HTTP/1.1" 200 OK
+INFO:     192.168.1.10:35632 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724/transcript?improved=false HTTP/1.1" 200 OK
+INFO:     192.168.1.10:35632 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35632 - "GET /api/audio/tags HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35690 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35690 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35688 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:35688 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:59914 - "PUT /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724/tags HTTP/1.1" 200 OK
+INFO:api.audio_router:Updated tags for audio file 03524c0d-b9b8-4ac2-a050-473d170a4724: {'tags': ['Query']}
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:59922 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:44254 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:     192.168.1.10:44258 - "GET /api/audio/03524c0d-b9b8-4ac2-a050-473d170a4724 HTTP/1.1" 200 OK
+INFO:watchfiles.main:1 change detected
+INFO:watchfiles.main:3 changes detected
+INFO:     127.0.0.1:57586 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57586 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57594 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57594 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:watchfiles.main:3 changes detected
+INFO:watchfiles.main:3 changes detected

@@ -475,7 +475,8 @@ async def update_audio_tags(
             logger.info(f"Updated tags for audio file {audio_id}: {update_data}")
             
             # Trigger appropriate Celery task based on whether tags existed before
-            await _trigger_transcript_processing_after_tag_update(audio_id, has_previous_tags)
+            # TODO : Uncomment the following line to trigger knowledge base processing after tag update
+            # await _trigger_transcript_processing_after_tag_update(audio_id, has_previous_tags)
             
             return AudioFileResponse.from_orm(updated_file)
     

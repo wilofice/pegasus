@@ -87,6 +87,18 @@ services:
     networks:
       - pegasus_network
 
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: pegasus-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__LOG_LEVEL=INFO
+    restart: unless-stopped
+
 networks:
   pegasus_network:
     driver: bridge
@@ -99,3 +111,4 @@ volumes:
   neo4j_import:
   neo4j_plugins:
   chromadb_data:
+  qdrant_storage:
