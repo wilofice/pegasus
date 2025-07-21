@@ -99,41 +99,42 @@ services:
       - QDRANT__LOG_LEVEL=INFO
     restart: unless-stopped
 
-  # FastAPI Backend
-  backend:
-    build: .
-    container_name: pegasus_backend
-    command: uvicorn main:app --host 0.0.0.0 --port 9000
-    ports:
-      - "9000:9000"
-    volumes:
-      - .:/app
-    depends_on:
-      - postgres
-      - redis
-      - neo4j
-      - chromadb
-      - qdrant
-    networks:
-      - pegasus_network
-
-  # Celery Worker
-  celery_worker:
-    build: .
-    container_name: pegasus_celery_worker
-    command: python start_worker.py
-    volumes:
-      - .:/app
-    depends_on:
-      - backend
-      - redis
-      - postgres
-    networks:
-      - pegasus_network
+#  # FastAPI Backend
+#  backend:
+#    build: .
+#    container_name: pegasus_backend
+#    command: uvicorn main:app --host 0.0.0.0 --port 9000
+#    ports:
+#      - "9000:9000"
+#    volumes:
+#      - .:/app
+#    depends_on:
+#      - postgres
+#      - redis
+#      - neo4j
+#      - chromadb
+#      - qdrant
+#    networks:
+#      - pegasus_network
+#
+#  # Celery Worker
+#  celery_worker:
+#    build: .
+#    container_name: pegasus_celery_worker
+#    command: python start_worker.py
+#    volumes:
+#      - .:/app
+#    depends_on:
+#      - backend
+#      - redis
+#      - postgres
+#    networks:
+#      - pegasus_network
 
 networks:
   pegasus_network:
     driver: bridge
+    name: my_shared_pegasus_backend_network
 
 volumes:
   postgres_data:
